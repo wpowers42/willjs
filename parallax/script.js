@@ -7,7 +7,9 @@ const CANVAS_HEIGHT = canvas.height = 700;
 const slider = /** @type {HTMLInputElement} */ (document.getElementById('slider'));
 const showGameSpeed = /** @type {HTMLSpanElement} */ (document.getElementById('showGameSpeed'));
 
-let gameSpeed = slider.value;
+let gameSpeed = 10;
+slider.value = gameSpeed;
+showGameSpeed.textContent = gameSpeed;
 
 slider.addEventListener('change', e => {
     gameSpeed = e.target.value;
@@ -30,7 +32,7 @@ class Layer {
         this.speed = gameSpeed * this.speedModifier;
         this.x -= this.speed;
 
-        if (this.x < -this.width) {
+        if (this.x <= -this.width) {
             this.x += this.width;
         }
     }
