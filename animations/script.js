@@ -1,4 +1,9 @@
-const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('canvas1'));
+const dropdown = /** @type {HTMLSelectElement} */ (document.getElementById('animations'));
+let playerState = dropdown.value;
+
+dropdown.addEventListener('change', e => playerState = e.target.value );
+
+const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('canvas'));
 const ctx = canvas.getContext('2d');
 const CANVAS_WIDTH = canvas.width = 600;
 const CANVAS_HEIGHT = canvas.height = 600;
@@ -9,11 +14,8 @@ playerImage.src = 'shadow_dog.png';
 const spriteWidth = 575;
 const spriteHeight = 523;
 
-let i = 0;
-
 let gameFrame = 0;
 const staggerFrames = 3;
-const maxFrames = [7, 7, 7, 9, 11, 5, 7, 7, 12, 4];
 
 const spriteAnimations = [];
 const animationStates = [
@@ -58,6 +60,7 @@ const animationStates = [
         frames: 4
     }
 ];
+
 animationStates.forEach((state, index) => {
     let frames = {
         loc: []
@@ -70,15 +73,12 @@ animationStates.forEach((state, index) => {
     spriteAnimations[state.name] = frames;
 });
 
-let animation = spriteAnimations['idle'];
-
-console.log(spriteAnimations);
+let animation = spriteAnimations[playerState];
 
 function animate() {
+    animation = spriteAnimations[playerState];
     // need to specify which area of the canvas to clear
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    // ctx.fillRect(50, 50, 100, 100);
-    // ctx.drawImage(playerImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // JS will stretch based on arguments 4 and 5
     let position = Math.floor(gameFrame / staggerFrames) % animation.loc.length;
     let sx = animation.loc[position].x;
     let sy = animation.loc[position].y;

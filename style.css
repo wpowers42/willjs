@@ -1,0 +1,7 @@
+.links {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    font-size: 24px;
+    padding: 12px;
+}
