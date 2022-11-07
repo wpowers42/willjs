@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Making Rays</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <p id="fpsContainer" class="strokeme">FPS: <span id="fps"></span></p>
+    <div id="options" class="strokeme">
+        <div>
+            <label for="rayCount">Number of Rays:</label>
+            <select id="dropdownRayCount" name="rayCount">
+                <option value="1">1</option>
+                <option value="10">10</option>
+                <option value="100" selected>100</option>
+                <option value="360">360</option>
+                <option value="720">720</option>
+                <option value="1440">1,440</option>
+                <option value="2880">2,880</option>
+                <option value="5760">5,760</option>
+            </select>
+        </div>
+        <div>
+            <label for="wallCount">Number of Walls:</label>
+            <select id="dropdownWallCount" name="wallCount">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="4">4</option>
+                <option value="8" selected>8</option>
+                <option value="16">16</option>
+                <option value="32">32</option>
+                <option value="64">64</option>
+                <option value="128">128</option>
+            </select>
+        </div>
+    </div>
+</body>
+<script src="./vector2.js"></script>
+<script src="./wall.js"></script>
+<script src="./ray.js"></script>
+<script src="./particle.js"></script>
+<script src="./script.js"></script>
+
+</html>
