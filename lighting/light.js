@@ -6,22 +6,19 @@ class Light {
         this.fillColor = 'rgb(155, 155, 155)';
         this.lightColor = 'rgb(255, 255, 255)';
         this.rayCastVisibility = new RayCastVisibility([CANVAS_WIDTH, CANVAS_HEIGHT],
-                                                       map.blocksLight.bind(map), map.setVisible.bind(map));
+            map.blocksLight.bind(map), map.setVisible.bind(map));
         this.frame = 0;
     }
 
     update() {
-        if (this.frame > 0 & this.frame % 10 == 0) {
-            this.x = Math.floor(Math.random() * (CANVAS_WIDTH - this.radius));
-            this.y = Math.floor(Math.random() * (CANVAS_HEIGHT - this.radius));
-            for (let i = 0; i < map.imageData.data.length; i += 4) {
-                map.imageData.data[i + 0] = 0;    // R value
-                map.imageData.data[i + 1] = 0;  // G value
-                map.imageData.data[i + 2] = 0;    // B value
-                map.imageData.data[i + 3] = 255;  // A value
-              }
-            this.rayCastVisibility.compute(this);
-        }
+        this.x = Math.floor(Math.sin(this.frame / 50) * CANVAS_WIDTH / 3 + CANVAS_WIDTH / 2);
+        this.y = Math.floor(Math.cos(this.frame / 50 + 135) * CANVAS_HEIGHT / 3 + CANVAS_HEIGHT / 2);
+
+        // this.x = Math.floor(Math.random() * (CANVAS_WIDTH - this.radius));
+        // this.y = Math.floor(Math.random() * (CANVAS_HEIGHT - this.radius));
+        map.imageData = ctx.createImageData(map.width, map.height);
+        
+        this.rayCastVisibility.compute(this);
 
         this.frame++;
     }
