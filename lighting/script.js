@@ -16,13 +16,41 @@ const boxD = new Box(100, 500, 100, 50);
 const map = new Map(CANVAS_WIDTH, CANVAS_HEIGHT, 6);
 const light = new Light(400, 100);
 
+canvas.addEventListener('mousedown', e => {
+    let rect = canvas.getBoundingClientRect();
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+    let mouseX = clientX - rect.left;
+    let mouseY = clientY - rect.top;
+
+    if (light.pointInArc(mouseX, mouseY)) {
+        // mouse on top of light
+        light.isMoving = true;
+    }
+});
+
+canvas.addEventListener('mousemove', e => {
+    let rect = canvas.getBoundingClientRect();
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+    let mouseX = Math.floor(clientX - rect.left);
+    let mouseY = Math.floor(clientY - rect.top);
+
+    if (light.isMoving) {
+        light.x = 0 > mouseX ? 0 : CANVAS_WIDTH < mouseX ? CANVAS_WIDTH : mouseX;
+        light.y = 0 > mouseY ? 0 : CANVAS_HEIGHT < mouseY ? CANVAS_HEIGHT : mouseY;
+        light.update();
+    }
+});
+
+document.addEventListener('mouseup', e => light.isMoving = false);
+
 
 let now = Date.now()
 let milliseconds;
 
 function animate() {
     ctx.clearRect(0, 0, CANVAS_HEIGHT, CANVAS_HEIGHT);
-    light.update();
     map.draw();
     light.draw();
 

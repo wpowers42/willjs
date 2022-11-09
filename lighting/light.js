@@ -7,20 +7,17 @@ class Light {
         this.lightColor = 'rgb(255, 255, 255)';
         this.rayCastVisibility = new RayCastVisibility([CANVAS_WIDTH, CANVAS_HEIGHT],
             map.blocksLight.bind(map), map.setVisible.bind(map));
-        this.frame = 0;
+        this.isMoving = false;
+        this.update();
+    }
+
+    pointInArc(x, y) {
+        return (x - this.x) ** 2 + (y - this.y) ** 2 < this.radius ** 2;
     }
 
     update() {
-        this.x = Math.floor(Math.sin(this.frame / 50) * CANVAS_WIDTH / 3 + CANVAS_WIDTH / 2);
-        this.y = Math.floor(Math.cos(this.frame / 50 + 135) * CANVAS_HEIGHT / 3 + CANVAS_HEIGHT / 2);
-
-        // this.x = Math.floor(Math.random() * (CANVAS_WIDTH - this.radius));
-        // this.y = Math.floor(Math.random() * (CANVAS_HEIGHT - this.radius));
         map.imageData = ctx.createImageData(map.width, map.height);
-        
         this.rayCastVisibility.compute(this);
-
-        this.frame++;
     }
 
     draw() {
