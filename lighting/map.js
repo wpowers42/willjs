@@ -6,10 +6,30 @@ class Map {
         this.lineWidth = 2;
         this.imageData = ctx.createImageData(width, height);
         this.boxes = boxes;
+        this.coords = [];
+        this.setUpCoords();
+    }
+
+    setUpCoords() {
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
+                if(typeof this.coords[x] == 'undefined'){
+                    this.coords[x] = [];
+                 }
+                 if (this._blocksLight(x, y)) {
+                    this.coords[x][y] = 1;
+                 } else {
+                    this.coords[x][y] = 0;
+                 }
+            }
+        }
     }
 
     blocksLight(x, y) {
-        return boxA.pointInBox(x, y) | boxB.pointInBox(x, y);
+        return this.coords[x][y] == 1;
+    }
+
+    _blocksLight(x, y) {
         let isBlocked = false;
         this.boxes.forEach(box => {
             if (box.pointInBox(x, y)) {
