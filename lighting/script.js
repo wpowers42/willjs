@@ -9,6 +9,9 @@ const fpsSpan = document.getElementById('fps');
 
 const boxA = new Box(100, 50, 100, 200);
 const boxB = new Box(300, 0, 50, 400);
+const boxC = new Box(300, 500, 200, 100);
+const boxD = new Box(100, 500, 100, 50);
+const map = new Map(CANVAS_WIDTH, CANVAS_HEIGHT, [boxA, boxB, boxC, boxD]);
 const light = new Light(400, 100);
 
 
@@ -19,8 +22,6 @@ function animate() {
     ctx.clearRect(0, 0, CANVAS_HEIGHT, CANVAS_HEIGHT);
     light.update();
     map.draw();
-    boxA.draw();
-    boxB.draw();
     light.draw();
 
     milliseconds = Date.now() - now;
