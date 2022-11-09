@@ -4,7 +4,6 @@ class Map {
         this.height = height;
         this.color = 'rgb(255,0,255)';
         this.lineWidth = 2;
-        this.visiblePoints = new Set();
         this.imageData = ctx.createImageData(width, height);
         this.boxes = boxes;
     }
@@ -26,7 +25,6 @@ class Map {
         this.imageData.data[y * this.width * 4 + x * 4 + 1] = 255;
         this.imageData.data[y * this.width * 4 + x * 4 + 2] = 255;
         this.imageData.data[y * this.width * 4 + x * 4 + 3] = 255;
-        this.visiblePoints.add(`${x}.${y}`);
     }
     
     draw() {
