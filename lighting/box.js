@@ -6,6 +6,9 @@ class Box {
         this.height = height;
         this.fillColor = 'rgb(255,0,0)';
         this.strokeColor = 'rgb(255,255,255)';
+        this.isMoving = false;
+        this.mouseOffsetX = 0;
+        this.mouseOffsetY = 0;
     }
 
     pointInBox(x, y) {
