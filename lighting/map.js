@@ -29,7 +29,8 @@ class Map {
     }
 
     setUpCoords() {
-        for (let x = 0; x < this.width; x++) {
+        // TODO: things break in blocksLight if I remove the + 1 from the x loop.
+        for (let x = 0; x < this.width + 1; x++) {
             for (let y = 0; y < this.height; y++) {
                 if(typeof this.coords[x] == 'undefined'){
                     this.coords[x] = [];
