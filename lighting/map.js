@@ -50,12 +50,12 @@ class Map {
 
     _blocksLight(x, y) {
         let isBlocked = false;
-        this.boxes.forEach(box => {
+        for (let box of this.boxes) {
             if (box.pointInBox(x, y)) {
                 isBlocked = true;
-                return;
+                break;
             }
-        });
+        };
         return isBlocked;
     }
 

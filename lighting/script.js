@@ -13,7 +13,7 @@ const boxC = new Box(300, 500, 200, 100);
 const boxD = new Box(100, 500, 100, 50);
 
 
-const map = new Map(CANVAS_WIDTH, CANVAS_HEIGHT, 1);
+const map = new Map(CANVAS_WIDTH, CANVAS_HEIGHT, 2);
 const light = new Light(400, 100);
 
 canvas.addEventListener('mousedown', e => {
@@ -28,15 +28,15 @@ canvas.addEventListener('mousedown', e => {
         light.isMoving = true;
     }
 
-    map.boxes.forEach(box => {
+    for (let box of map.boxes) {
         if (box.pointInBox(mouseX, mouseY)) {
             // mouse on top of box
             box.isMoving = true;
             box.mouseOffsetX = mouseX - box.x;
             box.mouseOffsetY = mouseY - box.y;
-            return; // only one box moving at a time
+            break;
         }
-    })
+    }
 
     if (light.pointInArc(mouseX, mouseY)) {
         // mouse on top of light
@@ -56,15 +56,15 @@ canvas.addEventListener('mousemove', e => {
         light.y = 0 > mouseY ? 0 : CANVAS_HEIGHT < mouseY ? CANVAS_HEIGHT : mouseY;
         light.update();
     } else {
-        map.boxes.forEach(box => {
+        for (let box of map.boxes) {
             if (box.isMoving) {
                 box.x = (0 > mouseX ? 0 : CANVAS_WIDTH < mouseX ? CANVAS_WIDTH : mouseX) - box.mouseOffsetX;
                 box.y = (0 > mouseY ? 0 : CANVAS_HEIGHT < mouseY ? CANVAS_HEIGHT : mouseY) - box.mouseOffsetY;
                 map.setUpCoords();
                 light.update();
-                return;
+                break;
             }
-        });
+        };
     }
 });
 
