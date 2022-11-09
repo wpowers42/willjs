@@ -13,6 +13,7 @@ class Map {
     }
 
     setUpBoxes() {
+        this.boxes = [];
         let boxesCreated = 0;
         let maxWidth = 300;
         let maxHeight = 300;

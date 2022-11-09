@@ -7,14 +7,25 @@ const CANVAS_HEIGHT = canvas.height = 800;
 /** @type {HTMLSpanElement} */
 const fpsSpan = document.getElementById('fps');
 
+/** @type {HTMLInputElement} */
+const numBoxesInput = document.getElementById('numBoxes');
+
 const boxA = new Box(100, 50, 100, 200);
 const boxB = new Box(300, 0, 50, 400);
 const boxC = new Box(300, 500, 200, 100);
 const boxD = new Box(100, 500, 100, 50);
 
 
-const map = new Map(CANVAS_WIDTH, CANVAS_HEIGHT, 2);
+const map = new Map(CANVAS_WIDTH, CANVAS_HEIGHT, numBoxesInput.value);
 const light = new Light(400, 100);
+
+numBoxesInput.addEventListener('change', e => {
+    map.boxCount = e.target.value;
+    map.setUpBoxes();
+    map.setUpCoords();
+    light.update();
+
+});
 
 canvas.addEventListener('mousedown', e => {
     let rect = canvas.getBoundingClientRect();

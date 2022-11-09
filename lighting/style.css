@@ -16,10 +16,22 @@ body {
     transform: translate(-50%, -50%);
 }
 
-#fps-container {
+#ui-container {
+    display: flex;
+    flex-direction: column;
     position: absolute;
     top: 0;
     left: 0;
     padding: 4px;
 }
 
+#numBoxesContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 5px;
+}
+
+#numBoxes {
+    margin-left: 5px;
+}
