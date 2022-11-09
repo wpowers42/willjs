@@ -1,5 +1,6 @@
 class Light {
     constructor(x, y) {
+        
         this.x = x;
         this.y = y;
         this.radius = 10;
@@ -9,32 +10,28 @@ class Light {
             map.blocksLight.bind(map), map.setVisible.bind(map));
         this.isMoving = false;
         this.update();
+
     }
 
     pointInArc(x, y) {
+
         return (x - this.x) ** 2 + (y - this.y) ** 2 < this.radius ** 2;
+
     }
 
     update() {
+
         map.imageData = ctx.createImageData(map.width, map.height);
         this.rayCastVisibility.compute(this);
+
     }
 
     draw() {
-        // ctx.beginPath();
-        // ctx.fillStyle = this.lightColor;
-        // map.visiblePoints.forEach(point => {
-        //     let coords = point.split('.');
-        //     ctx.fillRect(coords[0], coords[1], 1, 1);
-        // });
 
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
         ctx.fillStyle = this.fillColor;
         ctx.fill();
-
-        // console.log(map.visiblePoints.size);
-        // debugger;
 
     }
 }
