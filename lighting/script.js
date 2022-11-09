@@ -11,7 +11,9 @@ const boxA = new Box(100, 50, 100, 200);
 const boxB = new Box(300, 0, 50, 400);
 const boxC = new Box(300, 500, 200, 100);
 const boxD = new Box(100, 500, 100, 50);
-const map = new Map(CANVAS_WIDTH, CANVAS_HEIGHT, [boxA, boxB, boxC, boxD]);
+
+
+const map = new Map(CANVAS_WIDTH, CANVAS_HEIGHT, 6);
 const light = new Light(400, 100);
 
 

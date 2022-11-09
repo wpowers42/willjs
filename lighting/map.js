@@ -1,13 +1,31 @@
 class Map {
-    constructor(width, height, boxes) {
+    constructor(width, height, boxCount) {
         this.width = width;
         this.height = height;
         this.color = 'rgb(255,0,255)';
         this.lineWidth = 2;
         this.imageData = ctx.createImageData(width, height);
-        this.boxes = boxes;
+        this.boxCount = boxCount;
+        this.boxes = [];
+        this.setUpBoxes();
         this.coords = [];
         this.setUpCoords();
+    }
+
+    setUpBoxes() {
+        let boxesCreated = 0;
+        let maxWidth = 300;
+        let maxHeight = 300;
+        while (boxesCreated < this.boxCount) {
+            let x = Math.floor(Math.random() * this.width);
+            let y = Math.floor(Math.random() * this.height);
+            let w = Math.min(Math.floor(Math.random() * (this.width - x)), maxWidth);
+            let h = Math.min(Math.floor(Math.random() * (this.height - y)), maxHeight);
+
+            this.boxes.push(new Box(x, y, w, h));
+            boxesCreated++;
+        }
+        
     }
 
     setUpCoords() {
