@@ -23,7 +23,6 @@ numBoxesInput.addEventListener('change', e => {
     map.boxCount = e.target.value;
     map.setUpCoords();
     map.createBoxes();
-    console.log(map.coords);
     light.update();
 
 });
@@ -73,7 +72,6 @@ canvas.addEventListener('mousemove', e => {
 
                 map.moveBox(box, newX, newY);
                 light.update();
-                break;
             }
         };
     }
