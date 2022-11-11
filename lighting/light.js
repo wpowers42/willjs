@@ -14,7 +14,8 @@ class Light {
     }
 
     pointInArc(x, y) {
-
+        
+        // TODO: Add a cheaper rect check first
         return (x - this.x) ** 2 + (y - this.y) ** 2 < this.radius ** 2;
 
     }
