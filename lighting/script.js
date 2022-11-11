@@ -63,8 +63,8 @@ canvas.addEventListener('mousemove', e => {
     let mouseY = Math.floor(clientY - rect.top);
 
     if (light.isMoving) {
-        light.x = 0 > mouseX ? 0 : CANVAS_WIDTH < mouseX ? CANVAS_WIDTH : mouseX;
-        light.y = 0 > mouseY ? 0 : CANVAS_HEIGHT < mouseY ? CANVAS_HEIGHT : mouseY;
+        light.x = clamp(mouseX, 0, CANVAS_WIDTH);
+        light.y = clamp(mouseY, 0, CANVAS_HEIGHT);
         light.update();
     } else {
         for (let box of map.boxes) {
