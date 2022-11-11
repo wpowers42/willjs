@@ -12,10 +12,14 @@ class Box {
     }
 
     pointInBox(x, y) {
-        const xLine = x >= this.x & x <= this.x + this.width;
-        const yLine = y >= this.y & y <= this.y + this.height;
-
-        return xLine & yLine;
+        // or is more performant than and
+        if (x < this.x ||
+            x > this.x + this.width ||
+            y < this.y ||
+            y > this.y + this.height) {
+            return false;
+        }
+        return true;
     }
 
     update() {
