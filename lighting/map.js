@@ -6,13 +6,13 @@ class Map {
         this.lineWidth = 2;
         this.imageData = ctx.createImageData(width, height);
         this.boxCount = boxCount;
-        this.boxes = [];
-        this.setUpBoxes();
-        this.coords = [];
+        this.coords;
+        this.boxes;
         this.setUpCoords();
+        this.createBoxes();
     }
 
-    setUpBoxes() {
+    createBoxes() {
         this.boxes = [];
         let boxesCreated = 0;
         let maxWidth = 300;
@@ -23,41 +23,47 @@ class Map {
             let w = Math.min(Math.floor(Math.random() * (this.width - x)), maxWidth);
             let h = Math.min(Math.floor(Math.random() * (this.height - y)), maxHeight);
 
-            this.boxes.push(new Box(x, y, w, h));
+            let box = new Box(x, y, w, h);
+            this.boxes.push(box);
+            this.addBox(box);
             boxesCreated++;
         }
         
     }
 
+    moveBox(box, newX, newY) {
+        // debugger;
+        this.removeBox(box);
+        box.x = newX;
+        box.y = newY;
+        this.addBox(box);
+    }
+
     setUpCoords() {
-        // TODO: things break in blocksLight if I remove the + 1 from the x loop.
-        for (let x = 0; x < this.width + 1; x++) {
-            for (let y = 0; y < this.height; y++) {
-                if(typeof this.coords[x] == 'undefined'){
-                    this.coords[x] = [];
-                 }
-                 if (this._blocksLight(x, y)) {
-                    this.coords[x][y] = 1;
-                 } else {
-                    this.coords[x][y] = 0;
-                 }
+        this.coords = [...Array(this.height).keys()].map(_ => [...Array(this.width).keys()].map(_ => 0));
+    }
+
+    addBox(box) {
+
+        for (let x = box.x; x < box.x + box.width; x++) {
+            for (let y = box.y; y < box.y + box.height; y++) {
+                this.coords[x][y]++;
+            }
+        }
+
+    }
+
+    removeBox(box) {
+        
+        for (let x = box.x; x < box.x + box.width; x++) {
+            for (let y = box.y; y < box.y + box.height; y++) {
+                this.coords[x][y]--;
             }
         }
     }
 
     blocksLight(x, y) {
-        return this.coords[x][y] == 1;
-    }
-
-    _blocksLight(x, y) {
-        let isBlocked = false;
-        for (let box of this.boxes) {
-            if (box.pointInBox(x, y)) {
-                isBlocked = true;
-                break;
-            }
-        };
-        return isBlocked;
+        return this.coords[x][y] > 0;
     }
 
     setVisible(x, y) {

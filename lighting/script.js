@@ -21,8 +21,9 @@ const light = new Light(400, 100);
 
 numBoxesInput.addEventListener('change', e => {
     map.boxCount = e.target.value;
-    map.setUpBoxes();
     map.setUpCoords();
+    map.createBoxes();
+    console.log(map.coords);
     light.update();
 
 });
@@ -31,28 +32,25 @@ canvas.addEventListener('mousedown', e => {
     let rect = canvas.getBoundingClientRect();
     let clientX = e.clientX;
     let clientY = e.clientY;
-    let mouseX = clientX - rect.left;
-    let mouseY = clientY - rect.top;
+    let mouseX =  Math.floor(clientX - rect.left);
+    let mouseY =  Math.floor(clientY - rect.top);
 
     if (light.pointInArc(mouseX, mouseY)) {
         // mouse on top of light
         light.isMoving = true;
     }
 
-    for (let box of map.boxes) {
+
+    for (const box of map.boxes) {
         if (box.pointInBox(mouseX, mouseY)) {
             // mouse on top of box
             box.isMoving = true;
             box.mouseOffsetX = mouseX - box.x;
             box.mouseOffsetY = mouseY - box.y;
-            break;
+            // break;
         }
     }
 
-    if (light.pointInArc(mouseX, mouseY)) {
-        // mouse on top of light
-        light.isMoving = true;
-    }
 });
 
 canvas.addEventListener('mousemove', e => {
@@ -69,9 +67,11 @@ canvas.addEventListener('mousemove', e => {
     } else {
         for (let box of map.boxes) {
             if (box.isMoving) {
-                box.x = (0 > mouseX ? 0 : CANVAS_WIDTH < mouseX ? CANVAS_WIDTH : mouseX) - box.mouseOffsetX;
-                box.y = (0 > mouseY ? 0 : CANVAS_HEIGHT < mouseY ? CANVAS_HEIGHT : mouseY) - box.mouseOffsetY;
-                map.setUpCoords();
+
+                let newX = clamp(mouseX - box.mouseOffsetX, 0, CANVAS_WIDTH - box.width);
+                let newY = clamp(mouseY - box.mouseOffsetY, 0, CANVAS_HEIGHT - box.height);
+
+                map.moveBox(box, newX, newY);
                 light.update();
                 break;
             }
