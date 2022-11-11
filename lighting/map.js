@@ -32,7 +32,6 @@ class Map {
     }
 
     moveBox(box, newX, newY) {
-        // debugger;
         this.removeBox(box);
         box.x = newX;
         box.y = newY;
