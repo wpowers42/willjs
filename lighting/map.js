@@ -62,7 +62,9 @@ class Map {
     }
 
     blocksLight(x, y) {
+
         return this.coords[x][y] > 0;
+        
     }
 
     setVisible(x, y) {
