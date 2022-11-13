@@ -16,8 +16,9 @@ class Raven {
         this.markedForDeletion = false;
         this.timeSinceFlapped = 0;
         this.flapInterval = 100 - (this.directionX * 8);
-        this.randomColors = [Math.floor(Math.random() * 255),Math.floor(Math.random() * 255),Math.floor(Math.random() * 255),255];
+        this.randomColors = [Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), 255];
         this.color = `rgba(${this.randomColors[0]},${this.randomColors[1]},${this.randomColors[2]},${this.randomColors[3]})`;
+        this.hasTrail = Math.random() < 0.50;
     }
 
     update(deltatime) {
@@ -25,6 +26,7 @@ class Raven {
         this.y += this.directionY;
         if (this.x + this.width < 0) {
             this.markedForDeletion = true;
+            gameOver = true; // end the game
         }
 
         if (this.y < 0 || this.y + this.height > canvas.height) {
@@ -38,6 +40,13 @@ class Raven {
                 this.frame = 0;
             }
             this.timeSinceFlapped = 0;
+
+            if (this.hasTrail) {
+                for (let i = 0; i < 3; i++) {
+                    particles.push(new Particle(this.x + this.width, this.y + this.height / 2,
+                        this.sizeModifier, this.color));
+                }
+            }
         }
     }
 
@@ -53,7 +62,7 @@ class Raven {
 
         collisionCTX.fillStyle = this.color;
         collisionCTX.fillRect(this.x, this.y, this.width, this.height);
-        
+
         ctx.drawImage(this.image, sx, sy, sw, sh, dx, dy, dw, dh);
     }
 }

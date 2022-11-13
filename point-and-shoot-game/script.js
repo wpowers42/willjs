@@ -19,17 +19,29 @@ addEventListener('resize', () => {
 
 let ravens = [];
 let explosions = [];
+let particles = [];
 let timeToNextRaven = 0;
 let ravenInterval = 500;
 let lastTime = 0;
 let score = 0;
+let gameOver = false;
 
 ctx.font = '32px Courier';
 function drawScore() {
+    ctx.textAlign = 'left';
     ctx.fillStyle = 'black';
     ctx.fillText(`Score: ${score}`, 50, 75);
     ctx.fillStyle = 'white';
     ctx.fillText(`Score: ${score}`, 51, 76);
+}
+
+function drawGameOver() {
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'black';
+    let message = `GAME OVER, your score is: ${score}`;
+    ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+    ctx.fillStyle = 'white';
+    ctx.fillText(message, canvas.width / 2 + 1, canvas.height / 2 + 1);
 }
 
 canvas.addEventListener('mousedown', e => {
@@ -56,7 +68,7 @@ canvas.addEventListener('mousedown', e => {
 function animate(timestamp) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     collisionCTX.clearRect(0, 0, collisionCanvas.width, collisionCanvas.height);
-    
+
     let deltatime = timestamp - lastTime;
     lastTime = timestamp;
     timeToNextRaven += deltatime;
@@ -67,16 +79,20 @@ function animate(timestamp) {
         timeToNextRaven = 0;
     }
 
-    [...ravens, ...explosions].forEach(object => object.update(deltatime));
-
-    drawScore();
-    [...ravens, ...explosions].forEach(object => object.draw());
+    [...particles, ...ravens, ...explosions].forEach(object => object.update(deltatime));
+    [...particles, ...ravens, ...explosions].forEach(object => object.draw());
 
     ravens = ravens.filter(object => !object.markedForDeletion);
     explosions = explosions.filter(object => !object.markedForDeletion);
+    particles = particles.filter(object => !object.markedForDeletion);
 
 
-    requestAnimationFrame(animate);
+    if (!gameOver) {
+        drawScore();
+        requestAnimationFrame(animate);
+    } else {
+        drawGameOver();
+    }
 }
 
 
