@@ -35,7 +35,6 @@ function animate(timestamp) {
 
     let angle = -(timestamp * angularSpeed) % (Math.PI * 2.0);
     angle += Math.PI * 0.75;
-    console.log(angle);
 
 
     for (let i = 0; i < segments; i++) {
