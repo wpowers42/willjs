@@ -6,15 +6,15 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+let radius = Math.min(canvas.width, canvas.height) / 2 * 0.90;
+
+window.addEventListener('resize', _ => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    radius = Math.min(canvas.width, canvas.height) / 2 * 0.90;
+})
+
 let lastTime = 0;
-
-const points = [];
-
-const rectWidth = 400;
-const rectHeight = 400;
-
-
-const radius = canvas.width / 2 * 0.90;
 
 function animate(timestamp) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
