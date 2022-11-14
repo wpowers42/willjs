@@ -27,7 +27,7 @@ function animate(timestamp) {
     // ctx.strokeRect(canvas.width / 2 - 200, canvas.height / 2 - 200, 400, 400);
 
     ctx.globalAlpha = 1;
-    let segments = 128;
+    let segments = 720;
     ctx.lineWidth = 2;
     ctx.strokeStyle = 'white';
 
@@ -42,7 +42,7 @@ function animate(timestamp) {
         // negative to move counter clockwise
         let start = -i / segments * Math.PI * 2 - angle;
         let stop = -(i + 1) / segments * Math.PI * 2 - angle;
-        ctx.globalAlpha = Math.max(1 - i / segments * 8, 0.10);
+        ctx.globalAlpha = Math.max(1 - i / segments * 20, 0.10);
         // ctx.strokeStyle = (s % 2) == 0 ? 'white' : 'red';
         ctx.arc(canvas.width / 2, canvas.height / 2, radius, start, stop, true);
         ctx.stroke();
@@ -56,9 +56,7 @@ function animate(timestamp) {
 
     
 
-    // ctx.font = `${Math.floor(seconds % 4 * 4 + 24)}px Courier`;
-    ctx.font = '36px Courier';
-    // ctx.fillText(Math.floor(seconds) % 4 + 1, canvas.width / 2, canvas.height / 2 );
+    ctx.font = '24px Courier';
 
     let alphasNums = [
         Math.floor(seconds) % 4 + 1 == 1 ? 0.90 : 0.10,
@@ -67,7 +65,7 @@ function animate(timestamp) {
         Math.floor(seconds) % 4 + 1 == 4 ? 0.90 : 0.10
     ]
 
-    let gap = 48;
+    let gap = 36;
     ctx.globalAlpha = alphasNums[0];
     ctx.fillText(1, canvas.width / 2 - gap - gap / 2, canvas.height / 2);
     ctx.globalAlpha = alphasNums[1];
@@ -95,7 +93,6 @@ function animate(timestamp) {
         ctx.restore();
     }
 
-    ctx.font = '24px Courier';
     ctx.globalAlpha = alphas[0];
     ctx.textBaseline = 'top';
     ctx.fillText('Breathe In', canvas.width / 2, canvas.height / 2 - radius + 40);
