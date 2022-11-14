@@ -95,19 +95,20 @@ function animate(timestamp) {
 
     ctx.globalAlpha = alphas[0];
     ctx.textBaseline = 'top';
-    ctx.fillText('Breathe In', canvas.width / 2, canvas.height / 2 - radius + 40);
+    ctx.fillText('Breathe In', canvas.width / 2, canvas.height / 2 - radius + 32);
     ctx.globalAlpha = alphas[2];
     ctx.textBaseline = 'bottom';
-    ctx.fillText('Breathe Out', canvas.width / 2, canvas.height / 2 + radius - 40);
+    ctx.fillText('Breathe Out', canvas.width / 2, canvas.height / 2 + radius - 32);
+    
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
     ctx.globalAlpha = alphas[1];
-    ctx.fillText('Hold', canvas.width / 2 + radius - 40, canvas.height / 2);
+    ctx.fillText('Hold', canvas.width / 2 + radius - 16, canvas.height / 2);
 
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.globalAlpha = alphas[3];
-    ctx.fillText('Hold', canvas.width / 2 - radius + 40, canvas.height / 2);
+    ctx.fillText('Hold', canvas.width / 2 - radius + 16, canvas.height / 2);
 
 
     requestAnimationFrame(animate);
