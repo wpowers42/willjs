@@ -1,5 +1,3 @@
-// @ts-check
-
 class Background {
     constructor(gameWidth, gameHeight) {
         this.gameWidth = gameWidth;
@@ -10,6 +8,10 @@ class Background {
         this.width = 2400;
         this.height = 720;
         this.speed = 0.3;
+    }
+
+    restart() {
+        this.x = 0;
     }
 
     update(deltaTime) {

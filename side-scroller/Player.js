@@ -1,5 +1,3 @@
-// @ts-check
-
 class Player {
     /**
      * @param {number} gameWidth
@@ -13,10 +11,10 @@ class Player {
         // good practice to match art to game size
         this.width = this.spriteWidth;
         this.height = this.spriteHeight;
-        this.x = 10;
+        this.x = 100;
         this.y = this.gameHeight - this.height;
-        this.speedX = 0.30;
-        this.speedY = 1.10;
+        this.speedX = 0.45;
+        this.speedY = 1.30;
         this.gravity = 0.05;
         this.dx = 0;
         this.dy = 0;
@@ -27,9 +25,20 @@ class Player {
         this.frameInterval = 1000 / this.fps;
         this.timeSinceLastFrame = 0;
         this.image = document.getElementById('playerImage');
-        this.collisionXOffset = this.width * 0.50;
-        this.collisionYOffset = this.height * 0.60;
-        this.collisionRadius = this.width * 0.50 * 0.80;
+        this.collisionXOffset = this.width * 0.53;
+        this.collisionYOffset = this.height * 0.55;
+        this.collisionRadius = this.width * 0.50 * 0.67;
+        this.debug = false;
+    }
+
+    restart() {
+        this.x = 100;
+        this.y = this.gameHeight - this.height;
+        this.dx = 0;
+        this.dy = 0;
+        this.frameX = 0;
+        this.frameY = 0;
+        this.timeSinceLastFrame = 0;
     }
 
     /**
@@ -80,7 +89,7 @@ class Player {
 
         /* Animation Frames */
         // speed up animation if moving forward
-        this.timeSinceLastFrame += deltatime * (this.dx > 0 ? 1.25 : 1);
+        this.timeSinceLastFrame += deltatime * (this.dx > 0 ? 1.25 : 1.00);
 
         if (!this.#onGround()) {
             this.frameY = 1;
@@ -105,7 +114,8 @@ class Player {
             this.dx = 0;
         }
 
-        if (input.keys.indexOf('ArrowUp') > -1 && this.#onGround()) {
+        if ((input.keys.indexOf('ArrowUp') > -1 || input.keys.indexOf('SwipeUp') > -1) &&
+            this.#onGround()) {
             // jump
             this.dy = -this.speedY;
             this.frameX = 0;
@@ -131,14 +141,17 @@ class Player {
         let dy = this.y;
         let dw = this.width;
         let dh = this.height;
-        
+
         ctx.drawImage(this.image, sx, sy, sw, sh, dx, dy, dw, dh);
-        ctx.save();
-        ctx.strokeStyle = 'white'
-        ctx.beginPath();
-        ctx.arc(this.x + this.collisionXOffset, this.y + this.collisionYOffset, this.collisionRadius, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
+
+        if (this.debug) {
+            ctx.save();
+            ctx.strokeStyle = 'white'
+            ctx.beginPath();
+            ctx.arc(this.x + this.collisionXOffset, this.y + this.collisionYOffset, this.collisionRadius, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        }
     }
 
     #onGround() {

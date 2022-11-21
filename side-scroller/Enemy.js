@@ -1,5 +1,3 @@
-// @ts-check
-
 class Enemy {
     constructor(gameWidth, gameHeight) {
         this.gameWidth = gameWidth;
@@ -19,8 +17,9 @@ class Enemy {
         this.dx = 0.20;
         this.markedForDeletion = false;
         this.collisionXOffset = this.width * 0.35;
-        this.collisionYOffset = this.height * 0.50;
+        this.collisionYOffset = this.height * 0.52;
         this.collisionRadius = this.width * 0.50 * 0.75;
+        this.debug = false;
     }
 
     update(deltaTime) {
@@ -53,11 +52,13 @@ class Enemy {
         let dw = this.width;
         let dh = this.height;
         ctx.drawImage(this.image, sx, sy, sw, sh, dx, dy, dw, dh);
-        ctx.save();
-        ctx.strokeStyle = 'white'
-        ctx.beginPath();
-        ctx.arc(this.x + this.collisionXOffset, this.y + this.collisionYOffset, this.collisionRadius, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
+        if (this.debug) {
+            ctx.save();
+            ctx.strokeStyle = 'white'
+            ctx.beginPath();
+            ctx.arc(this.x + this.collisionXOffset, this.y + this.collisionYOffset, this.collisionRadius, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        }
     }
 }
