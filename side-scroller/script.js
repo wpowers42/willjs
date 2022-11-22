@@ -8,6 +8,7 @@ canvas.height = 720;
 
 const toggleFullScreenButton = document.getElementById('fullScreenButton');
 
+// Note: As of Nov 2022 iOS does NOT support the Fullscreen API.
 const toggleFullScreen = () => {
     console.log(document.fullscreenElement);
     if (!document.fullscreenElement) {
