@@ -20,7 +20,7 @@ window.onload = () => {
     const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('canvas'));
     const ctx = canvas.getContext('2d');
 
-    canvas.width = 500;
+    canvas.width = 800;
     canvas.height = 500;
 
     const game = new Game(ctx);
