@@ -14,8 +14,8 @@ export default class Player {
         this.y = this.game.height - this.height - this.game.groundMargin;
         this.dx = 0;
         this.dy = 0;
-        this.maxDX = 0.30;
-        this.maxDY = 1.05;
+        this.maxDX = 0.50;
+        this.maxDY = 1.00;
         this.gravity = this.maxDY * 0.00151;
         this.frameX = 0;
         this.frameY = 0;
@@ -45,12 +45,13 @@ export default class Player {
         }
 
 
+        // update background speed
         if (['SITTING','STANDING'].includes(this.currentState.state)) {
             this.game.backgroundSpeed = 0;
         } else {
-            this.game.backgroundSpeed = Math.abs(this.dx) * this.game.maxBackgroundSpeed + this.game.minBackgroundSpeed;
+            this.game.backgroundSpeed = Math.max(this.dx, 0.2) * this.game.maxBackgroundSpeed; // + this.game.minBackgroundSpeed;
         }
-        this.x += this.dx * dt;
+        this.x += this.dx * dt - this.game.backgroundSpeed * dt * 0.25;
         this.y += this.dy * dt;
 
         if (!this.onGround()) {
@@ -59,7 +60,7 @@ export default class Player {
             this.dy = 0;
         }
 
-        this.currentState.handleInput(this.game.input.keys);
+        this.currentState.handleInput(keys);
 
         // clamp player to screen
         this.x = Math.min(Math.max(this.x, 0), this.game.width - this.width);
