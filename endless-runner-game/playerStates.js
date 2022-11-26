@@ -77,7 +77,7 @@ export class SittingState extends State {
 
     /** @param {Array<string>} input */
     handleInput(input) {
-        if (input.includes('Enter')) {
+        if (input.includes('Shift')) {
             this.player.setState(states.ROLLING);
         } else if (!input.includes('ArrowDown')) {
             this.player.setState(states.STANDING);
@@ -110,7 +110,7 @@ export class RunningState extends State {
         }
         if (input.includes('ArrowUp')) {
             this.player.setState(states.JUMPING);
-        } else if (input.includes('Enter')) {
+        } else if (input.includes('Shift')) {
             this.player.setState(states.ROLLING);
         } else if (input.includes('ArrowLeft') && !input.includes('ArrowRight')) {
             this.player.dx = -this.player.maxDX;
@@ -138,7 +138,7 @@ export class JumpingState extends State {
 
     /** @param {Array<string>} input */
     handleInput(input) {
-        if (input.includes('Enter')) {
+        if (input.includes('Shift')) {
             this.player.setState(states.ROLLING);
         } else if (input.includes('ArrowDown') && this.player.dy > -this.player.maxDY * 0.50) {
             this.player.setState(states.DIVING);
@@ -172,7 +172,7 @@ export class FallingState extends State {
     handleInput(input) {
         if (this.player.onGround()) {
             this.player.setState(states.STANDING);
-        } else if (input.includes('Enter')) {
+        } else if (input.includes('Shift')) {
             this.player.setState(states.ROLLING);
         } else if (input.includes('ArrowDown')) {
             this.player.setState(states.DIVING);
@@ -195,7 +195,7 @@ export class RollingState extends State {
         this.maxDX = this.player.maxDX * 2.00;
         this.dy = this.player.dy;
         this.maxDY = this.player.maxDY;
-        this.particleInterval = 32;
+        this.particleInterval = 64;
         this.particleTimer = 0;
     }
 
@@ -211,9 +211,9 @@ export class RollingState extends State {
                 this.player.y + this.player.height * 0.50));
             this.particleTimer -= this.particleInterval;
         }
-        if (!input.includes('Enter') && this.player.onGround()) {
+        if (!input.includes('Shift') && this.player.onGround()) {
             this.player.setState(states.RUNNING);
-        } else if (!input.includes('Enter') && !this.player.onGround()) {
+        } else if (!input.includes('Shift') && !this.player.onGround()) {
             this.player.setState(states.FALLING);
         } else if (input.includes('ArrowUp') && this.player.onGround()) {
             this.player.dy = -this.maxDY;
@@ -234,9 +234,9 @@ export class DivingState extends State {
         this.frames = 7;
         this.dx = 0;
         this.dy = this.player.maxDY;
-        this.particleInterval = 32;
+        this.particleInterval = 64;
         this.particleTimer = 0;
-        this.splashParticles = 100;
+        this.splashParticles = 50;
     }
 
     enter() {
@@ -258,7 +258,7 @@ export class DivingState extends State {
                 this.player.y + this.player.height * 0.50));
             this.particleTimer -= this.particleInterval;
         }
-        if (input.includes('Enter') && this.player.onGround()) {
+        if (input.includes('Shift') && this.player.onGround()) {
             this.player.setState(states.ROLLING);
         } else if (this.player.onGround()) {
             this.player.setState(states.RUNNING);
@@ -282,9 +282,9 @@ export class HitState extends State {
 
     /** @param {Array<string>} input */
     handleInput(input) {
-        if (this.player.frameX === this.frames - 1) {
+        if (this.player.frameX === this.frames - 1 && this.player.onGround()) {
             this.player.setState(states.RUNNING);
-        } else if (this.player.frameX === this.frames - 1) {
+        } else if (this.player.frameX === this.frames - 1 && !this.player.onGround()) {
             this.player.setState(states.FALLING);
         }
     }

@@ -13,16 +13,17 @@ export default class InputHandler {
                 return;
             }
 
+            if (e.key == 'Enter' && this.game.gameOver) {
+                this.game.reset();
+            }
+
             if (!this.keys.includes(e.key)) {
                 this.keys.push(e.key);
             }
 
         });
         window.addEventListener('keyup', e => {
-
-            if (this.keys.includes(e.key)) {
-                this.keys.splice(this.keys.indexOf(e.key), 1);
-            }
+            this.keys = this.keys.filter(key => key !== e.key);
         });
     }
 }

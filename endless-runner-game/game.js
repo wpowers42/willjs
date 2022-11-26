@@ -13,7 +13,8 @@ export default class Game {
         this.width = this.ctx.canvas.width;
         this.height = this.ctx.canvas.height;
         this.t = 0;
-        this.dt = 0.01;
+        this.fps = 60;
+        this.dt = 1000 / this.fps;
         this.currentTime = performance.now();
         this.accumulator = 0;
         this.paused = false;
@@ -23,8 +24,9 @@ export default class Game {
         this.maxBackgroundSpeed = 1.5;
         this.particles = [];
         this.collisions = [];
-        this.player = new Player(this);
         this.enemies = [];
+        this.floatingMessages = [];
+        this.player = new Player(this);
         this.input = new InputHandler(this);
         this.background = new Background(this);
         this.enemyInterval = 2000;
@@ -33,7 +35,9 @@ export default class Game {
         this.debug = false;
         this.score = 0;
         this.maxTime = 60000;
+        this.lives = 5;
         this.gameOver = false;
+        this.frameTimes = [];
         this.UI = new UI(this);
 
         document.addEventListener('blur', _ => this.paused = true);
@@ -41,6 +45,22 @@ export default class Game {
             this.currentTime = performance.now();
             this.paused = false;
         });
+    }
+
+    reset() {
+        this.t = 0;
+        this.currentTime = performance.now();
+        this.accumulator = 0;
+        this.paused = false;
+        this.player = new Player(this);
+        this.background = new Background(this);
+        this.enemyTimer = 0;
+        this.particles = [];
+        this.collisions = [];
+        this.enemies = [];
+        this.floatingMessages = [];
+        this.lives = 5;
+        this.gameOver = false;
     }
 
     #addEnemy() {
@@ -62,6 +82,7 @@ export default class Game {
         this.background.update();
         this.particles.forEach(particle => particle.update());
         this.collisions.forEach(collision => collision.update());
+        this.floatingMessages.forEach(floatingMessage => floatingMessage.update(this.dt));
 
         this.enemyTimer += this.dt;
         if (this.enemyTimer > this.enemyInterval) {
@@ -73,27 +94,35 @@ export default class Game {
     update() {
         let newTime = performance.now();
         let frameTime = newTime - this.currentTime;
+        this.frameTimes.push(frameTime);
+        if (this.frameTimes.length > 120) {
+            this.frameTimes.shift();
+        }
         this.currentTime = newTime;
         this.accumulator += frameTime;
 
-        this.enemies = this.enemies.filter(enemy => !enemy.markedForDeletion);
-        this.particles = this.particles.filter(particle => !particle.markedForDeletion);
-        this.collisions = this.collisions.filter(collision => !collision.markedForDeletion);
-
+        
         while (this.accumulator >= this.dt) {
             this.step();
             this.accumulator -= this.dt;
             this.t += this.dt;
-            this.gameOver = this.t >= this.maxTime;
+            // gameOver because of time or lives
+            this.gameOver = this.t >= this.maxTime || this.gameOver;
         }
+        
+        this.enemies = this.enemies.filter(enemy => !enemy.markedForDeletion);
+        this.particles = this.particles.filter(particle => !particle.markedForDeletion);
+        this.collisions = this.collisions.filter(collision => !collision.markedForDeletion);
+        this.floatingMessages = this.floatingMessages.filter(floatingMessage => !floatingMessage.markedForDeletion);
     }
 
     draw() {
         this.background.draw();
         this.particles.forEach(particle => particle.draw());
         this.collisions.forEach(collision => collision.draw());
-        this.UI.draw();
         this.enemies.forEach(enemy => enemy.draw());
+        this.floatingMessages.forEach(floatingMessage => floatingMessage.draw(this.ctx));
+        this.UI.draw();
         this.player.draw();
     }
 }
