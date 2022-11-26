@@ -1,5 +1,8 @@
 import Game from "./game.js";
-import { StandingState, SittingState, RunningState, JumpingState, FallingState } from "./playerStates.js"
+import {
+    StandingState, SittingState, RunningState, JumpingState, FallingState,
+    RollingState
+} from "./playerStates.js"
 
 export default class Player {
     /** 
@@ -26,7 +29,7 @@ export default class Player {
         this.states = [
             new StandingState(this), new SittingState(this),
             new RunningState(this), new JumpingState(this),
-            new FallingState(this)
+            new FallingState(this), new RollingState(this),
         ];
         this.currentState = this.states[0];
     }
@@ -46,13 +49,15 @@ export default class Player {
 
 
         // update background speed
-        if (['SITTING','STANDING'].includes(this.currentState.state)) {
+        if (['SITTING', 'STANDING'].includes(this.currentState.state)) {
             this.game.backgroundSpeed = 0;
         } else {
             this.game.backgroundSpeed = Math.max(this.dx, 0.2) * this.game.maxBackgroundSpeed; // + this.game.minBackgroundSpeed;
         }
         this.x += this.dx * dt - this.game.backgroundSpeed * dt * 0.25;
         this.y += this.dy * dt;
+
+        this.#checkCollision();
 
         if (!this.onGround()) {
             this.dy += this.gravity * dt;
@@ -70,8 +75,12 @@ export default class Player {
 
     /** @param {CanvasRenderingContext2D} ctx */
     draw(ctx = this.game.ctx) {
-        ctx.drawImage(this.image, this.frameX * this.width, this.frameY * this.height,
-            this.width, this.height, this.x, this.y, this.width, this.height)
+        let sx = this.frameX * this.width;
+        let sy = this.frameY * this.height;
+        ctx.drawImage(this.image, sx, sy, this.width, this.height, this.x, this.y, this.width, this.height);
+        if (this.game.debug) {
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+        }
     }
 
     onGround() {
@@ -81,6 +90,21 @@ export default class Player {
     setState(state) {
         this.currentState = this.states[state];
         this.currentState.enter();
+    }
+
+    #checkCollision() {
+        this.game.enemies.forEach(enemy => {
+            let [ax, ay, aw, ah] = [this.x, this.y, this.width, this.height];
+            let [bx, by, bw, bh] = [enemy.x, enemy.y, enemy.width, enemy.height];
+
+            if (ax + aw < bx || ax > bx + bw || ay + ah < by || ay > by + bh) {
+                // no collision
+            } else if (!enemy.markedForDeletion) {
+                // collision
+                enemy.markedForDeletion = true;
+                this.game.score++;
+            }
+        })
     }
 
 }

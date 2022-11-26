@@ -2,6 +2,7 @@ import InputHandler from "./input.js";
 import Player from "./player.js";
 import Background from "./background.js";
 import { FlyingEnemy, GroundEnemy, ClimbingEnemy } from "./enemy.js";
+import UI from "./ui.js";
 
 export default class Game {
     /** 
@@ -15,35 +16,48 @@ export default class Game {
         this.dt = 0.01;
         this.currentTime = performance.now();
         this.accumulator = 0;
+        this.paused = false;
         this.groundMargin = 80;
         this.backgroundSpeed = 0;
         this.minBackgroundSpeed = 0.75;
         this.maxBackgroundSpeed = 1.5;
+        this.particles = [];
         this.player = new Player(this);
         this.enemies = [];
-        this.input = new InputHandler();
+        this.input = new InputHandler(this);
         this.background = new Background(this);
         this.enemyInterval = 2000;
         this.enemyTimer = 0;
         this.#addEnemy();
+        this.debug = false;
+        this.score = 0;
+        this.UI = new UI(this);
+
+        document.addEventListener('blur', _ => this.paused = true);
+        document.addEventListener('focus', _ => {
+            this.currentTime = performance.now();
+            this.paused = false;
+        });
     }
 
     #addEnemy() {
-        if (this.backgroundSpeed > 0 && Math.random() > 0.50) {
+        if (this.backgroundSpeed > 0 && Math.random() < 0.50) {
             this.enemies.push(new GroundEnemy(this));
-        } else {
-            // this.enemies.push(new ClimbingEnemy(this));
+        }
+
+        if (Math.random() < 0.25) {
+            this.enemies.push(new ClimbingEnemy(this));
         }
 
         this.enemies.push(new FlyingEnemy(this));
         this.enemies.sort((a, b) => a.y - b.y);
-        this.enemies = this.enemies.filter(enemy => !enemy.markedForDeletion);
     }
 
     step() {
         this.player.update();
         this.enemies.forEach(enemy => enemy.update());
         this.background.update();
+        this.particles.forEach(particle => particle.update());
 
         this.enemyTimer += this.dt;
         if (this.enemyTimer > this.enemyInterval) {
@@ -58,23 +72,20 @@ export default class Game {
         this.currentTime = newTime;
         this.accumulator += frameTime;
 
+        this.enemies = this.enemies.filter(enemy => !enemy.markedForDeletion);
+        this.particles = this.particles.filter(particle => !particle.markedForDeletion);
+
         while (this.accumulator >= this.dt) {
             this.step();
             this.accumulator -= this.dt;
             this.t += this.dt;
         }
-
-        // console.log(this.enemies.length);
-        // console.log(this.player.dx, this.player.currentState);
-        // console.log(this.player.dx);
-        // console.log(this.player.currentState.state);
-        // console.log(this.player.x, this.player.y);
-        // console.log(this.input.keys);
-
     }
 
     draw() {
         this.background.draw();
+        this.particles.forEach(particle => particle.draw());
+        this.UI.draw();
         this.enemies.forEach(enemy => enemy.draw());
         this.player.draw();
     }

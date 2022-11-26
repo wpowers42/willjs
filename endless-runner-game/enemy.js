@@ -1,6 +1,6 @@
 import Game from "./game.js";
 
-class Enemy {
+export class Enemy {
     /** @param {Game} game */
     constructor(game) {
         this.game = game;
@@ -35,8 +35,12 @@ class Enemy {
 
     /** @param {CanvasRenderingContext2D} ctx */
     draw(ctx) {
-        ctx.drawImage(this.image, this.frameX * this.width, this.frameY * this.height,
-            this.width, this.height, this.x, this.y, this.width, this.height)
+        let sx = this.frameX * this.width;
+        let sy = this.frameY * this.height;
+        ctx.drawImage(this.image, sx, sy, this.width, this.height, this.x, this.y, this.width, this.height);
+        if (this.game.debug) {
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+        }
     }
 
 }
@@ -100,19 +104,37 @@ export class ClimbingEnemy extends Enemy {
         this.height = 144;
         this.image = document.getElementById('enemySpiderBig');
         this.frames = 6;
-        this.x = Math.random() * this.game.width * 0.75 + this.game.width * 0.25;
-        this.y = this.game.height - this.height;
-        this.maxY = Math.random() * this.game.height * 0.75 + this.game.height * 0.25;
+        this.x = this.game.width;
+        this.y = 0 - this.height;
+        this.maxY = Math.random() * (this.game.height - this.game.groundMargin - this.height);
         this.dx = 0;
-        this.dy = 0.05;
+        this.dy = 0;
+        this.maxDY = 0.05;
+        this.descending = true;
     }
 
     update() {
         super.update(this.game.dt);
-        // if (this.y > this.game.height) {}
+
+        if (this.y < -this.height && !this.descending) {
+            this.markedForDeletion = true;
+        }
+
+        if (this.y > this.maxY) {
+            this.descending = false;
+        }
+        this.dy = this.descending ? this.maxDY : -this.maxDY;
     }
 
-    draw() {
-        super.draw(this.game.ctx);
+    /** @param {CanvasRenderingContext2D} ctx */
+    draw(ctx = this.game.ctx) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(this.x + this.width * 0.5, 0);
+        ctx.strokeStyle = 'black';
+        ctx.lineTo(this.x + this.width * 0.5, this.y + this.height * 0.5);
+        ctx.stroke();
+        ctx.restore();
+        super.draw(ctx);
     }
 }

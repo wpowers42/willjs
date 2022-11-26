@@ -4,14 +4,15 @@ import Game from "./game.js";
 
 /** @param {{ctx: ctx}} game*/
 function animate(game) {
+
     /** @type {HTMLCanvasElement} */
     const ctx = game.ctx;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    game.update();
-    game.draw();
-    
+    if (!game.paused) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        game.update();
+        game.draw();
+    }
     requestAnimationFrame(() => animate(game));
 }
 
