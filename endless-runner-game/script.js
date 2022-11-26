@@ -8,11 +8,12 @@ function animate(game) {
     /** @type {HTMLCanvasElement} */
     const ctx = game.ctx;
 
-    if (!game.paused) {
+    if (!game.paused && !game.gameOver) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         game.update();
         game.draw();
     }
+
     requestAnimationFrame(() => animate(game));
 }
 

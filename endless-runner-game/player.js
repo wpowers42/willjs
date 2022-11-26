@@ -1,8 +1,10 @@
 import Game from "./game.js";
 import {
-    StandingState, SittingState, RunningState, JumpingState, FallingState,
-    RollingState
-} from "./playerStates.js"
+    StandingState, SittingState, RunningState, JumpingState,
+    FallingState, RollingState, DivingState, HitState
+} from "./playerStates.js";
+
+import CollisionAnimation from "./collisionAnimation.js";
 
 export default class Player {
     /** 
@@ -30,6 +32,7 @@ export default class Player {
             new StandingState(this), new SittingState(this),
             new RunningState(this), new JumpingState(this),
             new FallingState(this), new RollingState(this),
+            new DivingState(this), new HitState(this),
         ];
         this.currentState = this.states[0];
     }
@@ -49,7 +52,7 @@ export default class Player {
 
 
         // update background speed
-        if (['SITTING', 'STANDING'].includes(this.currentState.state)) {
+        if (['SITTING', 'STANDING', 'HIT'].includes(this.currentState.state)) {
             this.game.backgroundSpeed = 0;
         } else {
             this.game.backgroundSpeed = Math.max(this.dx, 0.2) * this.game.maxBackgroundSpeed; // + this.game.minBackgroundSpeed;
@@ -88,7 +91,12 @@ export default class Player {
     }
 
     setState(state) {
+        let oldState = this.currentState.state;
+        this.currentState.exit();
         this.currentState = this.states[state];
+        if (this.game.debug) {
+            console.log(`${oldState} => ${this.currentState.state}`);
+        }
         this.currentState.enter();
     }
 
@@ -102,7 +110,12 @@ export default class Player {
             } else if (!enemy.markedForDeletion) {
                 // collision
                 enemy.markedForDeletion = true;
-                this.game.score++;
+                this.game.collisions.push(new CollisionAnimation(this.game, bx + bw * 0.5, by + bh * 0.5));
+                if (['ROLLING', 'DIVING'].includes(this.currentState.state)) {
+                    this.game.score++;
+                } else {
+                    this.setState(7);
+                }
             }
         })
     }

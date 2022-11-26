@@ -22,6 +22,7 @@ export default class Game {
         this.minBackgroundSpeed = 0.75;
         this.maxBackgroundSpeed = 1.5;
         this.particles = [];
+        this.collisions = [];
         this.player = new Player(this);
         this.enemies = [];
         this.input = new InputHandler(this);
@@ -31,6 +32,8 @@ export default class Game {
         this.#addEnemy();
         this.debug = false;
         this.score = 0;
+        this.maxTime = 60000;
+        this.gameOver = false;
         this.UI = new UI(this);
 
         document.addEventListener('blur', _ => this.paused = true);
@@ -58,6 +61,7 @@ export default class Game {
         this.enemies.forEach(enemy => enemy.update());
         this.background.update();
         this.particles.forEach(particle => particle.update());
+        this.collisions.forEach(collision => collision.update());
 
         this.enemyTimer += this.dt;
         if (this.enemyTimer > this.enemyInterval) {
@@ -74,17 +78,20 @@ export default class Game {
 
         this.enemies = this.enemies.filter(enemy => !enemy.markedForDeletion);
         this.particles = this.particles.filter(particle => !particle.markedForDeletion);
+        this.collisions = this.collisions.filter(collision => !collision.markedForDeletion);
 
         while (this.accumulator >= this.dt) {
             this.step();
             this.accumulator -= this.dt;
             this.t += this.dt;
+            this.gameOver = this.t >= this.maxTime;
         }
     }
 
     draw() {
         this.background.draw();
         this.particles.forEach(particle => particle.draw());
+        this.collisions.forEach(collision => collision.draw());
         this.UI.draw();
         this.enemies.forEach(enemy => enemy.draw());
         this.player.draw();
