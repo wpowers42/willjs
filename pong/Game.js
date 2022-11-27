@@ -9,6 +9,7 @@ class GameState {
 
     constructor(state) {
         this.state = state;
+        this.name = GameState.START == this.state ? 'START' : 'PLAY';
     }
 }
 
@@ -68,16 +69,26 @@ export default class Game {
         this.ball.reset();
         this.paused = true;
         this.t = 0;
-        this.fps = 60;
+        this.fps = 30;
         this.dt = 1000 / this.fps;
         this.accumulator = 0;
         this.currentTime = performance.now();
+        this.frameTimes = 0;
+        this.frames = 0;
     }
 
     update() {
         let newTime = performance.now();
         let frameTime = newTime - this.currentTime;
         this.currentTime = newTime;
+        
+        if (this.frames >= 60) {
+            this.frameTimes -= this.frameTimes / this.frames;
+            this.frames -= 1;
+        }
+        this.frameTimes += frameTime;
+        this.frames += 1;
+
         this.#handleInput(this.inputHandler.keys);
 
         if (!this.paused) {
