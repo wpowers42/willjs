@@ -2,8 +2,10 @@ export default class Ball {
     constructor(x, y) {
         this.width = 4;
         this.height = 4;
-        this.x = x - this.width * 0.50;
-        this.y = y - this.height * 0.50;
+        this.startX = x - this.width * 0.50;
+        this.startY = y - this.height * 0.50;
+        this.x = this.startX;
+        this.y = this.startY;
         this.speedX = 0.10;
         this.speedY = 0.10;
         this.dx = (Math.random() < 0.50 ? -1 : 1) * this.speedX;
@@ -11,8 +13,8 @@ export default class Ball {
     }
 
     reset() {
-        this.x = x - this.width * 0.50;
-        this.y = y - this.height * 0.50;
+        this.x = this.startX;
+        this.y = this.startY;
         this.dx = (Math.random() < 0.50 ? -1 : 1) * this.speedX;
         this.dy = (Math.random() - 0.50) * this.speedY;
     }

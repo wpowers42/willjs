@@ -20,16 +20,7 @@ class StartGameState extends GameState {
     }
 
     enter() {
-        this.game.player1 = new Player1(15, 20, this.game);
-        this.game.player2 = new Player2(this.game.width - 15, this.game.height - 20, this.game);
-        this.game.ball = new Ball(this.game.width * 0.50, this.game.height * 0.50, this.game);
-        this.game.gameObjects = [this.game.player1, this.game.player2, this.game.ball];
-        this.game.paused = true;
-        this.game.t = 0;
-        this.game.fps = 60;
-        this.game.dt = 1000 / this.game.fps;
-        this.game.accumulator = 0;
-        this.game.currentTime = performance.now();
+        this.game.reset();
     }
 }
 
@@ -54,6 +45,11 @@ export default class Game {
         this.paused = false;
         this.gameOver = false;
 
+        this.player1 = new Player1(this);
+        this.player2 = new Player2(this);
+        this.ball = new Ball(this.width * 0.50, this.height * 0.50, this);
+        this.gameObjects = [this.player1, this.player2, this.ball];
+
         this.inputHandler = new InputHandler();
         this.inputMap = {
             START: 'Enter',
@@ -64,6 +60,18 @@ export default class Game {
         this.states = [new StartGameState(this), new PlayGameState(this)];
         this.currentState;
         this.setState(GameState.START);
+    }
+
+    reset() {
+        this.player1.reset();
+        this.player2.reset();
+        this.ball.reset();
+        this.paused = true;
+        this.t = 0;
+        this.fps = 60;
+        this.dt = 1000 / this.fps;
+        this.accumulator = 0;
+        this.currentTime = performance.now();
     }
 
     update() {

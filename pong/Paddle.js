@@ -53,12 +53,10 @@ class MovingDownState extends State {
 
 class Paddle {
     /** @param {Game} game */
-    constructor(x, y, game) {
+    constructor(game) {
         this.game = game;
         this.width = 5;
         this.height = 20;
-        this.x = x - this.width * 0.50;
-        this.y = y - this.height * 0.50;
         this.dx = 0;
         this.dy = 0;
         this.speed = 0.10;
@@ -66,6 +64,13 @@ class Paddle {
         this.currentState;
         this.setState(State.IDLE);
         this.score = 0;
+    }
+
+    reset() {
+        this.x = this.startX;
+        this.y = this.startY;
+        this.score = 0;
+        this.setState(State.IDLE);
     }
 
     /** @param {number} dt */
@@ -127,8 +132,12 @@ class Paddle {
 }
 
 export class Player1 extends Paddle {
-    constructor(x, y, game) {
-        super(x, y, game);
+    constructor(game) {
+        super(game);
+        this.startX = 10 + this.width * 0.50;
+        this.startY = 20 + this.height * 0.50;
+        this.x = this.startX;
+        this.y = this.startY;
         this.inputMap = {
             UP: 'w',
             DOWN: 's'
@@ -137,8 +146,12 @@ export class Player1 extends Paddle {
 }
 
 export class Player2 extends Paddle {
-    constructor(x, y, game) {
-        super(x, y, game);
+    constructor(game) {
+        super(game);
+        this.startX = this.game.width - 10 - this.width * 0.50;
+        this.startY = this.game.height - 20 - this.height * 0.50;
+        this.x = this.startX;
+        this.y = this.startY;
         this.inputMap = {
             UP: 'ArrowUp',
             DOWN: 'ArrowDown'
