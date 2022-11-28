@@ -16,7 +16,10 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 1200px;
-    height: auto;
+    height: 800px;
     max-width: 100%;
-    image-rendering: pixelated; /* https://caniuse.com/?search=image-rendering */
+    /* https://caniuse.com/?search=image-rendering */
+    image-rendering: pixelated;
+
+    background-color: rgb(40, 45, 52);
 }

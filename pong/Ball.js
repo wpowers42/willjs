@@ -4,16 +4,15 @@ import Vector2 from "../math/Vector2.js";
 export default class Ball {
     constructor(x, y, game) {
         this.game = game;
-        this.width = 4;
-        this.height = 4;
+        this.width = 12;
+        this.height = 12;
         this.startX = x - this.width * 0.50;
         this.startY = y - this.height * 0.50;
         this.x = this.startX;
         this.y = this.startY;
-        this.startSpeed = 0.10;
+        this.startSpeed = 0.30;
         this.speed = this.startSpeed;
         this.radians;
-        this.vector;
         this.dx;
         this.dy;
     }
@@ -36,7 +35,6 @@ export default class Ball {
         this.heading = new Vector2(Math.cos(angle), Math.sin(angle));
         this.dx = this.heading.x * this.speed;
         this.dy = this.heading.y * this.speed;
-        console.log(this.heading);
     }
 
     reset() {

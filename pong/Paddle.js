@@ -55,11 +55,11 @@ class Paddle {
     /** @param {Game} game */
     constructor(game) {
         this.game = game;
-        this.width = 5;
-        this.height = 20;
+        this.width = 15;
+        this.height = 60;
         this.dx = 0;
         this.dy = 0;
-        this.speed = 0.15;
+        this.speed = 0.45;
         this.states = [new IdleState(this), new MovingUpState(this), new MovingDownState(this)];
         this.currentState;
         this.setState(State.IDLE);
@@ -134,8 +134,8 @@ class Paddle {
 export class Player1 extends Paddle {
     constructor(game) {
         super(game);
-        this.startX = 10 + this.width * 0.50;
-        this.startY = 20 + this.height * 0.50;
+        this.startX = this.width;
+        this.startY = this.height;
         this.x = this.startX;
         this.y = this.startY;
         this.inputMap = {
@@ -148,8 +148,8 @@ export class Player1 extends Paddle {
 export class Player2 extends Paddle {
     constructor(game) {
         super(game);
-        this.startX = this.game.width - 10 - this.width * 0.50;
-        this.startY = this.game.height - 20 - this.height * 0.50;
+        this.startX = this.game.width - this.width * 2;
+        this.startY = this.game.height - this.height * 2;
         this.x = this.startX;
         this.y = this.startY;
         this.inputMap = {

@@ -69,7 +69,7 @@ export default class Game {
         this.ball.reset();
         this.paused = true;
         this.t = 0;
-        this.fps = 30;
+        this.fps = 60;
         this.dt = 1000 / this.fps;
         this.accumulator = 0;
         this.currentTime = performance.now();
@@ -109,7 +109,6 @@ export default class Game {
 
     setState(state) {
         this.currentState = this.states[state];
-        // debugger;
         this.currentState.enter();
     }
 
