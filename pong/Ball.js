@@ -1,3 +1,6 @@
+import Mathf from "../math/Mathf.js";
+import Vector2 from "../math/Vector2.js";
+
 export default class Ball {
     constructor(x, y, game) {
         this.game = game;
@@ -7,10 +10,12 @@ export default class Ball {
         this.startY = y - this.height * 0.50;
         this.x = this.startX;
         this.y = this.startY;
-        this.speedX = 0.10;
-        this.speedY = 0.10;
-        this.dx = (Math.random() < 0.50 ? -1 : 1) * this.speedX;
-        this.dy = (Math.random() - 0.50) * this.speedY;
+        this.startSpeed = 0.10;
+        this.speed = this.startSpeed;
+        this.radians;
+        this.vector;
+        this.dx;
+        this.dy;
     }
 
     collides(player) {
@@ -24,11 +29,26 @@ export default class Ball {
         }
     }
 
+    setVelocity(angle) {
+        // randomly change angle by +- 1.5 degrees
+        angle += Math.random() * (3 * Mathf.Deg2Rad) - (1.5 * Mathf.Deg2Rad);
+
+        this.heading = new Vector2(Math.cos(angle), Math.sin(angle));
+        this.dx = this.heading.x * this.speed;
+        this.dy = this.heading.y * this.speed;
+        console.log(this.heading);
+    }
+
     reset() {
         this.x = this.startX;
         this.y = this.startY;
-        this.dx = (Math.random() < 0.50 ? -1 : 1) * this.speedX;
-        this.dy = (Math.random() - 0.50) * this.speedY;
+        this.speed = this.startSpeed;
+
+
+        let rand = Math.random() * 90 - 45;
+        // use reasonable angles to start
+        this.angle = Math.random() < 0.50 ? rand : rand + 180;
+        this.setVelocity(this.angle * Mathf.Deg2Rad);
     }
 
     update(dt) {
@@ -36,15 +56,32 @@ export default class Ball {
         this.y += this.dy * dt;
 
         if (this.collides(this.game.player1) || this.collides(this.game.player2)) {
-            this.dx *= -1;
             let left = this.game.player1.x + this.game.player1.width;
             let right = this.game.player2.x - this.width;
-            this.x = Math.max(left, Math.min(this.x, right));
+            this.x = Mathf.Clamp(this.x, left, right);
+
+            // speed up ball with each hit
+            this.speed *= 1.1;
+
+            if (this.x === left) {
+                // hit left player
+                this.heading = Vector2.Reflect(this.heading, Vector2.right);
+                this.setVelocity(Vector2.SignedAngle(Vector2.right, this.heading) * Mathf.Deg2Rad);
+
+            } else {
+                // hit right player
+                // debugger;
+                this.heading = Vector2.Reflect(this.heading, Vector2.left);
+                this.setVelocity(Vector2.SignedAngle(Vector2.right, this.heading) * Mathf.Deg2Rad);
+            }
         }
 
         if (this.y <= 0 || this.y >= this.game.height - this.height) {
-            this.dy *= -1;
-            this.y = Math.max(0, Math.min(this.y, this.game.height - this.height));
+            this.heading = Vector2.Reflect(this.heading, Vector2.up);
+            this.dx = this.heading.x * this.speed;
+            this.dy = this.heading.y * this.speed;
+            // this.setVelocity(Vector2.Angle(Vector2.right, this.heading) * Mathf.Deg2Rad);
+            this.y = Mathf.Clamp(this.y, 0, this.game.height - this.height);
         }
 
     }
