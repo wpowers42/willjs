@@ -59,7 +59,7 @@ class Paddle {
         this.height = 20;
         this.dx = 0;
         this.dy = 0;
-        this.speed = 0.10;
+        this.speed = 0.15;
         this.states = [new IdleState(this), new MovingUpState(this), new MovingDownState(this)];
         this.currentState;
         this.setState(State.IDLE);
