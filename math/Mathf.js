@@ -9,7 +9,7 @@ export default class Mathf {
     static Clamp = (value, min, max) => {
         if (value < min) {
             value = min;
-        } else if (value > 1) {
+        } else if (value > max) {
             value = max;
         }
         return value;
