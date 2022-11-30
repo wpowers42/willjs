@@ -1,30 +1,20 @@
 "use strict";
-
-import Game from "./Game.js";
-
+Object.defineProperty(exports, "__esModule", { value: true });
+var Game_1 = require("./Game");
 function animate(game) {
-
-    /** @type {CanvasRenderingContext2D} */
-    const ctx = game.ctx;
-    
+    var ctx = game.ctx;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     game.update();
     game.draw();
-
-    requestAnimationFrame(() => animate(game));
+    requestAnimationFrame(function () { return animate(game); });
 }
-
-window.onload = () => {
-
-    /** @type {HTMLCanvasElement} */
-    const canvas = (document.getElementById('canvas'));
-    const ctx = canvas.getContext('2d');
-
+window.onload = function () {
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
     canvas.width = 1280;
     canvas.height = 720;
-
-    const game = new Game(ctx);
-
+    var game = new Game_1.default(ctx);
     // enter main loop
     animate(game);
-}
+};
+//# sourceMappingURL=script.js.map
