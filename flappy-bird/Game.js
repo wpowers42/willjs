@@ -4,11 +4,14 @@ export default class Game {
         this.ctx = ctx;
         this.input = new InputHandler();
         this.graphics = new Graphics(this);
+        this.fps = 60;
+        this.dt = 1000 / this.fps;
     }
     update() {
+        this.graphics.update(this.dt);
     }
     draw() {
-        this.graphics.draw();
+        this.graphics.draw(this.ctx);
     }
 }
 class InputHandler {

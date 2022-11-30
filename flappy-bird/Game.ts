@@ -4,19 +4,23 @@ export default class Game {
     ctx: CanvasRenderingContext2D;
     input: InputHandler;
     graphics: Graphics;
+    fps: number;
+    dt: number;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
         this.input = new InputHandler();
         this.graphics = new Graphics(this);
+        this.fps = 60;
+        this.dt = 1000 / this.fps;
     }
 
     update() {
-
+        this.graphics.update(this.dt);
     }
 
     draw() {
-        this.graphics.draw();
+        this.graphics.draw(this.ctx);
     }
 }
 
