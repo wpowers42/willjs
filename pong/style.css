@@ -1,6 +1,7 @@
+/* https://fonts.google.com/specimen/Press+Start+2P */
 @font-face {
-    font-family: VT323-Regular;
-    src: url(VT323-Regular.ttf);
+    font-family: PressStart2P-Regular;
+    src: url(assets/fonts/PressStart2P-Regular.ttf);
 }
 
 * {

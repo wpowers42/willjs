@@ -1,55 +1,5 @@
 import Game from "./Game.js";
-
-class State {
-    static IDLE = 0;
-    static MOVING_UP = 1;
-    static MOVING_DOWN = 2;
-
-    constructor(state) {
-        this.state = state;
-    }
-
-}
-
-class IdleState extends State {
-    /** @param {Paddle} paddle */
-    constructor(paddle) {
-        super(State.IDLE);
-        this.paddle = paddle;
-    }
-
-    enter() {
-        this.paddle.dy = 0;
-    }
-
-}
-
-class MovingUpState extends State {
-    /** @param {Paddle} paddle */
-    constructor(paddle) {
-        super(State.MOVING_UP);
-        this.paddle = paddle;
-    }
-
-    enter() {
-        this.paddle.dy = -this.paddle.speed;
-    }
-
-}
-
-class MovingDownState extends State {
-    /** @param {Paddle} paddle */
-    constructor(paddle) {
-        super(State.MOVING_DOWN);
-        this.paddle = paddle;
-    }
-
-    enter() {
-        this.paddle.dy = this.paddle.speed;
-    }
-
-}
-
+import { PaddleState, IdlePaddleState, MovingUpPaddleState, MovingDownPaddleState } from "./PaddleState.js";
 
 class Paddle {
     /** @param {Game} game */
@@ -60,9 +10,9 @@ class Paddle {
         this.dx = 0;
         this.dy = 0;
         this.speed = 0.45;
-        this.states = [new IdleState(this), new MovingUpState(this), new MovingDownState(this)];
+        this.states = [new IdlePaddleState(this), new MovingUpPaddleState(this), new MovingDownPaddleState(this)];
         this.currentState;
-        this.setState(State.IDLE);
+        this.setState(PaddleState.IDLE);
         this.score = 0;
     }
 
@@ -70,12 +20,12 @@ class Paddle {
         this.x = this.startX;
         this.y = this.startY;
         this.score = 0;
-        this.setState(State.IDLE);
+        this.setState(PaddleState.IDLE);
     }
 
     /** @param {number} dt */
     update(dt) {
-        this.#handleInput(this.game.inputHandler.keys);
+        this.#handleInput(this.game.inputHandler.keyPresses);
         this.y += this.dy * dt;
         this.y = Math.max(0, Math.min(this.y, this.game.height - this.height));
     }
@@ -93,36 +43,36 @@ class Paddle {
         this.currentState.enter();
     }
 
-    /** @param {Array<number>} keys */
-    #handleInput(keys) {
+    /** @param {Object} keyPresses */
+    #handleInput(keyPresses) {
         switch (this.currentState.state) {
-            case State.IDLE:
-                if (keys.includes(this.inputMap.UP)) {
-                    this.setState(State.MOVING_UP)
-                } else if (keys.includes(this.inputMap.DOWN)) {
-                    this.setState(State.MOVING_DOWN)
+            case PaddleState.IDLE:
+                if (keyPresses[this.inputMap.UP] === 1) {
+                    this.setState(PaddleState.MOVING_UP)
+                } else if (keyPresses[this.inputMap.DOWN]) {
+                    this.setState(PaddleState.MOVING_DOWN)
                 }
                 break;
-            case State.MOVING_UP:
-                if (keys.includes(this.inputMap.UP)) {
+            case PaddleState.MOVING_UP:
+                if (keyPresses[this.inputMap.UP] === 1) {
                     break; // stay in state
                 }
 
-                if (keys.includes(this.inputMap.DOWN)) {
-                    this.setState(State.MOVING_DOWN)
+                if (keyPresses[this.inputMap.DOWN] === 1) {
+                    this.setState(PaddleState.MOVING_DOWN)
                 } else {
-                    this.setState(State.IDLE)
+                    this.setState(PaddleState.IDLE)
                 }
                 break;
-            case State.MOVING_DOWN:
-                if (keys.includes(this.inputMap.DOWN)) {
+            case PaddleState.MOVING_DOWN:
+                if (keyPresses[this.inputMap.DOWN] === 1) {
                     break; // stay in state
                 }
 
-                if (keys.includes(this.inputMap.UP)) {
-                    this.setState(State.MOVING_UP)
+                if (keyPresses[this.inputMap.UP] === 1) {
+                    this.setState(PaddleState.MOVING_UP)
                 } else {
-                    this.setState(State.IDLE)
+                    this.setState(PaddleState.IDLE)
                 }
                 break;
         }

@@ -1,41 +1,8 @@
 import Ball from "./Ball.js";
 import InputHandler from "./input.js";
 import { Player1, Player2 } from "./Paddle.js";
+import { GameState, StartGameState, ServeGameState, PlayGameState, DoneGameState } from "./GameState.js";
 import UI from "./ui.js"
-
-class GameState {
-    static START = 0;
-    static PLAY = 1;
-
-    constructor(state) {
-        this.state = state;
-        this.name = GameState.START == this.state ? 'START' : 'PLAY';
-    }
-}
-
-class StartGameState extends GameState {
-    /** @param {Game} game */
-    constructor(game) {
-        super(GameState.START);
-        this.game = game;
-    }
-
-    enter() {
-        this.game.reset();
-    }
-}
-
-class PlayGameState extends GameState {
-    /** @param {Game} game */
-    constructor(game) {
-        super(GameState.PLAY);
-        this.game = game;
-    }
-
-    enter() {
-        this.game.paused = false;
-    }
-}
 
 export default class Game {
 
@@ -43,22 +10,18 @@ export default class Game {
         this.ctx = ctx;
         this.width = this.ctx.canvas.width;
         this.height = this.ctx.canvas.height;
-        this.paused = false;
         this.gameOver = false;
 
         this.player1 = new Player1(this);
         this.player2 = new Player2(this);
         this.ball = new Ball(this.width * 0.50, this.height * 0.50, this);
-        this.gameObjects = [this.player1, this.player2, this.ball];
+        this.gameObjects = [this.player1, this.player2];
 
         this.inputHandler = new InputHandler();
-        this.inputMap = {
-            START: 'Enter',
-            PLAY: ' ', // space
-        }
         this.ui = new UI(this);
 
-        this.states = [new StartGameState(this), new PlayGameState(this)];
+        this.states = [new StartGameState(this), new ServeGameState(this),
+        new PlayGameState(this), new DoneGameState(this)];
         this.currentState;
         this.setState(GameState.START);
     }
@@ -67,7 +30,6 @@ export default class Game {
         this.player1.reset();
         this.player2.reset();
         this.ball.reset();
-        this.paused = true;
         this.t = 0;
         this.fps = 60;
         this.dt = 1000 / this.fps;
@@ -81,7 +43,7 @@ export default class Game {
         let newTime = performance.now();
         let frameTime = newTime - this.currentTime;
         this.currentTime = newTime;
-        
+
         if (this.frames >= 60) {
             this.frameTimes -= this.frameTimes / this.frames;
             this.frames -= 1;
@@ -89,47 +51,31 @@ export default class Game {
         this.frameTimes += frameTime;
         this.frames += 1;
 
-        this.#handleInput(this.inputHandler.keys);
-
-        if (!this.paused) {
-            this.accumulator += frameTime;
-            while (this.accumulator >= this.dt) {
-                this.gameObjects.forEach(object => object.update(this.dt));
-                this.accumulator -= this.dt;
-                this.t += this.dt;
+        
+        this.accumulator += frameTime;
+        while (this.accumulator >= this.dt) {
+            this.currentState.handleInput(this.inputHandler.keyPresses);
+            this.player1.update(this.dt);
+            this.player2.update(this.dt);
+            if (this.currentState.state === GameState.PLAY) {
+                this.ball.update(this.dt);
             }
+            this.accumulator -= this.dt;
+            this.t += this.dt;
         }
 
     }
 
     draw() {
-        this.gameObjects.forEach(object => object.draw(this.ctx));
+        this.player1.draw(this.ctx);
+        this.player2.draw(this.ctx);
+        this.ball.draw(this.ctx);
         this.ui.draw(this.ctx);
     }
 
     setState(state) {
         this.currentState = this.states[state];
         this.currentState.enter();
-    }
-
-    /** @param {Array<number>} keys */
-    #handleInput(keys) {
-        switch (this.currentState.state) {
-            case GameState.START:
-                if (keys.includes(this.inputMap.PLAY)) {
-                    this.setState(GameState.PLAY);
-                    break;
-                }
-                break;
-            case GameState.PLAY:
-                if (keys.includes(this.inputMap.START)) {
-                    this.setState(GameState.START);
-                    break;
-                }
-                break;
-
-        }
-
     }
 
 }

@@ -1,5 +1,7 @@
 import Mathf from "../math/Mathf.js";
 import Vector2 from "../math/Vector2.js";
+import { GameState } from "./GameState.js";
+import Audio from "./Audio.js";
 
 export default class Ball {
     constructor(x, y, game) {
@@ -15,6 +17,8 @@ export default class Ball {
         this.radians;
         this.dx;
         this.dy;
+        this.servingPlayer = 1;
+        this.audio = new Audio();
     }
 
     collides(player) {
@@ -45,7 +49,7 @@ export default class Ball {
 
         let rand = Math.random() * 90 - 45;
         // use reasonable angles to start
-        this.angle = Math.random() < 0.50 ? rand : rand + 180;
+        this.angle = this.servingPlayer === 1 ? rand : rand + 180;
         this.setVelocity(this.angle * Mathf.Deg2Rad);
     }
 
@@ -53,7 +57,9 @@ export default class Ball {
         this.x += this.dx * dt;
         this.y += this.dy * dt;
 
+        // check paddle collision
         if (this.collides(this.game.player1) || this.collides(this.game.player2)) {
+            this.audio.play(Audio.PaddleHit);
             let left = this.game.player1.x + this.game.player1.width;
             let right = this.game.player2.x - this.width;
             this.x = Mathf.Clamp(this.x, left, right);
@@ -68,18 +74,34 @@ export default class Ball {
 
             } else {
                 // hit right player
-                // debugger;
                 this.heading = Vector2.Reflect(this.heading, Vector2.left);
                 this.setVelocity(Vector2.SignedAngle(Vector2.right, this.heading) * Mathf.Deg2Rad);
             }
         }
 
+        // check top or bottom collision
         if (this.y <= 0 || this.y >= this.game.height - this.height) {
+            this.audio.play(Audio.WallHit);
             this.heading = Vector2.Reflect(this.heading, Vector2.up);
-            this.dx = this.heading.x * this.speed;
-            this.dy = this.heading.y * this.speed;
-            // this.setVelocity(Vector2.Angle(Vector2.right, this.heading) * Mathf.Deg2Rad);
+            this.setVelocity(Vector2.SignedAngle(Vector2.right, this.heading) * Mathf.Deg2Rad);
             this.y = Mathf.Clamp(this.y, 0, this.game.height - this.height);
+        }
+
+        // check left or right edge collision
+        if (this.x + this.width < 0) {
+            // left edge collision, player2 scores point
+            this.audio.play(Audio.Score);
+            this.game.player2.score++;
+            this.servingPlayer = 1;
+            this.game.setState(GameState.SERVE);
+            this.reset();
+        } else if (this.x > this.game.width) {
+            // left edge collision, player1 scores point
+            this.audio.play(Audio.Score);
+            this.game.player1.score++;
+            this.servingPlayer = 2;
+            this.game.setState(GameState.SERVE);
+            this.reset();
         }
 
     }

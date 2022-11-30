@@ -3,20 +3,19 @@ import Game from "./Game.js";
 export default class InputHandler {
 
     constructor() {
-        this.keys = [];
+        this.keyPresses = {
+            'Enter': 0,
+            'w': 0,
+            's': 0,
+            'ArrowUp': 0,
+            'ArrowDown': 0,
+        };
 
         window.addEventListener('keydown', e => {
-
-            if (!this.keys.includes(e.key)) {
-                this.keys.push(e.key);
-            }
-
+            this.keyPresses[e.key] = 1;
         });
         window.addEventListener('keyup', e => {
-            if (this.keys.includes(e.key)) {
-                this.keys = this.keys.filter(key => key !== e.key);
-            }
-
+            this.keyPresses[e.key] = 0;
         });
     }
 
