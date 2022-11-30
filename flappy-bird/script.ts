@@ -1,4 +1,4 @@
-import Game from "./Game";
+import Game from "./Game.js";
 
 function animate(game: Game) {
 
@@ -16,8 +16,8 @@ window.onload = () => {
     const canvas = <HTMLCanvasElement>document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
-    canvas.width = 1280;
-    canvas.height = 720;
+    canvas.width = 512;
+    canvas.height = 288;
 
     const game = new Game(ctx);
 
