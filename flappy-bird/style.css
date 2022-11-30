@@ -16,3 +16,7 @@
 
     background-color: rgb(40, 45, 52);
 }
+
+img {
+    display: none;
+}
