@@ -11,6 +11,7 @@ export default class Game {
         this.width = this.ctx.canvas.width;
         this.height = this.ctx.canvas.height;
         this.gameOver = false;
+        this.scoreToWin = 11;
 
         this.player1 = new Player1(this);
         this.player2 = new Player2(this);
@@ -27,6 +28,7 @@ export default class Game {
     }
 
     reset() {
+        this.winningPlayer = undefined;
         this.player1.reset();
         this.player2.reset();
         this.ball.reset();

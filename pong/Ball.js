@@ -92,16 +92,26 @@ export default class Ball {
             // left edge collision, player2 scores point
             this.audio.play(Audio.Score);
             this.game.player2.score++;
-            this.servingPlayer = 1;
-            this.game.setState(GameState.SERVE);
-            this.reset();
+            if (this.game.player2.score === this.game.scoreToWin) {
+                this.game.winningPlayer = 2;
+                this.game.setState(GameState.DONE);
+            } else {
+                this.servingPlayer = 1;
+                this.game.setState(GameState.SERVE);
+                this.reset();
+            }
         } else if (this.x > this.game.width) {
             // left edge collision, player1 scores point
             this.audio.play(Audio.Score);
             this.game.player1.score++;
-            this.servingPlayer = 2;
-            this.game.setState(GameState.SERVE);
-            this.reset();
+            if (this.game.player1.score === this.game.scoreToWin) {
+                this.game.winningPlayer = 1;
+                this.game.setState(GameState.DONE);
+            } else {
+                this.servingPlayer = 2;
+                this.game.setState(GameState.SERVE);
+                this.reset();
+            }
         }
 
     }
