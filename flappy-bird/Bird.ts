@@ -9,8 +9,8 @@ export default class Bird {
     height: number;
     x: number;
     y: number;
-    dx: number;
     dy: number;
+    speedY: number;
     gravity: number;
     frames: number;
     frameX: number;
@@ -28,6 +28,9 @@ export default class Bird {
         this.height = this.spriteHeight * 0.50;
         this.x = this.game.width * 0.50 - this.width * 0.50;
         this.y = this.game.height * 0.50 - this.height * 0.50;
+        this.dy = 0;
+        this.speedY = 4.0;
+        this.gravity = 0.01;
         this.frames = 4;
         this.frameX = 0;
         this.fps = 4;
@@ -35,15 +38,24 @@ export default class Bird {
         this.frameTimer = 0;
     }
 
-    update(dt:number) {
+    update(dt: number) {
         this.frameTimer += dt;
         if (this.frameTimer > this.frameInterval) {
             this.frameX = (this.frameX + 1) % this.frames;
             this.frameTimer -= this.frameInterval;
         }
+
+        this.dy += this.gravity * dt;
+        this.y += this.dy;
+
+        if (this.game.input.keys[this.game.input.SPACE] === 1) {
+            this.dy = -this.speedY;
+            this.game.input.keys[this.game.input.SPACE] = 0;
+        }
+
     }
 
-    draw(ctx:CanvasRenderingContext2D) {
+    draw(ctx: CanvasRenderingContext2D) {
         let sx = this.frameX * this.spriteWidth;
         let sy = 0;
         let sw = this.spriteWidth;
