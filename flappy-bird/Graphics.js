@@ -44,7 +44,7 @@ class Background extends Scene {
         this.image = document.getElementById('backgroundImage');
         this.width = this.image.width;
         this.height = this.image.height;
-        this.dx = 0.08;
+        this.dx = 0.04;
     }
 }
 class Ground extends Scene {
@@ -53,7 +53,7 @@ class Ground extends Scene {
         this.image = document.getElementById('groundImage');
         this.width = this.image.width;
         this.height = this.image.height;
-        this.dx = 0.10;
+        this.dx = 0.05;
         this.y = gameHeight - this.height;
     }
 }
