@@ -1,3 +1,4 @@
+import Bird from "./Bird.js";
 import Graphics from "./Graphics.js";
 
 export default class Game {
@@ -8,6 +9,7 @@ export default class Game {
     dt: number;
     width: number;
     height: number;
+    bird: Bird;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
@@ -15,16 +17,19 @@ export default class Game {
         this.height = this.ctx.canvas.height;
         this.input = new InputHandler();
         this.graphics = new Graphics(this);
+        this.bird = new Bird(this);
         this.fps = 60;
         this.dt = 1000 / this.fps;
     }
 
     update() {
         this.graphics.update(this.dt);
+        this.bird.update(this.dt);
     }
 
     draw() {
         this.graphics.draw(this.ctx);
+        this.bird.draw(this.ctx);
     }
 }
 
