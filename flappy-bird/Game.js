@@ -22,17 +22,16 @@ export default class Game {
 }
 class InputHandler {
     constructor() {
-        this.keys = {
-            SPACE_KEY_CODE: 0,
-            ENTER_KEY_CODE: 0
-        };
+        this.SPACE = ' ';
+        this.ENTER = 'Enter';
+        this.keys = {};
+        this.keys[this.SPACE] = 0;
+        this.keys[this.ENTER] = 0;
         document.addEventListener('keydown', e => {
-            if (e.key === InputHandler.SPACE || e.key === InputHandler.ENTER) {
+            if (e.key === this.SPACE || e.key === this.ENTER) {
                 this.keys[e.key] = 1;
             }
         });
     }
 }
-InputHandler.SPACE = ' ';
-InputHandler.ENTER = 'Enter';
 //# sourceMappingURL=Game.js.map
