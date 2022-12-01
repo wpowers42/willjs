@@ -2,6 +2,8 @@ import Graphics from "./Graphics.js";
 export default class Game {
     constructor(ctx) {
         this.ctx = ctx;
+        this.width = this.ctx.canvas.width;
+        this.height = this.ctx.canvas.height;
         this.input = new InputHandler();
         this.graphics = new Graphics(this);
         this.fps = 60;

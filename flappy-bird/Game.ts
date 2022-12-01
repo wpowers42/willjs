@@ -6,9 +6,13 @@ export default class Game {
     graphics: Graphics;
     fps: number;
     dt: number;
+    width: number;
+    height: number;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
+        this.width = this.ctx.canvas.width;
+        this.height = this.ctx.canvas.height;
         this.input = new InputHandler();
         this.graphics = new Graphics(this);
         this.fps = 60;

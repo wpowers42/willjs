@@ -8,7 +8,7 @@ export default class Graphics {
     constructor(game: Game) {
         this.game = game;
         this.background = new Background();
-        this.ground = new Ground(this.game.ctx.canvas.height);
+        this.ground = new Ground(this.game.height);
     }
 
     update(dt: number) {
