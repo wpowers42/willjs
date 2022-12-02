@@ -10,7 +10,7 @@ export default class Bird {
     x: number;
     y: number;
     dy: number;
-    speedY: number;
+    antigravity: number;
     gravity: number;
     frames: number;
     frameX: number;
@@ -29,7 +29,7 @@ export default class Bird {
         this.x = this.game.width * 0.50 - this.width * 0.50;
         this.y = this.game.height * 0.50 - this.height * 0.50;
         this.dy = 0;
-        this.speedY = 4.0;
+        this.antigravity = 4.0;
         this.gravity = 0.01;
         this.frames = 4;
         this.frameX = 0;
@@ -49,7 +49,7 @@ export default class Bird {
         this.y += this.dy;
 
         if (this.game.input.isKeyPressed(' ')) {
-            this.dy = -this.speedY;
+            this.dy = -this.antigravity;
         }
 
     }
