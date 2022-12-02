@@ -22,16 +22,23 @@ export default class Game {
 }
 class InputHandler {
     constructor() {
-        this.SPACE = ' ';
-        this.ENTER = 'Enter';
-        this.keys = {};
-        this.keys[this.SPACE] = 0;
-        this.keys[this.ENTER] = 0;
-        document.addEventListener('keydown', e => {
-            if (e.key === this.SPACE || e.key === this.ENTER) {
-                this.keys[e.key] = 1;
+        this.keyPressed = {};
+        document.addEventListener('keypress', e => {
+            if (e.repeat) {
+                // ignore repeat key presses
+                return;
             }
+            this.keyPressed[e.key] = true;
         });
+        document.addEventListener('keyup', e => {
+            this.keyPressed[e.key] = false;
+        });
+    }
+    isKeyPressed(key) {
+        return this.keyPressed[key];
+    }
+    consumeKeyPress(key) {
+        this.keyPressed[key] = false;
     }
 }
 //# sourceMappingURL=Game.js.map

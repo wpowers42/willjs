@@ -48,9 +48,9 @@ export default class Bird {
         this.dy += this.gravity * dt;
         this.y += this.dy;
 
-        if (this.game.input.keys[this.game.input.SPACE] === 1) {
+        if (this.game.input.isKeyPressed(' ')) {
             this.dy = -this.speedY;
-            this.game.input.keys[this.game.input.SPACE] = 0;
+            this.game.input.consumeKeyPress(' ');
         }
 
     }
