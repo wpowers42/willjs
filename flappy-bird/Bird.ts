@@ -50,7 +50,6 @@ export default class Bird {
 
         if (this.game.input.isKeyPressed(' ')) {
             this.dy = -this.speedY;
-            this.game.input.consumeKeyPress(' ');
         }
 
     }

@@ -25,6 +25,7 @@ export default class Game {
     update() {
         this.graphics.update(this.dt);
         this.bird.update(this.dt);
+        this.input.reset();
     }
 
     draw() {
@@ -57,7 +58,8 @@ class InputHandler {
         return this.keyPressed[key];
     }
 
-    consumeKeyPress(key: string): void {
-        this.keyPressed[key] = false;
+    reset(): void {
+        this.keyPressed = {};
     }
+
 }

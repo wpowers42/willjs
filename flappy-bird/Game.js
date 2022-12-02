@@ -14,6 +14,7 @@ export default class Game {
     update() {
         this.graphics.update(this.dt);
         this.bird.update(this.dt);
+        this.input.reset();
     }
     draw() {
         this.graphics.draw(this.ctx);
@@ -37,8 +38,8 @@ class InputHandler {
     isKeyPressed(key) {
         return this.keyPressed[key];
     }
-    consumeKeyPress(key) {
-        this.keyPressed[key] = false;
+    reset() {
+        this.keyPressed = {};
     }
 }
 //# sourceMappingURL=Game.js.map
