@@ -1,5 +1,6 @@
 import Bird from "./Bird.js";
 import Graphics from "./Graphics.js";
+import Pipe from "./Pipe.js";
 export default class Game {
     constructor(ctx) {
         this.ctx = ctx;
@@ -8,16 +9,19 @@ export default class Game {
         this.input = new InputHandler();
         this.graphics = new Graphics(this);
         this.bird = new Bird(this);
+        this.pipes = [new Pipe(this)];
         this.fps = 60;
         this.dt = 1000 / this.fps;
     }
     update() {
         this.graphics.update(this.dt);
         this.bird.update(this.dt);
+        this.pipes.forEach(pipe => pipe.update(this.dt));
         this.input.reset();
     }
     draw() {
         this.graphics.draw(this.ctx);
+        this.pipes.forEach(pipe => pipe.draw(this.ctx));
         this.bird.draw(this.ctx);
     }
 }

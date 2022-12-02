@@ -1,5 +1,6 @@
 import Bird from "./Bird.js";
 import Graphics from "./Graphics.js";
+import Pipe from "./Pipe.js";
 
 export default class Game {
     ctx: CanvasRenderingContext2D;
@@ -10,6 +11,7 @@ export default class Game {
     width: number;
     height: number;
     bird: Bird;
+    pipes: Array<Pipe>;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
@@ -18,6 +20,7 @@ export default class Game {
         this.input = new InputHandler();
         this.graphics = new Graphics(this);
         this.bird = new Bird(this);
+        this.pipes = [new Pipe(this)];
         this.fps = 60;
         this.dt = 1000 / this.fps;
     }
@@ -25,11 +28,13 @@ export default class Game {
     update() {
         this.graphics.update(this.dt);
         this.bird.update(this.dt);
+        this.pipes.forEach(pipe => pipe.update(this.dt));
         this.input.reset();
     }
 
     draw() {
         this.graphics.draw(this.ctx);
+        this.pipes.forEach(pipe => pipe.draw(this.ctx));
         this.bird.draw(this.ctx);
     }
 }
