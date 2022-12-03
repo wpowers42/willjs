@@ -14,7 +14,6 @@ export default class Game {
     accumulator: number;
     width: number;
     height: number;
-    bird: Bird;
     lastTime: number;
     paused: boolean;
     debug: boolean;

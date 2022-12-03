@@ -14,8 +14,6 @@ export default class PlayState extends BaseState {
     game: Game;
     ctx: any;
     bird: Bird;
-    paused: boolean;
-    debug: boolean;
     pipePairs: any[];
     pipePairY: number;
     pipePairSpawnInterval: number;
