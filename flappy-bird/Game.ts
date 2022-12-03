@@ -1,6 +1,7 @@
 import Bird from "./Bird.js";
 import Graphics from "./Graphics.js";
-import Pipe from "./Pipe.js";
+import PipePair from "./PipePair.js";
+import Mathf from "../math/Mathf.js";
 
 export default class Game {
     ctx: CanvasRenderingContext2D;
@@ -13,10 +14,11 @@ export default class Game {
     width: number;
     height: number;
     bird: Bird;
-    pipes: Array<Pipe>;
     lastTime: number;
-    pipeSpawnInterval: number;
-    pipeSpawnTimer: number;
+    pipePairs: PipePair[];
+    pipePairY: number;
+    pipePairSpawnInterval: number;
+    pipePairSpawnTimer: number;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
@@ -25,28 +27,31 @@ export default class Game {
         this.input = new InputHandler();
         this.graphics = new Graphics(this);
         this.bird = new Bird(this);
-        this.pipes = [new Pipe(this)];
         this.fps = 60;
         this.t = 0;
         this.dt = 1000 / this.fps;
         this.accumulator = 0;
         this.lastTime = performance.now();
-        this.pipeSpawnInterval = 2500;
-        this.pipeSpawnTimer = 0;
+        this.pipePairs = [];
+        this.pipePairY = this.height * 0.5;
+        this.pipePairSpawnInterval = 2500;
+        this.pipePairSpawnTimer = 0;
     }
 
     step(dt: number) {
         this.graphics.update(dt);
         this.bird.update(dt);
-        this.pipes.forEach(pipe => pipe.update(dt));
+        this.pipePairs.forEach(pipePair => pipePair.update(dt));
         this.input.reset();
 
-        this.pipeSpawnTimer += dt;
-        if (this.pipeSpawnTimer > this.pipeSpawnInterval) {
-            this.pipes.push(new Pipe(this));
-            this.pipes = this.pipes.filter(pipe => !pipe.markedForDeletion);
-            this.pipeSpawnTimer -= this.pipeSpawnInterval;
-            console.log(this.pipes.length);
+        this.pipePairSpawnTimer += dt;
+        if (this.pipePairSpawnTimer > this.pipePairSpawnInterval) {
+            this.pipePairY = Mathf.Clamp(this.pipePairY + Math.random() * 40 - 20,
+                this.height * 0.10, this.height * 0.90);
+            this.pipePairs.push(new PipePair(this, this.pipePairY));
+            this.pipePairs = this.pipePairs.filter(pipePair => !pipePair.markedForDeletion);
+            this.pipePairSpawnTimer -= this.pipePairSpawnInterval;
+            console.log(this.pipePairs.length);
         }
     }
 
@@ -66,7 +71,7 @@ export default class Game {
 
     draw() {
         this.graphics.drawBackground(this.ctx);
-        this.pipes.forEach(pipe => pipe.draw(this.ctx));
+        this.pipePairs.forEach(pipePair => pipePair.draw(this.ctx));
         this.graphics.drawGround(this.ctx);
         this.bird.draw(this.ctx);
     }

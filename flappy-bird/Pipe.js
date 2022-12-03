@@ -1,15 +1,15 @@
 export default class Pipe {
-    constructor(game) {
-        this.game = game;
-        this.x = this.game.width;
-        this.y = Math.random() * this.game.height * 0.20 + this.game.height * 0.50; // top of the bottom section of the pipe
+    constructor(y, orientation) {
+        this.x = 500;
+        this.y = y;
         this.dx = 0.05;
         this.image = document.getElementById('pipeImage');
-        this.spriteWidth = this.image.width;
-        this.spriteHeight = this.image.height;
-        this.width = this.spriteWidth * 0.50;
-        this.height = this.spriteWidth * 0.50;
+        this.spriteWidth = 70;
+        this.spriteHeight = 288;
+        this.width = this.spriteWidth;
+        this.height = this.spriteHeight;
         this.pipeGap = 75;
+        this.orientation = orientation;
         this.markedForDeletion = false;
     }
     update(dt) {
@@ -17,11 +17,13 @@ export default class Pipe {
         this.markedForDeletion = this.x + this.width < 0;
     }
     draw(ctx) {
-        ctx.drawImage(this.image, this.x, this.y);
         ctx.save();
         ctx.translate(this.x, this.y);
-        ctx.scale(1, -1);
-        ctx.drawImage(this.image, 0, this.pipeGap);
+        if (this.orientation === 'top') {
+            ctx.scale(1, -1);
+        }
+        ctx.drawImage(this.image, 0, 0, this.width, this.height);
+        // ctx.drawImage(this.image, 0, this.pipeGap, this.width, this.height);
         ctx.restore();
     }
 }
