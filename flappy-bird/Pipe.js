@@ -4,11 +4,8 @@ export default class Pipe {
         this.y = y;
         this.dx = 0.05;
         this.image = document.getElementById('pipeImage');
-        this.spriteWidth = 70;
-        this.spriteHeight = 288;
-        this.width = this.spriteWidth;
-        this.height = this.spriteHeight;
-        this.pipeGap = 75;
+        this.width = 70;
+        this.height = 288;
         this.orientation = orientation;
         this.markedForDeletion = false;
     }
@@ -23,7 +20,6 @@ export default class Pipe {
             ctx.scale(1, -1);
         }
         ctx.drawImage(this.image, 0, 0, this.width, this.height);
-        // ctx.drawImage(this.image, 0, this.pipeGap, this.width, this.height);
         ctx.restore();
     }
 }
