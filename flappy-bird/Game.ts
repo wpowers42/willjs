@@ -34,7 +34,7 @@ export default class Game {
         this.lastTime = performance.now();
         this.pipePairs = [];
         this.pipePairY = this.height * 0.5;
-        this.pipePairSpawnInterval = 2500;
+        this.pipePairSpawnInterval = 100;
         this.pipePairSpawnTimer = 0;
     }
 
@@ -47,7 +47,7 @@ export default class Game {
         this.pipePairSpawnTimer += dt;
         if (this.pipePairSpawnTimer > this.pipePairSpawnInterval) {
             this.pipePairY = Mathf.Clamp(this.pipePairY + Math.random() * 40 - 20,
-                this.height * 0.10, this.height * 0.90);
+                this.height * 0.25, this.height * 0.75);
             this.pipePairs.push(new PipePair(this, this.pipePairY));
             this.pipePairs = this.pipePairs.filter(pipePair => !pipePair.markedForDeletion);
             this.pipePairSpawnTimer -= this.pipePairSpawnInterval;
