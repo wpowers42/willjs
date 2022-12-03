@@ -1,3 +1,8 @@
+@font-face {
+    font-family: flappy;
+    src: url(assets/fonts/flappy.ttf);
+  }
+
 * {
     margin: 0;
     padding: 0;
