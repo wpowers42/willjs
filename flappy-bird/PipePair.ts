@@ -2,21 +2,23 @@ import Bird from "./Bird";
 import Game from "./Game";
 import Pipe from "./Pipe.js";
 import StateMachine from "./StateMachine";
+import PlayState from "./states/PlayState";
 
 export default class PipePair {
     y: number;
-    game: any;
-    x: any;
+    playState: PlayState;
+    x: number;
     gapHeight: number;
     pipes: Pipe[];
     markedForDeletion: boolean;
     dx: number;
     pipeWidth: number;
     pipeHeight: number;
+    scored: boolean;
 
-    constructor(game: Game, y: number) {
-        this.game = game;
-        this.x = this.game.width;
+    constructor(playState: PlayState, y: number) {
+        this.playState = playState;
+        this.x = this.playState.game.width;
         this.dx = 0.05;
         this.y = y; // center of gap
         this.pipeWidth = 70;
@@ -27,6 +29,7 @@ export default class PipePair {
             new Pipe(this.x, this.y + this.gapHeight * 0.50, 'bottom')
         ]
         this.markedForDeletion = false;
+        this.scored = false;
     }
 
     update(dt: number, bird: Bird, stateMachine: StateMachine) {
@@ -36,12 +39,14 @@ export default class PipePair {
 
         this.pipes.forEach(pipe => {
             if (bird.collides(pipe)) {
-                stateMachine.change('title');
+                stateMachine.change('score', {
+                    score: this.playState.score,
+                });
             };
-        })
+        });
     }
 
-    draw(ctx: CanvasRenderingContext2D, debug : boolean) {
+    draw(ctx: CanvasRenderingContext2D, debug: boolean) {
         this.pipes.forEach(pipe => pipe.draw(ctx, debug));
     }
 }

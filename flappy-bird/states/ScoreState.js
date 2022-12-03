@@ -1,14 +1,15 @@
 /*
-The TitleScreenState is the starting screen of the game, shown on startup. It should
-    display "Press Enter" and also our highest score.
+
 */
 import BaseState from "./BaseState.js";
-export default class TitleScreenState extends BaseState {
+export default class ScoreState extends BaseState {
     constructor(game) {
         super();
         this.game = game;
     }
-    enter(enterParams) { }
+    enter(enterParams) {
+        this.score = enterParams['score'];
+    }
     exit() { }
     update(dt) {
         if (this.game.input.isKeyPressed('Enter')) {
@@ -18,9 +19,10 @@ export default class TitleScreenState extends BaseState {
     draw(ctx) {
         ctx.textAlign = 'center';
         ctx.font = this.game.fonts.large;
-        ctx.fillText('Flappy Bird', this.game.width * 0.50, 64);
+        ctx.fillText('Oof! You lost!', this.game.width * 0.50, 64);
         ctx.font = this.game.fonts.medium;
-        ctx.fillText('Press Enter', this.game.width * 0.50, 100);
+        ctx.fillText(`Score: ${this.score}`, this.game.width * 0.50, 100);
+        ctx.fillText('Press Enter to Play Again!', this.game.width * 0.50, 160);
     }
 }
-//# sourceMappingURL=TitleScreenState.js.map
+//# sourceMappingURL=ScoreState.js.map

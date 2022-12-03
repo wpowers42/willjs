@@ -3,6 +3,7 @@ import Graphics from "./Graphics.js";
 import StateMachine from "./StateMachine.js";
 import TitleScreenState from "./states/TitleScreenState.js";
 import PlayState from "./states/PlayState.js";
+import ScoreState from "./states/ScoreState.js";
 
 export default class Game {
     ctx: CanvasRenderingContext2D;
@@ -18,16 +19,23 @@ export default class Game {
     paused: boolean;
     debug: boolean;
     stateMachine: StateMachine;
+    fonts: { [key: string]: string }
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
         this.width = this.ctx.canvas.width;
         this.height = this.ctx.canvas.height;
         this.input = new InputHandler();
+        this.fonts = {
+            'small': '16px flappy',
+            'medium': '24px flappy',
+            'large': '48px flappy',
+        }
         this.graphics = new Graphics(this);
         this.stateMachine = new StateMachine({
-            'title' : () => new TitleScreenState(this),
-            'play' : () => new PlayState(this)
+            'title': () => new TitleScreenState(this),
+            'play': () => new PlayState(this),
+            'score': () => new ScoreState(this)
         });
         this.stateMachine.change('title');
         this.paused = false;
