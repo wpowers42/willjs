@@ -7,7 +7,7 @@ export default class Pipe {
         this.height = 288;
         this.orientation = orientation;
     }
-    draw(ctx) {
+    draw(ctx, debug) {
         ctx.save();
         if (this.orientation === 'top') {
             // Adjust the y position of the pipe before scaling the canvas
@@ -18,6 +18,9 @@ export default class Pipe {
             ctx.translate(this.x, this.y);
         }
         ctx.drawImage(this.image, 0, 0, this.width, this.height);
+        if (debug) {
+            ctx.strokeRect(0, 0, this.width, this.height);
+        }
         ctx.restore();
     }
 }

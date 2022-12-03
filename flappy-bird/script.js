@@ -2,7 +2,9 @@ import Game from "./Game.js";
 function animate(game) {
     const ctx = game.ctx;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    game.update();
+    if (!game.paused) {
+        game.update();
+    }
     game.draw();
     requestAnimationFrame(() => animate(game));
 }

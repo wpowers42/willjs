@@ -40,7 +40,7 @@ export default class PipePair {
         })
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
-        this.pipes.forEach(pipe => pipe.draw(ctx));
+    draw(ctx: CanvasRenderingContext2D, debug : boolean) {
+        this.pipes.forEach(pipe => pipe.draw(ctx, debug));
     }
 }

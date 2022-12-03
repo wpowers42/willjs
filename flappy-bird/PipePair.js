@@ -26,8 +26,8 @@ export default class PipePair {
             ;
         });
     }
-    draw(ctx) {
-        this.pipes.forEach(pipe => pipe.draw(ctx));
+    draw(ctx, debug) {
+        this.pipes.forEach(pipe => pipe.draw(ctx, debug));
     }
 }
 //# sourceMappingURL=PipePair.js.map

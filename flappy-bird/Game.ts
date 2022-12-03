@@ -20,6 +20,7 @@ export default class Game {
     pipePairSpawnInterval: number;
     pipePairSpawnTimer: number;
     paused: boolean;
+    debug: boolean;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
@@ -34,6 +35,7 @@ export default class Game {
         this.accumulator = 0;
         this.lastTime = performance.now();
         this.paused = false;
+        this.debug = true;
         this.pipePairs = [];
         this.pipePairY = this.height * 0.5;
         this.pipePairSpawnInterval = 2500;
@@ -73,9 +75,9 @@ export default class Game {
 
     draw() {
         this.graphics.drawBackground(this.ctx);
-        this.pipePairs.forEach(pipePair => pipePair.draw(this.ctx));
+        this.pipePairs.forEach(pipePair => pipePair.draw(this.ctx, this.debug));
         this.graphics.drawGround(this.ctx);
-        this.bird.draw(this.ctx);
+        this.bird.draw(this.ctx, this.debug);
     }
 }
 

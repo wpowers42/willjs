@@ -18,6 +18,10 @@ export default class Bird {
     fps: number;
     frameInterval: number;
     frameTimer: number;
+    collisionBoxWidth: number;
+    collisionBoxHeight: number;
+    collisionBoxX: number;
+    collisionBoxY: number;
 
 
     constructor(game: Game) {
@@ -37,13 +41,20 @@ export default class Bird {
         this.fps = 4;
         this.frameInterval = 1000 / this.fps;
         this.frameTimer = 0;
+
+        // Set the dimensions of the collision box
+        this.collisionBoxWidth = this.width * 0.65;
+        this.collisionBoxHeight = this.height * 0.65;
+        // Set the position of the collision box
+        this.collisionBoxX = this.x + (this.width - this.collisionBoxWidth) * 0.50;
+        this.collisionBoxY = this.y + (this.height - this.collisionBoxHeight) * 0.35;
     }
 
-    collides(pipe : Pipe) {
-        return !(this.x + this.width < pipe.x ||
-                 this.x > pipe.x + pipe.width ||
-                 this.y + this.height < pipe.y ||
-                 this.y > pipe.y + pipe.height);
+    collides(pipe: Pipe) {
+        return !(this.collisionBoxX + this.collisionBoxWidth < pipe.x ||
+            this.collisionBoxX > pipe.x + pipe.width ||
+            this.collisionBoxY + this.collisionBoxHeight < pipe.y ||
+            this.collisionBoxY > pipe.y + pipe.height);
     }
 
     update(dt: number) {
@@ -56,13 +67,16 @@ export default class Bird {
         this.dy += this.gravity * dt;
         this.y += this.dy;
 
+        this.collisionBoxX = this.x + (this.width - this.collisionBoxWidth) * 0.50;
+        this.collisionBoxY = this.y + (this.height - this.collisionBoxHeight) * 0.25;
+
         if (this.game.input.isKeyPressed(' ')) {
             this.dy = -this.antigravity;
         }
 
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    draw(ctx: CanvasRenderingContext2D, debug: boolean) {
         let sx = this.frameX * this.spriteWidth;
         let sy = 0;
         let sw = this.spriteWidth;
@@ -72,5 +86,9 @@ export default class Bird {
         let dw = this.width;;
         let dh = this.height;
         ctx.drawImage(this.image, sx, sy, sw, sh, dx, dy, dw, dh);
+
+        if (debug) {
+            ctx.strokeRect(this.collisionBoxX, this.collisionBoxY, this.collisionBoxWidth, this.collisionBoxHeight);
+        }
     }
 }
