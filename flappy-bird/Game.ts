@@ -43,6 +43,9 @@ export default class Game {
     }
 
     step(dt: number) {
+        if (this.paused) {
+            return;
+        }
         this.pipePairSpawnTimer += dt;
         if (this.pipePairSpawnTimer > this.pipePairSpawnInterval) {
             this.pipePairY = Mathf.Clamp(this.pipePairY + Math.random() * 40 - 20,
@@ -56,7 +59,6 @@ export default class Game {
         this.bird.update(dt);
         this.pipePairs.forEach(pipePair => pipePair.update(dt));
         this.input.reset();
-
     }
 
 

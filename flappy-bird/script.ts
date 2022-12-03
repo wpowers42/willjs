@@ -5,9 +5,7 @@ function animate(game: Game) {
     const ctx = game.ctx;
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    if (!game.paused) {
-        game.update();
-    }
+    game.update();
     game.draw();
 
     requestAnimationFrame(() => animate(game));

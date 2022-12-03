@@ -23,6 +23,9 @@ export default class Game {
         this.pipePairSpawnTimer = 0;
     }
     step(dt) {
+        if (this.paused) {
+            return;
+        }
         this.pipePairSpawnTimer += dt;
         if (this.pipePairSpawnTimer > this.pipePairSpawnInterval) {
             this.pipePairY = Mathf.Clamp(this.pipePairY + Math.random() * 40 - 20, this.height * 0.25, this.height * 0.75);
