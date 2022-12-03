@@ -10,9 +10,11 @@ export default class Pipe {
         this.width = this.spriteWidth * 0.50;
         this.height = this.spriteWidth * 0.50;
         this.pipeGap = 75;
+        this.markedForDeletion = false;
     }
     update(dt) {
         this.x -= this.dx * dt;
+        this.markedForDeletion = this.x + this.width < 0;
     }
     draw(ctx) {
         ctx.drawImage(this.image, this.x, this.y);

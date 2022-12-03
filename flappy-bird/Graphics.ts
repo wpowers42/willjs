@@ -16,8 +16,12 @@ export default class Graphics {
         this.ground.update(dt);
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    drawBackground(ctx: CanvasRenderingContext2D) {
         this.background.draw(ctx);
+    }
+
+    // using separate draw calls so we can layer the ground in front of the pipes
+    drawGround(ctx: CanvasRenderingContext2D) {
         this.ground.draw(ctx);
     }
 }

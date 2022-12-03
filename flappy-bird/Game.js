@@ -11,17 +11,41 @@ export default class Game {
         this.bird = new Bird(this);
         this.pipes = [new Pipe(this)];
         this.fps = 60;
+        this.t = 0;
         this.dt = 1000 / this.fps;
+        this.accumulator = 0;
+        this.lastTime = performance.now();
+        this.pipeSpawnInterval = 2500;
+        this.pipeSpawnTimer = 0;
+    }
+    step(dt) {
+        this.graphics.update(dt);
+        this.bird.update(dt);
+        this.pipes.forEach(pipe => pipe.update(dt));
+        this.input.reset();
+        this.pipeSpawnTimer += dt;
+        if (this.pipeSpawnTimer > this.pipeSpawnInterval) {
+            this.pipes.push(new Pipe(this));
+            this.pipes = this.pipes.filter(pipe => !pipe.markedForDeletion);
+            this.pipeSpawnTimer -= this.pipeSpawnInterval;
+            console.log(this.pipes.length);
+        }
     }
     update() {
-        this.graphics.update(this.dt);
-        this.bird.update(this.dt);
-        this.pipes.forEach(pipe => pipe.update(this.dt));
-        this.input.reset();
+        let newTime = performance.now();
+        let frameTime = newTime - this.lastTime;
+        this.lastTime = newTime;
+        this.accumulator += frameTime;
+        while (this.dt < this.accumulator) {
+            this.step(this.dt);
+            this.t += this.dt;
+            this.accumulator -= this.dt;
+        }
     }
     draw() {
-        this.graphics.draw(this.ctx);
+        this.graphics.drawBackground(this.ctx);
         this.pipes.forEach(pipe => pipe.draw(this.ctx));
+        this.graphics.drawGround(this.ctx);
         this.bird.draw(this.ctx);
     }
 }

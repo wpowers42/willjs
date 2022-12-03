@@ -8,8 +8,11 @@ export default class Graphics {
         this.background.update(dt);
         this.ground.update(dt);
     }
-    draw(ctx) {
+    drawBackground(ctx) {
         this.background.draw(ctx);
+    }
+    // using separate draw calls so we can layer the ground in front of the pipes
+    drawGround(ctx) {
         this.ground.draw(ctx);
     }
 }
