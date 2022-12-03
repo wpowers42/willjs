@@ -1,6 +1,5 @@
 export default class Pipe {
     constructor(y, orientation) {
-        this.x = 500;
         this.y = y;
         this.image = document.getElementById('pipeImage');
         this.width = 70;

@@ -17,22 +17,21 @@ export default class Game {
         this.lastTime = performance.now();
         this.pipePairs = [];
         this.pipePairY = this.height * 0.5;
-        this.pipePairSpawnInterval = 100;
+        this.pipePairSpawnInterval = 2500;
         this.pipePairSpawnTimer = 0;
     }
     step(dt) {
-        this.graphics.update(dt);
-        this.bird.update(dt);
-        this.pipePairs.forEach(pipePair => pipePair.update(dt));
-        this.input.reset();
         this.pipePairSpawnTimer += dt;
         if (this.pipePairSpawnTimer > this.pipePairSpawnInterval) {
             this.pipePairY = Mathf.Clamp(this.pipePairY + Math.random() * 40 - 20, this.height * 0.25, this.height * 0.75);
             this.pipePairs.push(new PipePair(this, this.pipePairY));
             this.pipePairs = this.pipePairs.filter(pipePair => !pipePair.markedForDeletion);
             this.pipePairSpawnTimer -= this.pipePairSpawnInterval;
-            console.log(this.pipePairs.length);
         }
+        this.graphics.update(dt);
+        this.bird.update(dt);
+        this.pipePairs.forEach(pipePair => pipePair.update(dt));
+        this.input.reset();
     }
     update() {
         let newTime = performance.now();

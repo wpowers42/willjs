@@ -8,7 +8,6 @@ export default class Pipe {
     orientation: string;
 
     constructor(y: number, orientation: string) {
-        this.x = 500;
         this.y = y;
         this.image = <HTMLImageElement>document.getElementById('pipeImage');
         this.width = 70;
