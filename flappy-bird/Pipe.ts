@@ -7,7 +7,8 @@ export default class Pipe {
     pipeGap: number;
     orientation: string;
 
-    constructor(y: number, orientation: string) {
+    constructor(x: number, y: number, orientation: string) {
+        this.x = x;
         this.y = y;
         this.image = <HTMLImageElement>document.getElementById('pipeImage');
         this.width = 70;
@@ -17,11 +18,16 @@ export default class Pipe {
 
     draw(ctx: CanvasRenderingContext2D) {
         ctx.save();
-        ctx.translate(this.x, this.y);
         if (this.orientation === 'top') {
+            // Adjust the y position of the pipe before scaling the canvas
+            ctx.translate(this.x, this.y + this.height);
             ctx.scale(1, -1);
+        } else {
+            ctx.translate(this.x, this.y);
         }
         ctx.drawImage(this.image, 0, 0, this.width, this.height);
         ctx.restore();
     }
-}
+    
+} 
+

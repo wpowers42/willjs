@@ -19,6 +19,7 @@ export default class Game {
     pipePairY: number;
     pipePairSpawnInterval: number;
     pipePairSpawnTimer: number;
+    paused: boolean;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
@@ -32,6 +33,7 @@ export default class Game {
         this.dt = 1000 / this.fps;
         this.accumulator = 0;
         this.lastTime = performance.now();
+        this.paused = false;
         this.pipePairs = [];
         this.pipePairY = this.height * 0.5;
         this.pipePairSpawnInterval = 2500;

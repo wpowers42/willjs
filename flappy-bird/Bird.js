@@ -17,6 +17,12 @@ export default class Bird {
         this.frameInterval = 1000 / this.fps;
         this.frameTimer = 0;
     }
+    collides(pipe) {
+        return !(this.x + this.width < pipe.x ||
+            this.x > pipe.x + pipe.width ||
+            this.y + this.height < pipe.y ||
+            this.y > pipe.y + pipe.height);
+    }
     update(dt) {
         this.frameTimer += dt;
         if (this.frameTimer > this.frameInterval) {

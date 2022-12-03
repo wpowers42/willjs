@@ -15,6 +15,7 @@ export default class Game {
         this.dt = 1000 / this.fps;
         this.accumulator = 0;
         this.lastTime = performance.now();
+        this.paused = false;
         this.pipePairs = [];
         this.pipePairY = this.height * 0.5;
         this.pipePairSpawnInterval = 2500;

@@ -1,4 +1,5 @@
 import Game from "./Game";
+import Pipe from "./Pipe";
 
 export default class Bird {
     game: Game;
@@ -36,6 +37,13 @@ export default class Bird {
         this.fps = 4;
         this.frameInterval = 1000 / this.fps;
         this.frameTimer = 0;
+    }
+
+    collides(pipe : Pipe) {
+        return !(this.x + this.width < pipe.x ||
+                 this.x > pipe.x + pipe.width ||
+                 this.y + this.height < pipe.y ||
+                 this.y > pipe.y + pipe.height);
     }
 
     update(dt: number) {
