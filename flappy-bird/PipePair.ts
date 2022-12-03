@@ -8,11 +8,15 @@ export default class PipePair {
     gapHeight: number;
     pipes: Pipe[];
     markedForDeletion: boolean;
+    dx: number;
+    width: number;
 
     constructor(game: Game, y: number) {
         this.game = game;
         this.x = this.game.width;
+        this.dx = 0.05;
         this.y = y; // center of gap
+        this.width = 70;
         this.gapHeight = 90;
         this.pipes = [
             new Pipe(this.y - this.gapHeight * 0.50, 'top'),
@@ -22,9 +26,9 @@ export default class PipePair {
     }
 
     update(dt: number) {
-        this.pipes.forEach(pipe => pipe.update(dt));
-        this.pipes = this.pipes.filter(pipe => !pipe.markedForDeletion);
-        this.markedForDeletion = this.pipes.length === 0;
+        this.x -= this.dx * dt;
+        this.pipes.forEach(pipe => pipe.x = this.x);
+        this.markedForDeletion = this.x + this.width < 0;
     }
 
     draw(ctx: CanvasRenderingContext2D) {
