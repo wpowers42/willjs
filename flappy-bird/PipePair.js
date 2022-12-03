@@ -14,14 +14,13 @@ export default class PipePair {
         ];
         this.markedForDeletion = false;
     }
-    update(dt) {
+    update(dt, bird, stateMachine) {
         this.x -= this.dx * dt;
         this.pipes.forEach(pipe => pipe.x = this.x);
         this.markedForDeletion = this.x + this.pipeWidth < 0;
         this.pipes.forEach(pipe => {
-            if (this.game.bird.collides(pipe)) {
-                this.game.paused = true;
-                console.log('COLLIDES!');
+            if (bird.collides(pipe)) {
+                stateMachine.change('title');
             }
             ;
         });

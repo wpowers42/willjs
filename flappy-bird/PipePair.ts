@@ -1,5 +1,7 @@
+import Bird from "./Bird";
 import Game from "./Game";
 import Pipe from "./Pipe.js";
+import StateMachine from "./StateMachine";
 
 export default class PipePair {
     y: number;
@@ -27,15 +29,14 @@ export default class PipePair {
         this.markedForDeletion = false;
     }
 
-    update(dt: number) {
+    update(dt: number, bird: Bird, stateMachine: StateMachine) {
         this.x -= this.dx * dt;
         this.pipes.forEach(pipe => pipe.x = this.x);
         this.markedForDeletion = this.x + this.pipeWidth < 0;
 
         this.pipes.forEach(pipe => {
-            if (this.game.bird.collides(pipe)) {
-                this.game.paused = true;
-                console.log('COLLIDES!');
+            if (bird.collides(pipe)) {
+                stateMachine.change('title');
             };
         })
     }
