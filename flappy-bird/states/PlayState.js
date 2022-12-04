@@ -27,6 +27,8 @@ export default class PlayState extends BaseState {
             this.pipePairs.push(new PipePair(this, this.pipePairY));
             this.pipePairs = this.pipePairs.filter(pipePair => !pipePair.markedForDeletion);
             this.pipePairSpawnTimer -= this.pipePairSpawnInterval;
+            // make next PipePair slightly random
+            this.pipePairSpawnInterval = Math.random() * 1000 + 2000;
         }
         this.bird.update(dt);
         this.pipePairs.forEach(pipePair => {
