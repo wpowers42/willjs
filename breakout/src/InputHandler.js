@@ -19,13 +19,13 @@ export default class InputHandler {
         // Remove the key from the set of pressed keys
         this.pressedKeys.delete(event.key);
     }
+    // Method to remove a key from the set of pressed keys
+    removeKey(key) {
+        this.pressedKeys.delete(key);
+    }
     // Method to check if a given key is currently pressed
     isKeyPressed(key) {
         return this.pressedKeys.has(key);
-    }
-    // Method to reset the set of pressed keys
-    reset() {
-        this.pressedKeys = new Set();
     }
 }
 //# sourceMappingURL=InputHandler.js.map

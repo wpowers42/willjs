@@ -23,13 +23,14 @@ export default class InputHandler {
         this.pressedKeys.delete(event.key);
     }
 
+    // Method to remove a key from the set of pressed keys
+    removeKey(key: string) {
+        this.pressedKeys.delete(key);
+    }
+
     // Method to check if a given key is currently pressed
     isKeyPressed(key: string) {
         return this.pressedKeys.has(key);
     }
 
-    // Method to reset the set of pressed keys
-    reset(): void {
-        this.pressedKeys = new Set();
-    }
 }
