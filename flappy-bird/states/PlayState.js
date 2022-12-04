@@ -31,6 +31,16 @@ export default class PlayState extends BaseState {
         this.bird.update(dt);
         this.pipePairs.forEach(pipePair => {
             pipePair.update(dt, this.bird, this.game.stateMachine);
+            pipePair.pipes.forEach(pipe => {
+                if (this.bird.collides(pipe)) {
+                    this.game.audio.play('explosion');
+                    this.game.audio.play('hurt');
+                    this.game.stateMachine.change('score', {
+                        score: this.score,
+                    });
+                }
+                ;
+            });
             if (!pipePair.scored) {
                 if (pipePair.x + pipePair.pipeWidth < this.bird.x) {
                     this.game.audio.play('score');
@@ -40,6 +50,8 @@ export default class PlayState extends BaseState {
             }
         });
         if (this.bird.y + this.bird.height > this.game.height) {
+            this.game.audio.play('explosion');
+            this.game.audio.play('hurt');
             this.game.stateMachine.change('score', {
                 score: this.score,
             });

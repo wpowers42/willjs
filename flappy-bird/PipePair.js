@@ -19,14 +19,6 @@ export default class PipePair {
         this.x -= this.dx * dt;
         this.pipes.forEach(pipe => pipe.x = this.x);
         this.markedForDeletion = this.x + this.pipeWidth < 0;
-        this.pipes.forEach(pipe => {
-            if (bird.collides(pipe)) {
-                stateMachine.change('score', {
-                    score: this.playState.score,
-                });
-            }
-            ;
-        });
     }
     draw(ctx, debug) {
         this.pipes.forEach(pipe => pipe.draw(ctx, debug));
