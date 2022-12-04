@@ -44,7 +44,7 @@ export default class Game {
             'paused': () => new PausedState(this),
         });
         this.stateMachine.change('title');
-        this.debug = true;
+        this.debug = false;
         this.fps = 60;
         this.t = 0;
         this.dt = 1000 / this.fps;
