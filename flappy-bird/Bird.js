@@ -40,6 +40,7 @@ export default class Bird {
         this.collisionBoxX = this.x + (this.width - this.collisionBoxWidth) * 0.50;
         this.collisionBoxY = this.y + (this.height - this.collisionBoxHeight) * 0.25;
         if (this.game.input.isKeyPressed(' ')) {
+            this.game.audio.sounds.jump.play();
             this.dy = -this.antigravity;
         }
     }

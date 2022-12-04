@@ -7,9 +7,8 @@ export default class Audio {
             score: document.getElementById('scoreSound'),
             music: document.getElementById('musicSound'),
         };
+        Object.keys(this.sounds).forEach(sound => this.sounds[sound].volume = 0.20);
         this.sounds.music.loop = true;
-        this.sounds.music.muted = true;
-        this.sounds.music.volume = 0.2;
         this.sounds.music.play();
     }
 }
