@@ -6,6 +6,7 @@ import ScoreState from "./states/ScoreState.js";
 import CountdownState from "./states/CountdownState.js";
 import Audio from "./Audio.js";
 import InputHandler from "./InputHandler.js";
+import PausedState from "./states/PausedState.js";
 
 export default class Game {
     ctx: CanvasRenderingContext2D;
@@ -40,6 +41,7 @@ export default class Game {
             'play': () => new PlayState(this),
             'score': () => new ScoreState(this),
             'countdown': () => new CountdownState(this),
+            'paused': () => new PausedState(this),
         });
         this.stateMachine.change('title');
         this.debug = true;

@@ -18,7 +18,18 @@ export default class PlayState extends BaseState {
         this.pipePairSpawnTimer = 0;
         this.score = 0;
     }
-    enter(enterParams) { }
+    enter(enterParams) {
+        if (enterParams && 'state' in enterParams) {
+            let state = enterParams['state'];
+            // restore prior state
+            this.bird = state.bird;
+            this.pipePairs = state.pipePairs;
+            this.pipePairY = state.pipePairY;
+            this.pipePairSpawnInterval = state.pipePairSpawnInterval;
+            this.pipePairSpawnTimer = state.pipePairSpawnTimer;
+            this.score = state.score;
+        }
+    }
     exit() { }
     update(dt) {
         this.pipePairSpawnTimer += dt;
@@ -56,6 +67,11 @@ export default class PlayState extends BaseState {
             this.game.audio.play('hurt');
             this.game.stateMachine.change('score', {
                 score: this.score,
+            });
+        }
+        if (this.game.input.isKeyPressed('Enter')) {
+            this.game.stateMachine.change('paused', {
+                state: this
             });
         }
     }
