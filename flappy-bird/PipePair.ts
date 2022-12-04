@@ -1,5 +1,4 @@
 import Bird from "./Bird";
-import Game from "./Game";
 import Pipe from "./Pipe.js";
 import StateMachine from "./StateMachine";
 import PlayState from "./states/PlayState";

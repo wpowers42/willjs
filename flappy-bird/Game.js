@@ -5,6 +5,7 @@ import PlayState from "./states/PlayState.js";
 import ScoreState from "./states/ScoreState.js";
 import CountdownState from "./states/CountdownState.js";
 import Audio from "./Audio.js";
+import InputHandler from "./InputHandler.js";
 export default class Game {
     constructor(ctx) {
         this.ctx = ctx;
@@ -25,7 +26,6 @@ export default class Game {
             'countdown': () => new CountdownState(this),
         });
         this.stateMachine.change('title');
-        this.paused = false;
         this.debug = true;
         this.fps = 60;
         this.t = 0;
@@ -53,27 +53,6 @@ export default class Game {
         this.graphics.drawBackground(this.ctx);
         this.stateMachine.draw(this.ctx);
         this.graphics.drawGround(this.ctx);
-    }
-}
-class InputHandler {
-    constructor() {
-        this.keyPressed = {};
-        document.addEventListener('keypress', e => {
-            if (e.repeat) {
-                // ignore repeat key presses
-                return;
-            }
-            this.keyPressed[e.key] = true;
-        });
-        document.addEventListener('keyup', e => {
-            this.keyPressed[e.key] = false;
-        });
-    }
-    isKeyPressed(key) {
-        return this.keyPressed[key];
-    }
-    reset() {
-        this.keyPressed = {};
     }
 }
 //# sourceMappingURL=Game.js.map
