@@ -3,7 +3,7 @@ export default class BaseState {
     }
     enter(baseParams) { }
     exit() { }
-    update(dt) { }
+    update(dt, inputHandler) { }
     draw(ctx) { }
 }
 //# sourceMappingURL=BaseState.js.map

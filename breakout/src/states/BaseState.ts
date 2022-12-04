@@ -1,3 +1,5 @@
+import InputHandler from "../InputHandler";
+
 export default class BaseState {
     constructor() {
 
@@ -5,6 +7,6 @@ export default class BaseState {
 
     enter(baseParams?: Object) { }
     exit() { }
-    update(dt: number) { }
+    update(dt: number, inputHandler: InputHandler) { }
     draw(ctx: CanvasRenderingContext2D) { }
 }

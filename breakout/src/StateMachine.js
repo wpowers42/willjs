@@ -11,8 +11,8 @@ export default class StateMachine {
         this.current = this.states[stateName]();
         this.current.enter(enterParams);
     }
-    update(dt) {
-        this.current.update(dt);
+    update(dt, inputHandler) {
+        this.current.update(dt, inputHandler);
     }
     draw(ctx) {
         this.current.draw(ctx);

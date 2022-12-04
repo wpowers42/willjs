@@ -1,3 +1,4 @@
+import InputHandler from "./InputHandler";
 import BaseState from "./states/BaseState.js";
 
 export default class StateMachine {
@@ -15,11 +16,12 @@ export default class StateMachine {
         this.current.enter(enterParams);
     }
 
-    update(dt: number) {
-        this.current.update(dt);
+    update(dt: number, inputHandler: InputHandler) {
+        this.current.update(dt, inputHandler);
     }
 
     draw(ctx : CanvasRenderingContext2D) {
         this.current.draw(ctx);
     }
 }
+
