@@ -22,7 +22,7 @@ export default class PipePair {
         this.y = y; // center of gap
         this.pipeWidth = 70;
         this.pipeHeight = 288;
-        this.gapHeight = 90;
+        this.gapHeight = Math.random() * 50 + 70;
         this.pipes = [
             new Pipe(this.x, this.y - this.gapHeight * 0.50 - this.pipeHeight, 'top'),
             new Pipe(this.x, this.y + this.gapHeight * 0.50, 'bottom')
