@@ -5,6 +5,7 @@ import TitleScreenState from "./states/TitleScreenState.js";
 import PlayState from "./states/PlayState.js";
 import ScoreState from "./states/ScoreState.js";
 import CountdownState from "./states/CountdownState.js";
+import Audio from "./Audio.js";
 
 export default class Game {
     ctx: CanvasRenderingContext2D;
@@ -21,6 +22,7 @@ export default class Game {
     debug: boolean;
     stateMachine: StateMachine;
     fonts: { [key: string]: string }
+    audio: Audio;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
@@ -33,6 +35,7 @@ export default class Game {
             'large': '48px flappy',
         }
         this.graphics = new Graphics(this);
+        this.audio = new Audio();
         this.stateMachine = new StateMachine({
             'title': () => new TitleScreenState(this),
             'play': () => new PlayState(this),

@@ -4,6 +4,7 @@ import TitleScreenState from "./states/TitleScreenState.js";
 import PlayState from "./states/PlayState.js";
 import ScoreState from "./states/ScoreState.js";
 import CountdownState from "./states/CountdownState.js";
+import Audio from "./Audio.js";
 export default class Game {
     constructor(ctx) {
         this.ctx = ctx;
@@ -16,6 +17,7 @@ export default class Game {
             'large': '48px flappy',
         };
         this.graphics = new Graphics(this);
+        this.audio = new Audio();
         this.stateMachine = new StateMachine({
             'title': () => new TitleScreenState(this),
             'play': () => new PlayState(this),
