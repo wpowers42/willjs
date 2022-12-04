@@ -33,6 +33,7 @@ export default class PlayState extends BaseState {
             pipePair.update(dt, this.bird, this.game.stateMachine);
             if (!pipePair.scored) {
                 if (pipePair.x + pipePair.pipeWidth < this.bird.x) {
+                    this.game.audio.play('score');
                     this.score++;
                     pipePair.scored = true;
                 }

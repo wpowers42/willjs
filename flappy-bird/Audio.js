@@ -11,5 +11,8 @@ export default class Audio {
         this.sounds.music.loop = true;
         this.sounds.music.play();
     }
+    play(sound) {
+        this.sounds[sound].play();
+    }
 }
 //# sourceMappingURL=Audio.js.map
