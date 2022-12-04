@@ -3,6 +3,7 @@ import StateMachine from "./StateMachine.js";
 import TitleScreenState from "./states/TitleScreenState.js";
 import PlayState from "./states/PlayState.js";
 import ScoreState from "./states/ScoreState.js";
+import CountdownState from "./states/CountdownState.js";
 export default class Game {
     constructor(ctx) {
         this.ctx = ctx;
@@ -18,7 +19,8 @@ export default class Game {
         this.stateMachine = new StateMachine({
             'title': () => new TitleScreenState(this),
             'play': () => new PlayState(this),
-            'score': () => new ScoreState(this)
+            'score': () => new ScoreState(this),
+            'countdown': () => new CountdownState(this),
         });
         this.stateMachine.change('title');
         this.paused = false;
