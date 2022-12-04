@@ -13,7 +13,7 @@ export default class ScoreState extends BaseState {
     exit() { }
     update(dt) {
         if (this.game.input.isKeyPressed('Enter')) {
-            this.game.stateMachine.change('play');
+            this.game.stateMachine.change('countdown');
         }
     }
     draw(ctx) {

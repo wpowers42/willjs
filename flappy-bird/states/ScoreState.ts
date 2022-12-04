@@ -24,7 +24,7 @@ export default class ScoreState extends BaseState {
 
     update(dt: number) {
         if (this.game.input.isKeyPressed('Enter')) {
-            this.game.stateMachine.change('play');
+            this.game.stateMachine.change('countdown');
         }
     }
 
