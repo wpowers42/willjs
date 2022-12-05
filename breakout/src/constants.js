@@ -38,6 +38,7 @@ export var Constants;
         victory: document.getElementById('victory-sound'),
         wallHit: document.getElementById('wall-hit-sound'),
     };
+    Object.keys(Constants.sounds).forEach(sound => Constants.sounds[sound].volume = 0.20);
     Constants.frames = {
         paddles: Util.generateQuadsPaddles(Constants.textures.main),
         balls: Util.generateQuadsBalls(Constants.textures.main),

@@ -43,6 +43,8 @@ export namespace Constants {
         wallHit: <HTMLAudioElement>document.getElementById('wall-hit-sound'),
     }
 
+    Object.keys(sounds).forEach(sound => sounds[sound].volume = 0.20);
+
     export const frames = {
         paddles: <Util.Quad[]>Util.generateQuadsPaddles(textures.main),
         balls: <Util.Quad[]>Util.generateQuadsBalls(textures.main),
