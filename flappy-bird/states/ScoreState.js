@@ -1,7 +1,7 @@
 /*
 
 */
-import Mathf from "../../math/Mathf.js";
+import { Mathf } from "../../math/Mathf.js";
 import BaseState from "./BaseState.js";
 export default class ScoreState extends BaseState {
     constructor(game) {

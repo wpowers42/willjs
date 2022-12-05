@@ -1,7 +1,5 @@
-export default class Mathf {
-    constructor() { }
-
-    static Clamp = (value : number, min : number, max : number) : number => {
+export namespace Mathf {
+    export const Clamp = (value: number, min: number, max: number) => {
         if (value < min) {
             value = min;
         } else if (value > max) {
@@ -10,7 +8,7 @@ export default class Mathf {
         return value;
     }
 
-    static Clamp01 = (value : number) : number => {
+    export const Clamp01 = (value: number) => {
         if (value < 0) {
             return 0.0;
         } else if (value > 1) {
@@ -20,6 +18,6 @@ export default class Mathf {
         }
     }
 
-    static Deg2Rad = Math.PI * 2 / 360;
-    static Rad2Deg = 1.0 / Mathf.Deg2Rad;
+    export const Deg2Rad = Math.PI * 2 / 360;
+    export const Rad2Deg = 1.0 / Mathf.Deg2Rad;
 }

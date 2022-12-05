@@ -6,7 +6,7 @@ we then go back to the main menu.
 
 import Game from "../Game";
 import Bird from "../Bird.js";
-import Mathf from "../../math/Mathf.js";
+import { Mathf } from "../../math/Mathf.js";
 import PipePair from "../PipePair.js";
 import BaseState from "./BaseState.js";
 
