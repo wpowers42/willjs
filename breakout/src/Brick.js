@@ -6,7 +6,7 @@ export default class Brick {
         this.width = 32;
         this.height = 16;
         this.tier = 0;
-        this.color = 1;
+        this.color = 0;
         this.inPlay = true;
     }
     hit() {
