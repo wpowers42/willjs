@@ -18,7 +18,7 @@ export default class PlayState extends BaseState {
         super();
         this.paddle = new Paddle();
         this.ball = new Ball();
-        this.bricks = LevelMaker.createMap();
+        this.bricks = LevelMaker.createMap(0);
         this.paused = false;
     }
 
