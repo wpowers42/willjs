@@ -1,4 +1,5 @@
 // constants.ts
+import { Util } from "./Util.js";
 export var Constants;
 (function (Constants) {
     Constants.canvasWidth = 1280;
@@ -18,6 +19,7 @@ export var Constants;
         blocks: document.getElementById('blocks-image'),
         hearts: document.getElementById('hearts-image'),
         particle: document.getElementById('particle-image'),
+        main: document.getElementById('main-image'),
     };
     // define the sounds
     Constants.sounds = {
@@ -35,6 +37,9 @@ export var Constants;
         select: document.getElementById('select-sound'),
         victory: document.getElementById('victory-sound'),
         wallHit: document.getElementById('wall-hit-sound'),
+    };
+    Constants.frames = {
+        paddles: Util.generateQuadsPaddles(Constants.textures.main),
     };
 })(Constants || (Constants = {}));
 //# sourceMappingURL=constants.js.map

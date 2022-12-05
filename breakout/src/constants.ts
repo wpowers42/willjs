@@ -1,5 +1,7 @@
 // constants.ts
 
+import { Util } from "./Util.js";
+
 export namespace Constants {
     export const canvasWidth = 1280;
     export const canvasHeight = 720;
@@ -20,6 +22,7 @@ export namespace Constants {
         blocks: <HTMLImageElement>document.getElementById('blocks-image'),
         hearts: <HTMLImageElement>document.getElementById('hearts-image'),
         particle: <HTMLImageElement>document.getElementById('particle-image'),
+        main: <HTMLImageElement>document.getElementById('main-image'),
     }
 
     // define the sounds
@@ -38,5 +41,9 @@ export namespace Constants {
         select: <HTMLAudioElement>document.getElementById('select-sound'),
         victory: <HTMLAudioElement>document.getElementById('victory-sound'),
         wallHit: <HTMLAudioElement>document.getElementById('wall-hit-sound'),
+    }
+
+    export const frames = {
+        paddles: <Util.Quad[]>Util.generateQuadsPaddles(textures.main),
     }
 }
