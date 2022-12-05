@@ -9,6 +9,7 @@ export namespace Constants {
     export const virtualHeight = 243;
     export const paddleSpeed = 0.20;
     export const FPS = 120;
+    export const debug = true;
 
     export const fonts: { [key: string]: string } = {
         small: '8px Copperplate',
@@ -48,5 +49,6 @@ export namespace Constants {
     export const frames = {
         paddles: <Util.Quad[]>Util.generateQuadsPaddles(textures.main),
         balls: <Util.Quad[]>Util.generateQuadsBalls(textures.main),
+        bricks: <Util.Quad[]>Util.generateQuadsBricks(textures.main),
     }
 }

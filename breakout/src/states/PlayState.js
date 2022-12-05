@@ -1,3 +1,4 @@
+import Ball from "../Ball.js";
 import { Constants } from "../constants.js";
 import Paddle from "../Paddle.js";
 import BaseState from "./BaseState.js";
@@ -5,6 +6,7 @@ export default class PlayState extends BaseState {
     constructor() {
         super();
         this.paddle = new Paddle();
+        this.ball = new Ball();
         this.paused = false;
     }
     update(dt, inputHandler, stateMachine) {
@@ -17,9 +19,16 @@ export default class PlayState extends BaseState {
             inputHandler.removeKey(' ');
         }
         this.paddle.update(dt, inputHandler);
+        this.ball.update(dt);
+        if (this.ball.collides(this.paddle)) {
+            this.ball.dy = -this.ball.dy;
+            this.ball.y = this.paddle.y - this.ball.height;
+            Constants.sounds.paddleHit.play();
+        }
     }
     draw(ctx) {
         this.paddle.draw(ctx);
+        this.ball.draw(ctx);
         if (this.paused) {
             ctx.font = Constants.fonts.large;
             ctx.textAlign = 'center';

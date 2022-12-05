@@ -31,6 +31,9 @@ export default class Paddle {
         let dw = this.width;
         let dh = this.height;
         ctx.drawImage(Constants.textures.main, sx, sy, sw, sh, dx, dy, dw, dh);
+        if (Constants.debug) {
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+        }
     }
 }
 //# sourceMappingURL=Paddle.js.map

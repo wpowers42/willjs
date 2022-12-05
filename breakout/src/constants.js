@@ -8,6 +8,7 @@ export var Constants;
     Constants.virtualHeight = 243;
     Constants.paddleSpeed = 0.20;
     Constants.FPS = 120;
+    Constants.debug = true;
     Constants.fonts = {
         small: '8px Copperplate',
         medium: '16px Copperplate',
@@ -42,6 +43,7 @@ export var Constants;
     Constants.frames = {
         paddles: Util.generateQuadsPaddles(Constants.textures.main),
         balls: Util.generateQuadsBalls(Constants.textures.main),
+        bricks: Util.generateQuadsBricks(Constants.textures.main),
     };
 })(Constants || (Constants = {}));
 //# sourceMappingURL=constants.js.map
