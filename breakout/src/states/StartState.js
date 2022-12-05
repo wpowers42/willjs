@@ -7,15 +7,21 @@ export default class StartState extends BaseState {
         this.color = 'rgb(255,255,255)';
         this.highlightColor = 'rgb(103,255,255)';
     }
-    update(dt, inputHandler) {
+    update(dt, inputHandler, stateMachine) {
         if (inputHandler.isKeyPressed('ArrowUp') ||
             inputHandler.isKeyPressed('ArrowDown')) {
+            Constants.sounds.select.play();
             this.highlighted ^= 1; // bitwise or toggles value between 0 and 1
             inputHandler.removeKey('ArrowUp');
             inputHandler.removeKey('ArrowDown');
         }
         if (inputHandler.isKeyPressed('Escape')) {
             // handle future quit state
+        }
+        if (inputHandler.isKeyPressed('Enter')) {
+            inputHandler.removeKey('Enter');
+            Constants.sounds.confirm.play();
+            stateMachine.change('play');
         }
     }
     draw(ctx) {

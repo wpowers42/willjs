@@ -1,9 +1,8 @@
 export default class BaseState {
-    constructor() {
-    }
+    constructor() { }
     enter(baseParams) { }
     exit() { }
-    update(dt, inputHandler) { }
+    update(dt, inputHandler, stateMachine) { }
     draw(ctx) { }
 }
 //# sourceMappingURL=BaseState.js.map

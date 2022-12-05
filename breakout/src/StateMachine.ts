@@ -17,7 +17,7 @@ export default class StateMachine {
     }
 
     update(dt: number, inputHandler: InputHandler) {
-        this.current.update(dt, inputHandler);
+        this.current.update(dt, inputHandler, this);
     }
 
     draw(ctx : CanvasRenderingContext2D) {

@@ -4,8 +4,8 @@ export default class Paddle {
     constructor() {
         this.width = 64;
         this.height = 16;
-        this.x = Constants.canvasWidth * 0.50 - this.width * 0.50;
-        this.y = Constants.canvasHeight - 32;
+        this.x = Constants.virtualWidth * 0.50 - this.width * 0.50;
+        this.y = Constants.virtualHeight - 32;
         this.dx = 0;
         this.skin = 0;
         this.size = 2;
@@ -20,8 +20,8 @@ export default class Paddle {
         else {
             this.dx = 0;
         }
-        this.x = this.dx * dt;
-        this.x = Mathf.Clamp(this.x, 0, Constants.canvasWidth);
+        this.x += this.dx * dt;
+        this.x = Mathf.Clamp(this.x, 0, Constants.virtualWidth - this.width);
     }
     draw(ctx) {
         let quad = Constants.frames.paddles[this.skin * 4 + this.size];

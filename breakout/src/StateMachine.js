@@ -12,7 +12,7 @@ export default class StateMachine {
         this.current.enter(enterParams);
     }
     update(dt, inputHandler) {
-        this.current.update(dt, inputHandler);
+        this.current.update(dt, inputHandler, this);
     }
     draw(ctx) {
         this.current.draw(ctx);
