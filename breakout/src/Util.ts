@@ -80,7 +80,7 @@ export namespace Util {
             // Generate the specified number of quads for this ball location
             for (let i = 0; i < ballLocation.count; i++) {
                 // Each quad is 8x8 pixels at coordinates (x * 8, y)
-                ballQuads.push(new Quad(ballLocation.x * 8, ballLocation.y, 8, 8));
+                ballQuads.push(new Quad(ballLocation.x + i * 8, ballLocation.y, 8, 8));
             }
         }
 
