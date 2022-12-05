@@ -40,6 +40,7 @@ export var Constants;
     };
     Constants.frames = {
         paddles: Util.generateQuadsPaddles(Constants.textures.main),
+        balls: Util.generateQuadsBalls(Constants.textures.main),
     };
 })(Constants || (Constants = {}));
 //# sourceMappingURL=constants.js.map

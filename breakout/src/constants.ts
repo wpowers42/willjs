@@ -45,5 +45,6 @@ export namespace Constants {
 
     export const frames = {
         paddles: <Util.Quad[]>Util.generateQuadsPaddles(textures.main),
+        balls: <Util.Quad[]>Util.generateQuadsBalls(textures.main),
     }
 }
