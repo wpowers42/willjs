@@ -2,6 +2,8 @@ import { Constants } from './src/constants.js';
 import InputHandler from './src/InputHandler.js';
 import StateMachine from './src/StateMachine.js';
 import StartState from './src/states/StartState.js';
+import { Util } from './src/Util.js';
+
 
 window.onload = () => {
 
