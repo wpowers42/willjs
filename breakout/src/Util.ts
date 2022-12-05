@@ -27,8 +27,8 @@ export namespace Util {
         // Generate quads for the entire atlas, using a cell size of 32x16 pixels
         const allQuads = generateQuads(atlas, 32, 16);
 
-        // Return the first 20 quads, which correspond to the bricks in the atlas
-        return allQuads.slice(0, 20);
+        // Return the first 21 quads, which correspond to the bricks in the atlas
+        return allQuads.slice(0, 21);
     }
 
 

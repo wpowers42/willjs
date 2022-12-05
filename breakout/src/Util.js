@@ -21,8 +21,8 @@ export var Util;
     Util.generateQuadsBricks = (atlas) => {
         // Generate quads for the entire atlas, using a cell size of 32x16 pixels
         const allQuads = Util.generateQuads(atlas, 32, 16);
-        // Return the first 20 quads, which correspond to the bricks in the atlas
-        return allQuads.slice(0, 20);
+        // Return the first 21 quads, which correspond to the bricks in the atlas
+        return allQuads.slice(0, 21);
     };
     // Generate quads for the paddles in the atlas
     Util.generateQuadsPaddles = (atlas) => {
