@@ -6,8 +6,8 @@ export var Constants;
     Constants.canvasHeight = 720;
     Constants.virtualWidth = 432;
     Constants.virtualHeight = 243;
-    Constants.paddleSpeed = 200;
-    Constants.FPS = 60;
+    Constants.paddleSpeed = 0.20;
+    Constants.FPS = 120;
     Constants.fonts = {
         small: '8px Copperplate',
         medium: '16px Copperplate',

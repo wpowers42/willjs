@@ -7,8 +7,8 @@ export namespace Constants {
     export const canvasHeight = 720;
     export const virtualWidth = 432;
     export const virtualHeight = 243;
-    export const paddleSpeed = 200;
-    export const FPS = 60;
+    export const paddleSpeed = 0.20;
+    export const FPS = 120;
 
     export const fonts: { [key: string]: string } = {
         small: '8px Copperplate',
@@ -34,7 +34,7 @@ export namespace Constants {
         hurt: <HTMLAudioElement>document.getElementById('hurt-sound'),
         music: <HTMLAudioElement>document.getElementById('music-sound'),
         noSelect: <HTMLAudioElement>document.getElementById('no-select-sound'),
-        paddleHit: document.getElementById('paddle-hit-sound'),
+        paddleHit: <HTMLAudioElement>document.getElementById('paddle-hit-sound'),
         pause: <HTMLAudioElement>document.getElementById('pause-sound'),
         recover: <HTMLAudioElement>document.getElementById('recover-sound'),
         score: <HTMLAudioElement>document.getElementById('score-sound'),
