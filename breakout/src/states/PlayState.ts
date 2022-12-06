@@ -7,6 +7,7 @@ import BaseState from "./BaseState.js";
 
 import Brick from "../Brick";
 import StateMachine from "../StateMachine";
+import { Mathf } from "../../../math/Mathf.js";
 
 export default class PlayState extends BaseState {
     paddle: Paddle;
@@ -41,6 +42,16 @@ export default class PlayState extends BaseState {
             this.ball.dy = -this.ball.dy;
             this.ball.y = this.paddle.y - this.ball.height;
             Constants.sounds.paddleHit.play();
+
+
+            let ballCenterX = this.ball.x + this.ball.width * 0.50;
+            let paddleCenterX = this.paddle.x + this.paddle.width * 0.50;
+            let horizontalVelocityRatio = Mathf.Clamp((ballCenterX - paddleCenterX) / (this.paddle.width * 0.50), -1, 1);
+
+            if (this.paddle.dx !== 0) {
+                // ball hit paddle on while moving
+                this.ball.dx = horizontalVelocityRatio * this.ball.maxHorizontalSpeed;
+            }
         }
 
         this.bricks.forEach(brick => {
@@ -52,7 +63,7 @@ export default class PlayState extends BaseState {
 
     draw(ctx: CanvasRenderingContext2D) {
         this.bricks.forEach(brick => brick.draw(ctx));
-        
+
         this.paddle.draw(ctx);
         this.ball.draw(ctx);
 

@@ -3,6 +3,7 @@ import { Constants } from "../constants.js";
 import LevelMaker from "../LevelMaker.js";
 import Paddle from "../Paddle.js";
 import BaseState from "./BaseState.js";
+import { Mathf } from "../../../math/Mathf.js";
 export default class PlayState extends BaseState {
     constructor() {
         super();
@@ -26,6 +27,13 @@ export default class PlayState extends BaseState {
             this.ball.dy = -this.ball.dy;
             this.ball.y = this.paddle.y - this.ball.height;
             Constants.sounds.paddleHit.play();
+            let ballCenterX = this.ball.x + this.ball.width * 0.50;
+            let paddleCenterX = this.paddle.x + this.paddle.width * 0.50;
+            let horizontalVelocityRatio = Mathf.Clamp((ballCenterX - paddleCenterX) / (this.paddle.width * 0.50), -1, 1);
+            if (this.paddle.dx !== 0) {
+                // ball hit paddle on while moving
+                this.ball.dx = horizontalVelocityRatio * this.ball.maxHorizontalSpeed;
+            }
         }
         this.bricks.forEach(brick => {
             if (brick.inPlay && this.ball.collides(brick)) {
