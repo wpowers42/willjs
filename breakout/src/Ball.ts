@@ -9,6 +9,10 @@ export default class Ball {
     skin: number;
     x: number;
     y: number;
+    minHorizontalSpeed: number;
+    maxHorizontalSpeed: number;
+    minVerticalSpeed: number;
+    maxVerticalSpeed: number;
 
 
     constructor() {
@@ -18,6 +22,10 @@ export default class Ball {
         this.y = 0;
         this.dx = 0
         this.dy = 0;
+        this.minHorizontalSpeed = Constants.paddleSpeed * 0.25;
+        this.maxHorizontalSpeed = Constants.paddleSpeed * 2.00;
+        this.minVerticalSpeed = 0.05;
+        this.maxVerticalSpeed = 0.10;
         this.skin = Math.floor(Math.random() * 6); // random ball skin
         this.reset();
     }
@@ -32,8 +40,8 @@ export default class Ball {
     reset() {
         this.x = Constants.virtualWidth * 0.50 - this.width * 0.50;
         this.y = Constants.virtualHeight * 0.50 - this.height * 0.50;
-        this.dx = Math.random() * 0.10 - 0.20;
-        this.dy = -(Math.random() * 0.05 + 0.05);
+        this.dx = Math.random() * (this.maxHorizontalSpeed - this.minHorizontalSpeed) * 0.25 + this.minHorizontalSpeed;
+        this.dy = -Math.random() * (this.maxHorizontalSpeed - this.minHorizontalSpeed) * 0.25 - this.minHorizontalSpeed;
     }
 
     update(dt: number) {
