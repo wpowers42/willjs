@@ -1,6 +1,6 @@
 export default class BaseState {
     constructor() { }
-    enter(baseParams) { }
+    enter(params) { }
     exit() { }
     update(dt, inputHandler, stateMachine) { }
     draw(ctx) { }

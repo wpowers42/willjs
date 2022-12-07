@@ -3,8 +3,8 @@ import InputHandler from './src/InputHandler.js';
 import StateMachine from './src/StateMachine.js';
 import StartState from './src/states/StartState.js';
 import PlayState from './src/states/PlayState.js';
-import { Util } from './src/Util.js';
-
+import ServeState from './src/states/ServeState.js';
+import GameOverState from './src/states/GameOverState.js';
 
 window.onload = () => {
 
@@ -26,7 +26,9 @@ window.onload = () => {
     */
     const stateMachine = new StateMachine({
         'start': () => new StartState(),
+        'serve': () => new ServeState(),
         'play': () => new PlayState(),
+        'gameOver': () => new GameOverState(),
     });
 
     stateMachine.change('start');
@@ -53,7 +55,7 @@ window.onload = () => {
 
         // draw background
         ctx.drawImage(Constants.textures.background, 0, 0, Constants.virtualWidth, Constants.virtualHeight);
-        
+
         stateMachine.draw(ctx);
         displayFPS(frameTime);
 

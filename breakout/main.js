@@ -3,6 +3,8 @@ import InputHandler from './src/InputHandler.js';
 import StateMachine from './src/StateMachine.js';
 import StartState from './src/states/StartState.js';
 import PlayState from './src/states/PlayState.js';
+import ServeState from './src/states/ServeState.js';
+import GameOverState from './src/states/GameOverState.js';
 window.onload = () => {
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -19,7 +21,9 @@ window.onload = () => {
     */
     const stateMachine = new StateMachine({
         'start': () => new StartState(),
+        'serve': () => new ServeState(),
         'play': () => new PlayState(),
+        'gameOver': () => new GameOverState(),
     });
     stateMachine.change('start');
     const dt = 1000 / Constants.FPS; // delta time using imported FPS constant

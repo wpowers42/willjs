@@ -6,7 +6,7 @@ export default class BaseState {
 
     constructor() { }
 
-    enter(baseParams?: Object) { }
+    enter(params?: Object) { }
     exit() { }
     update(dt: number, inputHandler: InputHandler, stateMachine: StateMachine) { }
     draw(ctx: CanvasRenderingContext2D) { }
