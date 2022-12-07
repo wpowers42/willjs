@@ -12,7 +12,7 @@ LevelMaker.createMap = (level) => {
             let brick = new Brick(x * 32 // brick width times index
                 + 8 // 8px for the screen
                 + (13 - numCols) * 16, // math to center entire row
-            y * 16 // brick height times index
+            y * 16 + 16 // brick height times index
             );
             bricks.push(brick);
         }
