@@ -8,20 +8,29 @@ import BaseState from "./BaseState.js";
 import Brick from "../Brick";
 import StateMachine from "../StateMachine";
 import { Mathf } from "../../../math/Mathf.js";
+import { Util } from "../Util.js";
 
 export default class PlayState extends BaseState {
     paddle: Paddle;
     paused: boolean;
     ball: Ball;
     bricks: Brick[];
+    health: number;
+    score: number;
 
     constructor() {
         super();
-        this.paddle = new Paddle();
-        this.ball = new Ball();
-        this.bricks = LevelMaker.createMap(0);
         this.paused = false;
     }
+
+    enter(params?: Object) {
+        this.paddle = params['paddle'];
+        this.bricks = params['bricks'];
+        this.health = params['health'];
+        this.score = params['score'];
+        this.ball = params['ball'];
+    }
+
 
     update(dt: number, inputHandler: InputHandler, stateMachine: StateMachine) {
         if (inputHandler.isKeyPressed(' ')) {
@@ -99,6 +108,24 @@ export default class PlayState extends BaseState {
                 break;
             }
         }
+
+        if (this.ball.y >= Constants.virtualHeight) {
+            this.health--;
+            Constants.sounds.hurt.play();
+
+            if (this.health === 0) {
+                stateMachine.change('gameOver', {
+                    score: this.score
+                });
+            } else {
+                stateMachine.change('serve', {
+                    paddle: this.paddle,
+                    bricks: this.bricks,
+                    health: this.health,
+                    score: this.score,
+                });
+            }
+        }
     }
 
     draw(ctx: CanvasRenderingContext2D) {
@@ -106,6 +133,9 @@ export default class PlayState extends BaseState {
 
         this.paddle.draw(ctx);
         this.ball.draw(ctx);
+
+        Util.renderHealth(ctx, this.health);
+        // Util.renderScore(ctx, this.health);
 
         if (this.paused) {
             ctx.font = Constants.fonts.large;

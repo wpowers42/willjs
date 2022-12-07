@@ -3,6 +3,8 @@ import BaseState from "./BaseState.js";
 import InputHandler from "../InputHandler";
 import { Constants } from '../constants.js';
 import StateMachine from "../StateMachine";
+import Paddle from "../Paddle.js";
+import LevelMaker from "../LevelMaker.js";
 
 export default class StartState extends BaseState {
     highlighted: number;
@@ -32,7 +34,15 @@ export default class StartState extends BaseState {
         if (inputHandler.isKeyPressed('Enter')) {
             inputHandler.removeKey('Enter');
             Constants.sounds.confirm.play();
-            stateMachine.change('play');
+
+            if (this.highlighted === 0) {
+                stateMachine.change('serve', {
+                    paddle: new Paddle(),
+                    bricks: LevelMaker.createMap(0),
+                    health: 3,
+                    score: 0
+                });
+            }
         }
     }
 
