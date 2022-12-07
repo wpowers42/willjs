@@ -40,8 +40,8 @@ export default class Ball {
     reset() {
         this.x = Constants.virtualWidth * 0.50 - this.width * 0.50;
         this.y = Constants.virtualHeight * 0.50 - this.height * 0.50;
-        this.dx = Math.random() * (this.maxHorizontalSpeed - this.minHorizontalSpeed) * 0.25 + this.minHorizontalSpeed;
-        this.dy = -Math.random() * (this.maxHorizontalSpeed - this.minHorizontalSpeed) * 0.25 - this.minHorizontalSpeed;
+        this.dx = (Math.random() * 2 - 1) * ((this.maxHorizontalSpeed - this.minHorizontalSpeed) + this.minHorizontalSpeed);
+        this.dy = -Math.random() * (this.maxVerticalSpeed - this.minVerticalSpeed) - this.minVerticalSpeed;
     }
 
     update(dt: number) {
