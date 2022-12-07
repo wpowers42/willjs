@@ -53,9 +53,9 @@ window.onload = () => {
 
         // draw background
         ctx.drawImage(Constants.textures.background, 0, 0, Constants.virtualWidth, Constants.virtualHeight);
-        displayFPS(frameTime);
-
+        
         stateMachine.draw(ctx);
+        displayFPS(frameTime);
 
         requestAnimationFrame(runGameLoop);
     }
