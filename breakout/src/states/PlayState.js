@@ -35,14 +35,11 @@ export default class PlayState extends BaseState {
                 this.ball.dx = horizontalVelocityRatio * this.ball.maxHorizontalSpeed;
             }
         }
-        // Loop through each brick in the game
+        // TODO: reset ball position to edge of brick if the ball is getting stuck
         for (const brick of this.bricks) {
-            // Check if the brick is in play and if it collides with the ball
             if (brick.inPlay && this.ball.collides(brick)) {
-                // Call the "hit" method on the brick to handle the collision
                 brick.hit();
                 let previousBallX = this.ball.x - this.ball.dx * dt;
-                // Check which side of the brick the ball hit
                 if (this.ball.x + this.ball.width >= brick.x &&
                     previousBallX + this.ball.width < brick.x) {
                     // ball hit left side of brick
@@ -60,9 +57,9 @@ export default class PlayState extends BaseState {
                 /*
                 To prevent multiple velocity changes, we exit the loop after the
                 first collision is handled. This also ensures that only one brick
-                is destroyed. Instead of using a loop, we can use a boolean flag
-                to prevent future velocity changes and still check for collisions
-                with other bricks
+                is destroyed. Instead of breaking the loop, we can use a boolean
+                flag to prevent future velocity changes and still check for
+                collisions with other bricks
                 */
                 break;
             }
