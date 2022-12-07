@@ -24,8 +24,23 @@ export default class PlayState extends BaseState {
         this.paddle.update(dt, inputHandler);
         this.ball.update(dt);
         if (this.ball.collides(this.paddle)) {
-            this.ball.dy = -this.ball.dy;
-            this.ball.y = this.paddle.y - this.ball.height;
+            // check if ball hit left or right side
+            let previousBallX = this.ball.x - this.ball.dx * dt;
+            if (this.ball.x + this.ball.width >= this.paddle.x &&
+                previousBallX + this.ball.width < this.paddle.x) {
+                // ball hit left side of paddle
+                this.ball.dx = -this.ball.dx;
+            }
+            else if (this.ball.x <= this.paddle.x + this.paddle.width &&
+                previousBallX > this.paddle.x + this.paddle.width) {
+                // ball hit right side of paddle
+                this.ball.dx = -this.ball.dx;
+            }
+            else {
+                // ball hit top or bottom of paddle
+                this.ball.dy = -this.ball.dy;
+                this.ball.y = this.paddle.y - this.ball.height;
+            }
             Constants.sounds.paddleHit.play();
             let ballCenterX = this.ball.x + this.ball.width * 0.50;
             let paddleCenterX = this.paddle.x + this.paddle.width * 0.50;
