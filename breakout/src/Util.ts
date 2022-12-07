@@ -1,3 +1,5 @@
+import { Constants } from "./constants.js";
+
 export namespace Util {
 
     // Generate quads for the tiles in an atlas or spritesheet
@@ -100,6 +102,21 @@ export namespace Util {
             this.sy = sy;
             this.sw = sw;
             this.sh = sh;
+        }
+    }
+
+
+    export const renderHealth = (ctx: CanvasRenderingContext2D, health: number) => {
+        for (let i = 0; i < 3; i++) {
+            const x = Constants.virtualWidth - 100 + i * 11;
+            const textureIndex = health > i ? 0 : 1;
+            const quad = Constants.frames.hearts[textureIndex];
+            let { sx, sy, sw, sh } = quad;
+            let dx = x;
+            let dy = 4;
+            let dw = sw;
+            let dh = sh;
+            ctx.drawImage(Constants.textures.hearts, sx, sy, sw, sh, dx, dy, dw, dh);
         }
     }
 }
