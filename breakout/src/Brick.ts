@@ -20,8 +20,28 @@ export default class Brick {
     }
 
     hit() {
+        Constants.sounds.brickHit2.pause();
+        Constants.sounds.brickHit2.currentTime = 0;
         Constants.sounds.brickHit2.play();
-        this.inPlay = false;
+        
+        if (this.tier > 0) {
+            if (this.color === 1) {
+                this.tier -= 1;
+                this.color = 4;
+            } else {
+                this.color -= 1;
+
+            }
+        } else {
+            if (this.color === 0) {
+                this.inPlay = false;
+                Constants.sounds.brickHit1.pause();
+                Constants.sounds.brickHit1.currentTime = 0;
+                Constants.sounds.brickHit1.play();
+            } else {
+                this.color -= 1;
+            }
+        }
     }
 
     draw(ctx: CanvasRenderingContext2D) {
