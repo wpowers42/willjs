@@ -5,25 +5,23 @@ export default class Brick {
         this.y = y;
         this.width = 32;
         this.height = 16;
-        this.tier = 0;
-        this.color = 0;
         this.inPlay = true;
     }
     hit() {
         Constants.sounds.brickHit2.pause();
         Constants.sounds.brickHit2.currentTime = 0;
         Constants.sounds.brickHit2.play();
-        if (this.tier > 0) {
+        if (this.tier > 1) {
             if (this.color === 1) {
                 this.tier -= 1;
-                this.color = 4;
+                this.color = 5;
             }
             else {
                 this.color -= 1;
             }
         }
         else {
-            if (this.color === 0) {
+            if (this.color === 1) {
                 this.inPlay = false;
                 Constants.sounds.brickHit1.pause();
                 Constants.sounds.brickHit1.currentTime = 0;
@@ -36,7 +34,7 @@ export default class Brick {
     }
     draw(ctx) {
         if (this.inPlay) {
-            let quad = Constants.frames.bricks[this.color * 4 + this.tier];
+            let quad = Constants.frames.bricks[this.tier * 4 + (this.color - 1)];
             let { sx, sy, sw, sh } = quad;
             let dx = this.x;
             let dy = this.y;
