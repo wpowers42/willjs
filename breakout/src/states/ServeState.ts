@@ -52,8 +52,8 @@ export default class ServeState extends BaseState {
         this.ball.draw(ctx);
         this.bricks.forEach(brick => brick.draw(ctx));
 
-        // Util.renderScore(ctx, this.score);
-        Util.renderHealth(ctx, this.health);
+        Util.drawScore(ctx, this.score);
+        Util.drawHealth(ctx, this.health);
 
         ctx.font = Constants.fonts.medium;
         ctx.textAlign = 'center';

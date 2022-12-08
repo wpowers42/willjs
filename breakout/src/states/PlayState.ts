@@ -81,6 +81,8 @@ export default class PlayState extends BaseState {
         // TODO: reset ball position to edge of brick if the ball is getting stuck
         for (const brick of this.bricks) {
             if (brick.inPlay && this.ball.collides(brick)) {
+                this.score += 10; // hard code score for now
+                
                 brick.hit();
 
                 let previousBallX = this.ball.x - this.ball.dx * dt;
@@ -134,8 +136,8 @@ export default class PlayState extends BaseState {
         this.paddle.draw(ctx);
         this.ball.draw(ctx);
 
-        Util.renderHealth(ctx, this.health);
-        // Util.renderScore(ctx, this.health);
+        Util.drawScore(ctx, this.score);
+        Util.drawHealth(ctx, this.health);
 
         if (this.paused) {
             ctx.font = Constants.fonts.large;

@@ -82,10 +82,11 @@ window.onload = () => {
             let fps = Math.round(1000 / avgFrameTime / 5) * 5;
 
             // Display the FPS on the screen
-            ctx.fillStyle = "white";
+            ctx.fillStyle = "green";
             ctx.font = Constants.fonts.small;
             ctx.textAlign = 'left';
-            ctx.fillText(`FPS: ${fps}`, 10, 20);
+            ctx.fillText(`FPS: ${fps}`, 10, 10);
+            ctx.fillStyle = "white";
         };
     };
 

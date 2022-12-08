@@ -77,7 +77,7 @@ export var Util;
         }
     }
     Util.Quad = Quad;
-    Util.renderHealth = (ctx, health) => {
+    Util.drawHealth = (ctx, health) => {
         for (let i = 0; i < 3; i++) {
             const x = Constants.virtualWidth - 100 + i * 11;
             const textureIndex = health > i ? 0 : 1;
@@ -89,6 +89,12 @@ export var Util;
             let dh = sh;
             ctx.drawImage(Constants.textures.hearts, sx, sy, sw, sh, dx, dy, dw, dh);
         }
+    };
+    Util.drawScore = (ctx, score) => {
+        ctx.font = Constants.fonts.small;
+        ctx.fillText('Score: ', Constants.virtualWidth - 60, 10);
+        ctx.textAlign = 'right';
+        ctx.fillText(`${score}`, Constants.virtualWidth - 10, 10);
     };
 })(Util || (Util = {}));
 //# sourceMappingURL=Util.js.map
