@@ -22,5 +22,9 @@ export var Mathf;
     };
     Mathf.Deg2Rad = Math.PI * 2 / 360;
     Mathf.Rad2Deg = 1.0 / Mathf.Deg2Rad;
+    // Custom Implementation
+    Mathf.RandomInt = (minValue, maxValue) => {
+        return Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
+    };
 })(Mathf || (Mathf = {}));
 //# sourceMappingURL=Mathf.js.map
