@@ -13,6 +13,7 @@ export default class PlayState extends BaseState {
         this.health = params['health'];
         this.score = params['score'];
         this.ball = params['ball'];
+        this.level = params['level'];
     }
     update(dt, inputHandler, stateMachine) {
         if (inputHandler.isKeyPressed(' ')) {
@@ -58,6 +59,16 @@ export default class PlayState extends BaseState {
             if (brick.inPlay && this.ball.collides(brick)) {
                 this.score += brick.tier * 200 + brick.color * 25;
                 brick.hit();
+                if (!this.checkVictory()) {
+                    Constants.sounds.victory.play();
+                    stateMachine.change('victory', {
+                        level: this.level,
+                        paddle: this.paddle,
+                        health: this.health,
+                        score: this.score,
+                        ball: this.ball
+                    });
+                }
                 let previousBallX = this.ball.x - this.ball.dx * dt;
                 if (this.ball.x + this.ball.width >= brick.x &&
                     previousBallX + this.ball.width < brick.x) {
@@ -97,9 +108,18 @@ export default class PlayState extends BaseState {
                     bricks: this.bricks,
                     health: this.health,
                     score: this.score,
+                    level: this.level
                 });
             }
         }
+    }
+    checkVictory() {
+        for (const brick of this.bricks) {
+            if (brick.inPlay) {
+                return false;
+            }
+        }
+        return true;
     }
     draw(ctx) {
         this.bricks.forEach(brick => brick.draw(ctx));

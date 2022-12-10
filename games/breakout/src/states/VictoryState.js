@@ -1,46 +1,44 @@
 import BaseState from "./BaseState.js";
-import Ball from "../Ball.js";
+import LevelMaker from "../LevelMaker.js";
 import { Util } from "../Util.js";
 import { Constants } from "../constants.js";
-export default class ServeState extends BaseState {
+export default class VictoryState extends BaseState {
     constructor() {
         super();
     }
     enter(params) {
-        this.paddle = params['paddle'];
-        this.bricks = params['bricks'];
-        this.health = params['health'];
-        this.score = params['score'];
-        this.ball = new Ball();
         this.level = params['level'];
+        this.score = params['score'];
+        this.paddle = params['paddle'];
+        this.health = params['health'];
+        this.ball = params['ball'];
     }
     update(dt, inputHandler, stateMachine) {
         this.paddle.update(dt, inputHandler);
         this.ball.x = this.paddle.x + this.paddle.width * 0.50 - this.ball.width * 0.50;
         this.ball.y = this.paddle.y - this.ball.height;
         if (inputHandler.isKeyPressed('Enter')) {
-            stateMachine.change('play', {
+            stateMachine.change('serve', {
+                level: this.level + 1,
+                bricks: LevelMaker.createMap(this.level + 1),
                 paddle: this.paddle,
-                bricks: this.bricks,
                 health: this.health,
-                score: this.score,
-                ball: this.ball,
-                level: this.level,
+                score: this.score
             });
-        }
-        if (inputHandler.isKeyPressed('Enter')) {
-            // handle quit
         }
     }
     draw(ctx) {
         this.paddle.draw(ctx);
         this.ball.draw(ctx);
-        this.bricks.forEach(brick => brick.draw(ctx));
-        Util.drawScore(ctx, this.score);
         Util.drawHealth(ctx, this.health);
-        ctx.font = Constants.fonts.medium;
+        Util.drawScore(ctx, this.score);
+        // level complete text
+        ctx.font = Constants.fonts.large;
         ctx.textAlign = 'center';
+        ctx.fillText(`Level ${this.level} complete!`, Constants.virtualWidth * 0.50, Constants.virtualHeight * 0.25);
+        // level complete text
+        ctx.font = Constants.fonts.medium;
         ctx.fillText('Press Enter to serve!', Constants.virtualWidth * 0.50, Constants.virtualHeight * 0.50);
     }
 }
-//# sourceMappingURL=ServeState.js.map
+//# sourceMappingURL=VictoryState.js.map

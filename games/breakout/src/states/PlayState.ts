@@ -16,6 +16,7 @@ export default class PlayState extends BaseState {
     bricks: Brick[];
     health: number;
     score: number;
+    level: number;
 
     constructor() {
         super();
@@ -28,6 +29,7 @@ export default class PlayState extends BaseState {
         this.health = params['health'];
         this.score = params['score'];
         this.ball = params['ball'];
+        this.level = params['level'];
     }
 
 
@@ -83,8 +85,20 @@ export default class PlayState extends BaseState {
 
             if (brick.inPlay && this.ball.collides(brick)) {
                 this.score += brick.tier * 200 + brick.color * 25;
-                
+
                 brick.hit();
+
+                if (!this.checkVictory()) {
+                    Constants.sounds.victory.play();
+
+                    stateMachine.change('victory', {
+                        level: this.level,
+                        paddle: this.paddle,
+                        health: this.health,
+                        score: this.score,
+                        ball: this.ball
+                    });
+                }
 
                 let previousBallX = this.ball.x - this.ball.dx * dt;
 
@@ -126,9 +140,19 @@ export default class PlayState extends BaseState {
                     bricks: this.bricks,
                     health: this.health,
                     score: this.score,
+                    level: this.level
                 });
             }
         }
+    }
+
+    checkVictory(): boolean {
+        for (const brick of this.bricks) {
+            if (brick.inPlay) {
+                return false;
+            }
+        }
+        return true;
     }
 
     draw(ctx: CanvasRenderingContext2D) {

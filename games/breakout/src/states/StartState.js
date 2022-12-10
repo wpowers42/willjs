@@ -28,7 +28,8 @@ export default class StartState extends BaseState {
                     paddle: new Paddle(),
                     bricks: LevelMaker.createMap(0),
                     health: 3,
-                    score: 0
+                    score: 0,
+                    level: 1
                 });
             }
         }

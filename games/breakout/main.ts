@@ -5,6 +5,7 @@ import StartState from './src/states/StartState.js';
 import PlayState from './src/states/PlayState.js';
 import ServeState from './src/states/ServeState.js';
 import GameOverState from './src/states/GameOverState.js';
+import VictoryState from './src/states/VictoryState.js';
 
 window.onload = () => {
 
@@ -29,6 +30,7 @@ window.onload = () => {
         'serve': () => new ServeState(),
         'play': () => new PlayState(),
         'gameOver': () => new GameOverState(),
+        'victory': () => new VictoryState(),
     });
 
     stateMachine.change('start');

@@ -1,31 +1,29 @@
-import BaseState from "./BaseState.js";
-
+import Ball from "../Ball";
 import InputHandler from "../InputHandler";
-import StateMachine from "../StateMachine";
 import Paddle from "../Paddle";
-import Brick from "../Brick";
-import Ball from "../Ball.js";
+import StateMachine from "../StateMachine";
+import BaseState from "./BaseState.js";
+import LevelMaker from "../LevelMaker.js";
 import { Util } from "../Util.js";
 import { Constants } from "../constants.js";
 
-export default class ServeState extends BaseState {
-    paddle: Paddle;
-    bricks: Brick[];
-    health: number;
-    score: number;
-    ball: Ball;
+export default class VictoryState extends BaseState {
     level: number;
+    score: number;
+    paddle: Paddle;
+    health: number;
+    ball: Ball;
     constructor() {
         super();
     }
 
-    enter(params?: Object) {
-        this.paddle = params['paddle'];
-        this.bricks = params['bricks'];
-        this.health = params['health'];
-        this.score = params['score'];
-        this.ball = new Ball();
+    enter(params?: Object): void {
         this.level = params['level'];
+        this.score = params['score'];
+        this.paddle = params['paddle'];
+        this.health = params['health'];
+        this.ball = params['ball'];
+
     }
 
     update(dt: number, inputHandler: InputHandler, stateMachine: StateMachine) {
@@ -34,32 +32,31 @@ export default class ServeState extends BaseState {
         this.ball.y = this.paddle.y - this.ball.height;
 
         if (inputHandler.isKeyPressed('Enter')) {
-            stateMachine.change('play', {
+            stateMachine.change('serve', {
+                level: this.level + 1,
+                bricks: LevelMaker.createMap(this.level + 1),
                 paddle: this.paddle,
-                bricks: this.bricks,
                 health: this.health,
-                score: this.score,
-                ball: this.ball,
-                level: this.level,
-            });
+                score: this.score
+            })
         }
-
-        if (inputHandler.isKeyPressed('Enter')) {
-            // handle quit
-        }
-
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    draw(ctx: CanvasRenderingContext2D): void {
         this.paddle.draw(ctx);
         this.ball.draw(ctx);
-        this.bricks.forEach(brick => brick.draw(ctx));
 
-        Util.drawScore(ctx, this.score);
         Util.drawHealth(ctx, this.health);
+        Util.drawScore(ctx, this.score);
 
-        ctx.font = Constants.fonts.medium;
+        // level complete text
+        ctx.font = Constants.fonts.large;
         ctx.textAlign = 'center';
+        ctx.fillText(`Level ${this.level} complete!`, Constants.virtualWidth * 0.50, Constants.virtualHeight * 0.25);
+
+        // level complete text
+        ctx.font = Constants.fonts.medium;
         ctx.fillText('Press Enter to serve!', Constants.virtualWidth * 0.50, Constants.virtualHeight * 0.50);
     }
+
 }
