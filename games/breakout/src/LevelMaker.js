@@ -38,24 +38,26 @@ LevelMaker.createMap = (level) => {
             if (skipPattern && skipFlag) {
                 continue;
             }
+            alternateFlag = !alternateFlag;
+            let color;
+            let tier;
+            if (alternatePattern && alternateFlag) {
+                color = alternateColor1;
+                tier = alternateTier1;
+            }
+            else {
+                color = alternateColor2;
+                tier = alternateTier2;
+            }
+            if (!alternatePattern) {
+                color = solidColor;
+                tier = solidTier;
+            }
             const brick = new Brick(x * 32 // brick width times index
                 + 8 // 8px for the screen
                 + (13 - numCols) * 16, // math to center entire row
-            y * 16 + 16 // brick height times index
-            );
-            alternateFlag = !alternateFlag;
-            if (alternatePattern && alternateFlag) {
-                brick.color = alternateColor1;
-                brick.tier = alternateTier1;
-            }
-            else {
-                brick.color = alternateColor2;
-                brick.tier = alternateTier2;
-            }
-            if (!alternatePattern) {
-                brick.color = solidColor;
-                brick.tier = solidTier;
-            }
+            y * 16 + 16, // brick height times index
+            color, tier);
             bricks.push(brick);
         }
     }
