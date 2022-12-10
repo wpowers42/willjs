@@ -88,7 +88,7 @@ export default class PlayState extends BaseState {
 
                 brick.hit();
 
-                if (!this.checkVictory()) {
+                if (this.checkVictory()) {
                     Constants.sounds.victory.play();
 
                     stateMachine.change('victory', {

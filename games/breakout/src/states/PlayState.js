@@ -59,7 +59,7 @@ export default class PlayState extends BaseState {
             if (brick.inPlay && this.ball.collides(brick)) {
                 this.score += brick.tier * 200 + brick.color * 25;
                 brick.hit();
-                if (!this.checkVictory()) {
+                if (this.checkVictory()) {
                     Constants.sounds.victory.play();
                     stateMachine.change('victory', {
                         level: this.level,
