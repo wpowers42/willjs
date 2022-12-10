@@ -7,6 +7,7 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const renderer = new THREE.WebGLRenderer({alpha: true});
 
 renderer.setSize(window.innerWidth, window.innerHeight);
+
 document.body.appendChild(renderer.domElement);
 
 const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -21,7 +22,8 @@ controls.maxZoom = 1.0;
 controls.maxDistance = 60.0;
 controls.enablePan = false;
 controls.enableKeys = false;
-controls.maxPolarAngle = Math.PI / 2; 
+controls.maxPolarAngle = Math.PI / 2;
+controls.autoRotate = true;
 
 const colorMap = {
       "BuildableBlockPurple": 0x9478DA,
@@ -109,7 +111,7 @@ if (drawAll) {
 
 let currentTime = 0;
 let accumulator = 0;
-let timeBetweenCubes = 50;
+let timeBetweenCubes = 5;
 
 function animate(timestamp) {
 
@@ -117,7 +119,7 @@ function animate(timestamp) {
     currentTime = timestamp;
     accumulator += deltatime;
 
-    if (accumulator >= timeBetweenCubes) {
+    while (accumulator >= timeBetweenCubes) {
         handleCube();
         accumulator -= timeBetweenCubes;
     }
