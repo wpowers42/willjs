@@ -66,7 +66,6 @@ export default class ParticleSystem {
 }
 
 class Particle {
-    private image: HTMLImageElement;
     lifetime: number;
     x: number;
     y: number;
