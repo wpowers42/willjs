@@ -46,7 +46,7 @@ export default class Brick {
     }
     draw(ctx) {
         if (this.inPlay) {
-            let quad = Constants.frames.bricks[this.tier * 4 + (this.color - 1)];
+            let quad = Constants.frames.bricks[(this.color - 1) * 4 + this.tier];
             let { sx, sy, sw, sh } = quad;
             let dx = this.x;
             let dy = this.y;

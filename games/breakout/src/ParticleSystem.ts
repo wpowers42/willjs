@@ -57,9 +57,6 @@ export default class ParticleSystem {
     update(dt: number) {
         this.particles.forEach(particle => particle.update(dt));
         this.particles = this.particles.filter(particle => particle.lifetime < this.particleLifetime.max);
-        if (this.particles.length > 0) {
-            console.log(this.particles.length);
-        }
 
     }
 
@@ -113,7 +110,6 @@ class Particle {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        console.log(this.color);
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x - this.width * 0.50, this.y - this.height * 0.50, this.width, this.height);
     }
