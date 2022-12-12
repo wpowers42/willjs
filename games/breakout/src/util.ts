@@ -38,7 +38,7 @@ export namespace Util {
     export const generateQuadsPaddles = (atlas: HTMLImageElement) => {
         // The starting x and y coordinates for the paddles in the atlas
         const x = 0;
-        const y = 64;
+        let y = 64;
 
         // An array to hold the quad objects for the paddles
         const paddleQuads = [];
@@ -56,6 +56,9 @@ export namespace Util {
 
             // The fourth quad is 128x16 pixels at coordinates (x, y + 16)
             paddleQuads.push(new Quad(x, y + 16, 128, 16));
+
+            // next set of paddles
+            y += 32;
         }
 
         // Return the array of paddle quads
