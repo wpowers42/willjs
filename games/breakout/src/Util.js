@@ -92,6 +92,7 @@ export var Util;
     };
     Util.drawScore = (ctx, score) => {
         ctx.font = Constants.fonts.small;
+        ctx.fillStyle = 'white';
         ctx.fillText('Score: ', Constants.virtualWidth - 60, 10);
         ctx.textAlign = 'right';
         ctx.fillText(`${score}`, Constants.virtualWidth - 10, 10);

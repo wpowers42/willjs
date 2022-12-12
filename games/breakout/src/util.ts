@@ -123,6 +123,7 @@ export namespace Util {
 
     export const drawScore = (ctx: CanvasRenderingContext2D, score: number) => {
         ctx.font = Constants.fonts.small;
+        ctx.fillStyle = 'white';
         ctx.fillText('Score: ', Constants.virtualWidth - 60, 10);
         ctx.textAlign = 'right';
         ctx.fillText(`${score}`, Constants.virtualWidth - 10, 10);
