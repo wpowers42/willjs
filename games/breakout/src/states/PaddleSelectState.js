@@ -50,13 +50,17 @@ export default class PaddleSelectState extends BaseState {
         ctx.fillText('(Press Enter to continue!)', Constants.virtualWidth * 0.50, Constants.virtualHeight * 0.33);
         // left arrow
         let { sx, sy, sw, sh } = Constants.frames.arrows[0];
+        ctx.globalAlpha = this.currentPaddle === 0 ? 0.25 : 1.00;
         ctx.drawImage(Constants.textures.arrows, sx, sy, sw, sh, Constants.virtualWidth * 0.25 - sw * 0.50, Constants.virtualHeight * 0.75 - sh * 0.50, sw, sh);
         // paddle
         ({ sx, sy, sw, sh } = Constants.frames.paddles[this.currentPaddle * 4 + 1]);
+        ctx.globalAlpha = 1.00;
         ctx.drawImage(Constants.textures.main, sx, sy, sw, sh, Constants.virtualWidth * 0.50 - sw * 0.50, Constants.virtualHeight * 0.75 - sh * 0.50, sw, sh);
         // right arrow
         ({ sx, sy, sw, sh } = Constants.frames.arrows[1]);
+        ctx.globalAlpha = this.currentPaddle === 3 ? 0.50 : 1.00;
         ctx.drawImage(Constants.textures.arrows, sx, sy, sw, sh, Constants.virtualWidth * 0.75 - sw * 0.50, Constants.virtualHeight * 0.75 - sh * 0.50, sw, sh);
+        ctx.globalAlpha = 1.00;
     }
 }
 //# sourceMappingURL=PaddleSelectState.js.map
