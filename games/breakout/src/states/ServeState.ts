@@ -15,6 +15,8 @@ export default class ServeState extends BaseState {
     score: number;
     ball: Ball;
     level: number;
+    recoverPoints: number;
+
     constructor() {
         super();
     }
@@ -26,6 +28,7 @@ export default class ServeState extends BaseState {
         this.score = params['score'];
         this.ball = new Ball();
         this.level = params['level'];
+        this.recoverPoints = params['recoverPoints'];
     }
 
     update(dt: number, inputHandler: InputHandler, stateMachine: StateMachine) {
@@ -42,6 +45,7 @@ export default class ServeState extends BaseState {
                 score: this.score,
                 ball: this.ball,
                 level: this.level,
+                recoverPoints: this.recoverPoints,
             });
         }
 

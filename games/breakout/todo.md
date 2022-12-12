@@ -1,3 +1,4 @@
+- [x] Restore a Heart whenever the Player earns enough points
 - [ ] Create a Powerup the Player can grab that spawns two additional Balls for the current level
     - [ ] Add a Powerup class to the game
     - [ ] Spawn a powerup randomly

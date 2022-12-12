@@ -36,7 +36,8 @@ export default class PaddleSelectState extends BaseState {
                 bricks: LevelMaker.createMap(1),
                 health: 3,
                 score: 0,
-                level: 1
+                level: 1,
+                recoverPoints: 250,
             });
         }
     }

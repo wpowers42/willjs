@@ -17,6 +17,7 @@ export default class PlayState extends BaseState {
     health: number;
     score: number;
     level: number;
+    recoverPoints: number;
 
     constructor() {
         super();
@@ -30,6 +31,7 @@ export default class PlayState extends BaseState {
         this.score = params['score'];
         this.ball = params['ball'];
         this.level = params['level'];
+        this.recoverPoints = params['recoverPoints'];
     }
 
 
@@ -88,6 +90,13 @@ export default class PlayState extends BaseState {
 
                 brick.hit();
 
+                // if we have enough points, recover a point of health
+                if (this.score > this.recoverPoints) {
+                    this.health = Math.min(3, this.health + 1);
+                    this.recoverPoints = Math.min(100000, this.recoverPoints * 2);
+                    Constants.sounds.recover.play();
+                }
+
                 if (this.checkVictory()) {
                     Constants.sounds.victory.play();
 
@@ -96,7 +105,8 @@ export default class PlayState extends BaseState {
                         paddle: this.paddle,
                         health: this.health,
                         score: this.score,
-                        ball: this.ball
+                        ball: this.ball,
+                        recoverPoints: this.recoverPoints,
                     });
                 }
 
@@ -140,7 +150,8 @@ export default class PlayState extends BaseState {
                     bricks: this.bricks,
                     health: this.health,
                     score: this.score,
-                    level: this.level
+                    level: this.level,
+                    recoverPoints: this.recoverPoints,
                 });
             }
         }

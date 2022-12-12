@@ -12,6 +12,7 @@ export default class VictoryState extends BaseState {
         this.paddle = params['paddle'];
         this.health = params['health'];
         this.ball = params['ball'];
+        this.recoverPoints = params['recoverPoints'];
     }
     update(dt, inputHandler, stateMachine) {
         this.paddle.update(dt, inputHandler);
@@ -24,7 +25,8 @@ export default class VictoryState extends BaseState {
                 bricks: LevelMaker.createMap(this.level + 1),
                 paddle: this.paddle,
                 health: this.health,
-                score: this.score
+                score: this.score,
+                recoverPoints: this.recoverPoints,
             });
         }
     }

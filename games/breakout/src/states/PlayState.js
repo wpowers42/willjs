@@ -14,6 +14,7 @@ export default class PlayState extends BaseState {
         this.score = params['score'];
         this.ball = params['ball'];
         this.level = params['level'];
+        this.recoverPoints = params['recoverPoints'];
     }
     update(dt, inputHandler, stateMachine) {
         if (inputHandler.isKeyPressed(' ')) {
@@ -59,6 +60,12 @@ export default class PlayState extends BaseState {
             if (brick.inPlay && this.ball.collides(brick)) {
                 this.score += brick.tier * 200 + brick.color * 25;
                 brick.hit();
+                // if we have enough points, recover a point of health
+                if (this.score > this.recoverPoints) {
+                    this.health = Math.min(3, this.health + 1);
+                    this.recoverPoints = Math.min(100000, this.recoverPoints * 2);
+                    Constants.sounds.recover.play();
+                }
                 if (this.checkVictory()) {
                     Constants.sounds.victory.play();
                     stateMachine.change('victory', {
@@ -66,7 +73,8 @@ export default class PlayState extends BaseState {
                         paddle: this.paddle,
                         health: this.health,
                         score: this.score,
-                        ball: this.ball
+                        ball: this.ball,
+                        recoverPoints: this.recoverPoints,
                     });
                 }
                 let previousBallX = this.ball.x - this.ball.dx * dt;
@@ -108,7 +116,8 @@ export default class PlayState extends BaseState {
                     bricks: this.bricks,
                     health: this.health,
                     score: this.score,
-                    level: this.level
+                    level: this.level,
+                    recoverPoints: this.recoverPoints,
                 });
             }
         }

@@ -13,6 +13,7 @@ export default class ServeState extends BaseState {
         this.score = params['score'];
         this.ball = new Ball();
         this.level = params['level'];
+        this.recoverPoints = params['recoverPoints'];
     }
     update(dt, inputHandler, stateMachine) {
         this.paddle.update(dt, inputHandler);
@@ -27,6 +28,7 @@ export default class ServeState extends BaseState {
                 score: this.score,
                 ball: this.ball,
                 level: this.level,
+                recoverPoints: this.recoverPoints,
             });
         }
     }
