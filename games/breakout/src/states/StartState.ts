@@ -43,6 +43,8 @@ export default class StartState extends BaseState {
                     score: 0,
                     level: 1
                 });
+            } else {
+                stateMachine.change('highScores');
             }
         }
     }

@@ -6,6 +6,7 @@ import PlayState from './src/states/PlayState.js';
 import ServeState from './src/states/ServeState.js';
 import GameOverState from './src/states/GameOverState.js';
 import VictoryState from './src/states/VictoryState.js';
+import HighScoreState from './src/states/HighScoreState.js';
 window.onload = () => {
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -26,6 +27,7 @@ window.onload = () => {
         'play': () => new PlayState(),
         'gameOver': () => new GameOverState(),
         'victory': () => new VictoryState(),
+        'highScores': () => new HighScoreState(),
     });
     stateMachine.change('start');
     const dt = 1000 / Constants.FPS; // delta time using imported FPS constant

@@ -32,6 +32,9 @@ export default class StartState extends BaseState {
                     level: 1
                 });
             }
+            else {
+                stateMachine.change('highScores');
+            }
         }
     }
     draw(ctx) {
