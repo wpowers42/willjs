@@ -40,6 +40,8 @@ window.onload = () => {
     });
 
     stateMachine.change('start');
+    Constants.sounds.music.loop = true;
+    Constants.sounds.music.play();
 
     const dt = 1000 / Constants.FPS; // delta time using imported FPS constant
     let t = 0; // time
