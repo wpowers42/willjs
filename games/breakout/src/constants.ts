@@ -9,7 +9,7 @@ export namespace Constants {
     export const virtualHeight = 243;
     export const paddleSpeed = 0.20;
     export const FPS = 120;
-    export const debug = true;
+    export const debug = false;
 
     export const fonts: { [key: string]: string } = {
         small: '8px Copperplate',

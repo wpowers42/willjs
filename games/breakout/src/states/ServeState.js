@@ -36,8 +36,10 @@ export default class ServeState extends BaseState {
         this.bricks.forEach(brick => brick.draw(ctx));
         Util.drawScore(ctx, this.score);
         Util.drawHealth(ctx, this.health);
-        ctx.font = Constants.fonts.medium;
         ctx.textAlign = 'center';
+        ctx.font = Constants.fonts.large;
+        ctx.fillText(`Level ${this.level}`, Constants.virtualWidth * 0.50, Constants.virtualHeight * 0.40);
+        ctx.font = Constants.fonts.medium;
         ctx.fillText('Press Enter to serve!', Constants.virtualWidth * 0.50, Constants.virtualHeight * 0.50);
     }
 }
