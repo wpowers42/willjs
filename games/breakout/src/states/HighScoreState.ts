@@ -2,9 +2,6 @@ import BaseState from "./BaseState.js";
 
 import InputHandler from "../InputHandler";
 import StateMachine from "../StateMachine";
-import Paddle from "../Paddle";
-import Brick from "../Brick";
-import Ball from "../Ball.js";
 import { Constants } from "../constants.js";
 import HighScores from "../HighScores.js";
 
@@ -21,6 +18,7 @@ export default class HighScoreState extends BaseState {
     update(dt: number, inputHandler: InputHandler, stateMachine: StateMachine) {
 
         if (inputHandler.isKeyPressed('Escape')) {
+            inputHandler.removeKey('Escape');
             stateMachine.change('start');
         }
 

@@ -27,10 +27,6 @@ export default class StartState extends BaseState {
             inputHandler.removeKey('ArrowDown');
         }
 
-        if (inputHandler.isKeyPressed('Escape')) {
-            // handle future quit state
-        }
-
         if (inputHandler.isKeyPressed('Enter')) {
             inputHandler.removeKey('Enter');
             Constants.sounds.confirm.play();

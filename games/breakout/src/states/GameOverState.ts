@@ -6,6 +6,7 @@ import Paddle from "../Paddle";
 import Brick from "../Brick";
 import Ball from "../Ball.js";
 import { Constants } from "../constants.js";
+import HighScores from "../HighScores.js";
 
 export default class GameOverState extends BaseState {
     paddle: Paddle;
@@ -13,8 +14,11 @@ export default class GameOverState extends BaseState {
     health: number;
     score: number;
     ball: Ball;
+    highScores: HighScores;
+
     constructor() {
         super();
+        this.highScores = new HighScores();
     }
 
     enter(params?: Object) {
@@ -24,11 +28,16 @@ export default class GameOverState extends BaseState {
     update(dt: number, inputHandler: InputHandler, stateMachine: StateMachine) {
 
         if (inputHandler.isKeyPressed('Enter')) {
-            stateMachine.change('start');
-        }
+            inputHandler.removeKey('Enter');
+            if (this.highScores.isHighScore(this.score)) {
+                Constants.sounds.highScore.play();
+                stateMachine.change('enterHighScore', {
+                    score: this.score
+                });
+            } else {
+                stateMachine.change('start');
+            }
 
-        if (inputHandler.isKeyPressed('Enter')) {
-            // handle quit
         }
 
     }

@@ -1,18 +1,26 @@
 import BaseState from "./BaseState.js";
 import { Constants } from "../constants.js";
+import HighScores from "../HighScores.js";
 export default class GameOverState extends BaseState {
     constructor() {
         super();
+        this.highScores = new HighScores();
     }
     enter(params) {
         this.score = params['score'];
     }
     update(dt, inputHandler, stateMachine) {
         if (inputHandler.isKeyPressed('Enter')) {
-            stateMachine.change('start');
-        }
-        if (inputHandler.isKeyPressed('Enter')) {
-            // handle quit
+            inputHandler.removeKey('Enter');
+            if (this.highScores.isHighScore(this.score)) {
+                Constants.sounds.highScore.play();
+                stateMachine.change('enterHighScore', {
+                    score: this.score
+                });
+            }
+            else {
+                stateMachine.change('start');
+            }
         }
     }
     draw(ctx) {

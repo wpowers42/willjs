@@ -7,6 +7,7 @@ import ServeState from './src/states/ServeState.js';
 import GameOverState from './src/states/GameOverState.js';
 import VictoryState from './src/states/VictoryState.js';
 import HighScoreState from './src/states/HighScoreState.js';
+import EnterHighScoreState from './src/states/EnterHighScoreState.js';
 
 window.onload = () => {
 
@@ -33,6 +34,7 @@ window.onload = () => {
         'gameOver': () => new GameOverState(),
         'victory': () => new VictoryState(),
         'highScores': () => new HighScoreState(),
+        'enterHighScore': () => new EnterHighScoreState(),
     });
 
     stateMachine.change('start');

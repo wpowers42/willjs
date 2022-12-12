@@ -19,6 +19,7 @@ export default class ServeState extends BaseState {
         this.ball.x = this.paddle.x + this.paddle.width * 0.50 - this.ball.width * 0.50;
         this.ball.y = this.paddle.y - this.ball.height;
         if (inputHandler.isKeyPressed('Enter')) {
+            inputHandler.removeKey('Enter');
             stateMachine.change('play', {
                 paddle: this.paddle,
                 bricks: this.bricks,
@@ -27,9 +28,6 @@ export default class ServeState extends BaseState {
                 ball: this.ball,
                 level: this.level,
             });
-        }
-        if (inputHandler.isKeyPressed('Enter')) {
-            // handle quit
         }
     }
     draw(ctx) {

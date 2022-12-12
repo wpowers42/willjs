@@ -9,6 +9,7 @@ export default class HighScoreState extends BaseState {
     enter(params) { }
     update(dt, inputHandler, stateMachine) {
         if (inputHandler.isKeyPressed('Escape')) {
+            inputHandler.removeKey('Escape');
             stateMachine.change('start');
         }
     }

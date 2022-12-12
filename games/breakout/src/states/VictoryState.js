@@ -18,6 +18,7 @@ export default class VictoryState extends BaseState {
         this.ball.x = this.paddle.x + this.paddle.width * 0.50 - this.ball.width * 0.50;
         this.ball.y = this.paddle.y - this.ball.height;
         if (inputHandler.isKeyPressed('Enter')) {
+            inputHandler.removeKey('Enter');
             stateMachine.change('serve', {
                 level: this.level + 1,
                 bricks: LevelMaker.createMap(this.level + 1),
