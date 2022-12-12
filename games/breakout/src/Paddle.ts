@@ -11,13 +11,13 @@ export default class Paddle {
     skin: number;
     size: number;
 
-    constructor() {
+    constructor(skin : number) {
         this.width = 64;
         this.height = 16;
         this.x = Constants.virtualWidth * 0.50 - this.width * 0.50;
         this.y = Constants.virtualHeight - 32;
         this.dx = 0;
-        this.skin = 0;
+        this.skin = skin;
         this.size = 2;
     }
 

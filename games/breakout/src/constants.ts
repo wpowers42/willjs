@@ -51,5 +51,6 @@ export namespace Constants {
         balls: <Util.Quad[]>Util.generateQuadsBalls(textures.main),
         bricks: <Util.Quad[]>Util.generateQuadsBricks(textures.main),
         hearts: <Util.Quad[]>Util.generateQuads(textures.hearts, 10, 9),
+        arrows: <Util.Quad[]>Util.generateQuads(textures.arrows, 24, 24),
     }
 }

@@ -32,13 +32,7 @@ export default class StartState extends BaseState {
             Constants.sounds.confirm.play();
 
             if (this.highlighted === 0) {
-                stateMachine.change('serve', {
-                    paddle: new Paddle(),
-                    bricks: LevelMaker.createMap(0),
-                    health: 3,
-                    score: 0,
-                    level: 1
-                });
+                stateMachine.change('paddleSelect');
             } else {
                 stateMachine.change('highScores');
             }

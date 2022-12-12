@@ -1,7 +1,5 @@
 import BaseState from "./BaseState.js";
 import { Constants } from '../constants.js';
-import Paddle from "../Paddle.js";
-import LevelMaker from "../LevelMaker.js";
 export default class StartState extends BaseState {
     constructor() {
         super();
@@ -21,13 +19,7 @@ export default class StartState extends BaseState {
             inputHandler.removeKey('Enter');
             Constants.sounds.confirm.play();
             if (this.highlighted === 0) {
-                stateMachine.change('serve', {
-                    paddle: new Paddle(),
-                    bricks: LevelMaker.createMap(0),
-                    health: 3,
-                    score: 0,
-                    level: 1
-                });
+                stateMachine.change('paddleSelect');
             }
             else {
                 stateMachine.change('highScores');

@@ -45,6 +45,7 @@ export var Constants;
         balls: Util.generateQuadsBalls(Constants.textures.main),
         bricks: Util.generateQuadsBricks(Constants.textures.main),
         hearts: Util.generateQuads(Constants.textures.hearts, 10, 9),
+        arrows: Util.generateQuads(Constants.textures.arrows, 24, 24),
     };
 })(Constants || (Constants = {}));
 //# sourceMappingURL=constants.js.map

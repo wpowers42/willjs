@@ -8,6 +8,7 @@ import GameOverState from './src/states/GameOverState.js';
 import VictoryState from './src/states/VictoryState.js';
 import HighScoreState from './src/states/HighScoreState.js';
 import EnterHighScoreState from './src/states/EnterHighScoreState.js';
+import PaddleSelectState from './src/states/PaddleSelectState.js';
 
 window.onload = () => {
 
@@ -35,6 +36,7 @@ window.onload = () => {
         'victory': () => new VictoryState(),
         'highScores': () => new HighScoreState(),
         'enterHighScore': () => new EnterHighScoreState(),
+        'paddleSelect': () => new PaddleSelectState(),
     });
 
     stateMachine.change('start');

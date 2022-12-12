@@ -1,13 +1,13 @@
 import { Mathf } from "../../math/Mathf.js";
 import { Constants } from "./constants.js";
 export default class Paddle {
-    constructor() {
+    constructor(skin) {
         this.width = 64;
         this.height = 16;
         this.x = Constants.virtualWidth * 0.50 - this.width * 0.50;
         this.y = Constants.virtualHeight - 32;
         this.dx = 0;
-        this.skin = 0;
+        this.skin = skin;
         this.size = 2;
     }
     update(dt, inputHandler) {
