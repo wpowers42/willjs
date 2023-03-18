@@ -1,0 +1,88 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #333;
+}
+
+body {
+    height: 100vh;
+    max-width: 375px;
+    display: grid;
+    grid-template-rows: repeat(4, auto);
+    padding: 20px;
+    margin: auto;
+}
+
+.font-small {
+    font-size: 12px;
+}
+
+.font-medium {
+    font-size: 18px;
+}
+
+.font-large {
+    font-size: 24px;
+}
+
+.input-output-container {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    width: 100%;
+}
+
+.input-output-column {
+    display: grid;
+    height: 158px;
+
+}
+
+.input-container,
+.output-container {
+    display: grid;
+    height: 54px;
+}
+
+.input-wrapper {
+    display: grid;
+    grid-template-columns: 25% 50% 25%;
+    align-items: center;
+    justify-items: center;
+}
+
+.timer-section {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+}
+
+.inactive span {
+    color: #AAA !important;
+}
+
+.timer-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.start-reset-section {
+    display: grid;
+    justify-items: center;
+}
+
+.start-reset-section button {
+    width: 200px;
+    height: 50px;
+}
+
+.increment-decrement-button {
+    width: 30px;
+    height: 30px;
+}
+
+button {
+    touch-action: manipulation;
+    border-radius: 5px;
+}
