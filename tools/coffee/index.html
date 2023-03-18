@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemex Coffee Timer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Chemex Coffee Timer</h1>
+        <div class="coffee-input-section">
+            <div class="coffee-input-box">
+                <span class="coffee-input-label">Total Coffee (grams):</span>
+                <span class="coffee-input-value">0</span>
+            </div>
+            <div class="presets">
+                <button class="preset-button" value="20">20g</button>
+                <button class="preset-button" value="30">30g</button>
+                <button class="preset-button" value="40">40g</button>
+                <button class="preset-button" value="50">50g</button>
+                <button class="preset-button" value="60">60g</button>
+            </div>
+            <div class="increment-decrement">
+                <button class="decrement-button">-</button>
+                <button class="increment-button">+</button>
+            </div>
+        </div>
+        <div class="ratio-selection-section">
+            <h2>Water to Coffee Ratio</h2>
+            <div id="ratio-selection">
+                <input type="radio" id="ratio15" name="ratio" value="15">
+                <label for="ratio15">15</label>
+                <input type="radio" id="ratio15_5" name="ratio" value="15.5">
+                <label for="ratio15_5">15.5</label>
+                <input type="radio" id="ratio16" name="ratio" value="16">
+                <label for="ratio16">16</label>
+                <input type="radio" id="ratio16_5" name="ratio" value="16.5">
+                <label for="ratio16_5">16.5</label>
+                <input type="radio" id="ratio17" name="ratio" value="17">
+                <label for="ratio17">17</label>
+            </div>
+        </div>
+        <div class="water-output-section">
+            <span class="water-output-label">Water Output (ml):</span>
+            <span class="water-output-value">0</span>
+        </div>
+
+        <div class="timer-section">
+            <div id="timer">0:00</div>
+            <button id="start-stop-button">Start</button>
+            <button id="reset-button">Reset</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
