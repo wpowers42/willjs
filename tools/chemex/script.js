@@ -33,8 +33,7 @@ const updateHTML = () => {
 
 for (const child of coffeeGramsElement.parentNode.children) {
     if (child.tagName === 'BUTTON') {
-        console.log(child.tagName);
-        child.addEventListener('touchstart', () => {
+        child.addEventListener('click', () => {
             coffeeGrams += parseInt(child.getAttribute('data-value'));
             updateHTML();
         });
@@ -43,14 +42,21 @@ for (const child of coffeeGramsElement.parentNode.children) {
 
 for (const child of waterCoffeeRatioElement.parentNode.children) {
     if (child.tagName === 'BUTTON') {
-        console.log(child.tagName);
-        child.addEventListener('touchstart', () => {
+        child.addEventListener('click', () => {
             waterCoffeeRatio += parseInt(child.getAttribute('data-value')) * 0.1;
             waterCoffeeRatio = Math.round(waterCoffeeRatio * 10) / 10;
             updateHTML();
         });
     }
 }
+
+const playBeep = (volume = 1) => {
+    const beepSound = document.getElementById('beep');
+    beepSound.currentTime = 0;
+    beepSound.volume = volume;
+    beepSound.play();
+}
+
 
 let timerLabel = 'Start';
 let timerStartedAt = null;
@@ -82,12 +88,7 @@ const updateTimers = () => {
         timerBloom.parentElement.classList.remove('inactive');
     } else {
         if (!bloomBeeped) {
-            const beep = document.getElementById('beep');
-            beep.play();
-            setTimeout(() => {
-                beep.currentTime = 0;
-                beep.play();
-            }, 500);
+            playBeep();
             bloomBeeped = true;
         }
         timerBloom.parentElement.classList.add('inactive');
@@ -95,7 +96,8 @@ const updateTimers = () => {
     }
 }
 
-timerButton.addEventListener('touchstart', () => {
+timerButton.addEventListener('click', () => {
+    playBeep(0); // the subsequent beeps don't play without this
     if (timerLabel === 'Start') {
         timerStartedAt = performance.now();
         timerLabel = 'Stop';
