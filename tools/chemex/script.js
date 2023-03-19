@@ -13,7 +13,7 @@ const timerTotal = document.getElementById('timer-total');
 // -------------------
 // CONSTANTS AND VALUES
 // -------------------
-const BLOOM_TIME_MS = 5000;
+const BLOOM_TIME_MS = 45000;
 let coffeeGrams = 40;
 let waterCoffeeRatio = 16.7;
 
@@ -127,7 +127,7 @@ const handleTimerButtonClick = () => {
         playBeep(0); // the subsequent beeps don't play without this
         timerStartedAt = performance.now();
         timerLabel = 'Stop';
-        timerInterval = setInterval(updateTimers, 100);
+        timerInterval = setInterval(updateTimers, 50);
     } else if (timerLabel === 'Stop') {
         timerStoppedAt = performance.now();
         clearInterval(timerInterval);
@@ -142,8 +142,8 @@ const handleTimerButtonClick = () => {
     timerButton.textContent = timerLabel;
 };
 
-// timerButton.addEventListener('click', handleTimerButtonClick);
-timerButton.addEventListener('touchend', handleTimerButtonClick);
+timerButton.addEventListener('click', handleTimerButtonClick);
+// timerButton.addEventListener('touchend', handleTimerButtonClick);
 
 // -----------------
 // INITIALIZE THE APP
