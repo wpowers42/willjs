@@ -71,11 +71,8 @@ for (const child of waterCoffeeRatioElement.parentNode.children) {
 const playBeep = (volume = 1) => {
     const beepSound = document.getElementById('beep');
     beepSound.currentTime = 0;
-    beepSound.volume = 1;
+    beepSound.volume = volume;
     beepSound.play();
-    if (volume === 0) {
-        beepSound.pause();
-    }
 };
 
 
