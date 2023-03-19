@@ -1,4 +1,6 @@
-// Elements
+// --------------
+// ELEMENTS SETUP
+// --------------
 const coffeeGramsElement = document.getElementById('coffee-grams');
 const waterCoffeeRatioElement = document.getElementById('water-coffee-ratio');
 const waterTotalElement = document.getElementById('water-total');
@@ -8,12 +10,16 @@ const timerBloom = document.getElementById('timer-bloom');
 const timerBrew = document.getElementById('timer-brew');
 const timerTotal = document.getElementById('timer-total');
 
-// Constants
+// -------------------
+// CONSTANTS AND VALUES
+// -------------------
 const BLOOM_TIME_MS = 5000;
-
 let coffeeGrams = 40;
 let waterCoffeeRatio = 16.7;
 
+// -----------------------
+// WATER CALCULATION HELPERS
+// -----------------------
 const calculateTotalWater = () => {
     return `${parseInt(coffeeGrams * waterCoffeeRatio)} ml`;
 }
@@ -24,6 +30,9 @@ const calculateBloomWater = () => {
     return `${lower} - ${upper} ml`;
 }
 
+// -----------------
+// HTML UPDATING METHOD
+// -----------------
 const updateHTML = () => {
     coffeeGramsElement.textContent = `${coffeeGrams}g`;
     waterCoffeeRatioElement.textContent = waterCoffeeRatio;
@@ -31,6 +40,9 @@ const updateHTML = () => {
     waterBloomElement.textContent = calculateBloomWater();
 };
 
+// ----------------------
+// EVENT LISTENERS FOR COFFEE GRAMS
+// ----------------------
 for (const child of coffeeGramsElement.parentNode.children) {
     if (child.tagName === 'BUTTON') {
         child.addEventListener('click', () => {
@@ -40,6 +52,9 @@ for (const child of coffeeGramsElement.parentNode.children) {
     }
 }
 
+// ----------------------------
+// EVENT LISTENERS FOR WATER COFFEE RATIO
+// ----------------------------
 for (const child of waterCoffeeRatioElement.parentNode.children) {
     if (child.tagName === 'BUTTON') {
         child.addEventListener('click', () => {
@@ -50,6 +65,9 @@ for (const child of waterCoffeeRatioElement.parentNode.children) {
     }
 }
 
+// -----------------
+// BEEP SOUND FUNCTION
+// -----------------
 const playBeep = (volume = 1) => {
     const beepSound = document.getElementById('beep');
     beepSound.currentTime = 0;
@@ -57,13 +75,16 @@ const playBeep = (volume = 1) => {
     beepSound.play();
 }
 
-
+// ----------------
+// TIMER MANAGEMENT
+// ----------------
 let timerLabel = 'Start';
 let timerStartedAt = null;
 let timerStoppedAt = null;
 let timerInterval = null;
 let bloomBeeped = false;
 
+// Resets the timers' states
 const resetTimers = () => {
     timerStartedAt = null;
     timerStoppedAt = null;
@@ -76,6 +97,7 @@ const resetTimers = () => {
     timerTotal.parentElement.classList.add('inactive');
 }
 
+// Updates the timers' values
 const updateTimers = () => {
     const now = timerStoppedAt ? timerStoppedAt : performance.now();
     const elapsedMilliseconds = now - timerStartedAt;
@@ -96,9 +118,12 @@ const updateTimers = () => {
     }
 }
 
+// ----------------------
+// TIMER BUTTON EVENT LISTENER
+// ----------------------
 timerButton.addEventListener('click', () => {
-    playBeep(0); // the subsequent beeps don't play without this
     if (timerLabel === 'Start') {
+        playBeep(0); // the subsequent beeps don't play without this
         timerStartedAt = performance.now();
         timerLabel = 'Stop';
         timerInterval = setInterval(updateTimers, 100);
@@ -116,5 +141,9 @@ timerButton.addEventListener('click', () => {
     timerButton.textContent = timerLabel;
 })
 
+// -----------------
+// INITIALIZE THE APP
+// -----------------
 updateHTML();
 resetTimers();
+
