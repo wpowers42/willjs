@@ -71,9 +71,13 @@ for (const child of waterCoffeeRatioElement.parentNode.children) {
 const playBeep = (volume = 1) => {
     const beepSound = document.getElementById('beep');
     beepSound.currentTime = 0;
-    beepSound.volume = volume;
+    beepSound.volume = 1;
     beepSound.play();
-}
+    if (volume === 0) {
+        beepSound.pause();
+    }
+};
+
 
 // ----------------
 // TIMER MANAGEMENT
@@ -110,7 +114,7 @@ const updateTimers = () => {
         timerBloom.parentElement.classList.remove('inactive');
     } else {
         if (!bloomBeeped) {
-            playBeep();
+            playBeep(1);
             bloomBeeped = true;
         }
         timerBloom.parentElement.classList.add('inactive');
@@ -121,7 +125,7 @@ const updateTimers = () => {
 // ----------------------
 // TIMER BUTTON EVENT LISTENER
 // ----------------------
-timerButton.addEventListener('click', () => {
+const handleTimerButtonClick = () => {
     if (timerLabel === 'Start') {
         playBeep(0); // the subsequent beeps don't play without this
         timerStartedAt = performance.now();
@@ -139,7 +143,10 @@ timerButton.addEventListener('click', () => {
         timerLabel = 'Start';
     }
     timerButton.textContent = timerLabel;
-})
+};
+
+// timerButton.addEventListener('click', handleTimerButtonClick);
+timerButton.addEventListener('touchend', handleTimerButtonClick);
 
 // -----------------
 // INITIALIZE THE APP
