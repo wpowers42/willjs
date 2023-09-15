@@ -4,27 +4,29 @@ import InputHandler from "../InputHandler.js";
 import Paddle from "../Paddle.js";
 import BaseState from "./BaseState.js";
 
-import Brick from "../Brick";
-import StateMachine from "../StateMachine";
-import * as Mathf from "../../../math/Mathf";
+import Brick from "../Brick.js";
+import StateMachine from "../StateMachine.js";
+import * as Mathf from "../../../math/Mathf.js";
 import Util from "../util.js";
 
+import type { enterParams } from "../StateMachine";
+
 export default class PlayState extends BaseState {
-    paddle: Paddle;
+    paddle: Paddle | undefined;
     paused: boolean;
-    ball: Ball;
-    bricks: Brick[];
-    health: number;
-    score: number;
-    level: number;
-    recoverPoints: number;
+    ball: Ball | undefined;
+    bricks: Brick[] | undefined;
+    health: number | undefined;
+    score: number | undefined;
+    level: number | undefined;
+    recoverPoints: number | undefined;
 
     constructor() {
         super();
         this.paused = false;
     }
 
-    enter(params?: Object) {
+    enter(params: enterParams) {
         this.paddle = params['paddle'];
         this.bricks = params['bricks'];
         this.health = params['health'];
@@ -47,10 +49,15 @@ export default class PlayState extends BaseState {
             inputHandler.removeKey(' ');
         }
 
+        if (this.paddle === undefined || this.ball === undefined || this.bricks === undefined) {
+            return;
+        }
+
         this.paddle.update(dt, inputHandler);
         this.ball.update(dt);
 
         if (this.ball.collides(this.paddle)) {
+
             // check if ball hit left or right side
             let previousBallX = this.ball.x - this.ball.dx * dt;
 
@@ -85,13 +92,13 @@ export default class PlayState extends BaseState {
         for (const brick of this.bricks) {
             brick.update(dt);
 
-            if (brick.inPlay && this.ball.collides(brick)) {
+            if (brick.inPlay && this.ball.collides(brick) && this.score) {
                 this.score += brick.tier * 200 + brick.color * 25;
 
                 brick.hit();
 
                 // if we have enough points, recover a point of health
-                if (this.score > this.recoverPoints) {
+                if (this.recoverPoints && this.health && this.score > this.recoverPoints) {
                     this.health = Math.min(3, this.health + 1);
                     this.recoverPoints = Math.min(100000, this.recoverPoints * 2);
                     Constants.sounds.recover.play();
@@ -137,7 +144,7 @@ export default class PlayState extends BaseState {
         }
 
         if (this.ball.y >= Constants.virtualHeight) {
-            this.health--;
+            this.health && this.health--;
             Constants.sounds.hurt.play();
 
             if (this.health === 0) {
@@ -158,6 +165,10 @@ export default class PlayState extends BaseState {
     }
 
     checkVictory(): boolean {
+        if (this.bricks === undefined) {
+            return false;
+        }
+
         for (const brick of this.bricks) {
             if (brick.inPlay) {
                 return false;
@@ -167,13 +178,17 @@ export default class PlayState extends BaseState {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
+        if (this.paddle === undefined || this.ball === undefined || this.bricks === undefined) {
+            return;
+        }
+
         this.bricks.forEach(brick => brick.draw(ctx));
 
         this.paddle.draw(ctx);
         this.ball.draw(ctx);
 
-        Util.drawScore(ctx, this.score);
-        Util.drawHealth(ctx, this.health);
+        this.score && Util.drawScore(ctx, this.score);
+        this.health && Util.drawHealth(ctx, this.health);
 
         if (this.paused) {
             ctx.font = Constants.fonts.large;

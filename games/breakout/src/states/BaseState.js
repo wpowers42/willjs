@@ -1,5 +1,6 @@
 export default class BaseState {
-    constructor() { }
+    constructor() {
+    }
     enter(params) { }
     exit() { }
     update(dt, inputHandler, stateMachine) { }

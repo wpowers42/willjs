@@ -1,6 +1,6 @@
-import * as Mathf from "../../math/Mathf";
+import * as Mathf from "../../math/Mathf.js";
 import Constants from "./constants.js";
-import InputHandler from "./InputHandler";
+import InputHandler from "./InputHandler.js";
 
 export default class Paddle {
     width: number;

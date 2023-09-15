@@ -33,7 +33,7 @@ export default class GameOverState extends BaseState {
                     score: this.score
                 });
             } else {
-                stateMachine.change('start');
+                stateMachine.change('start', {});
             }
 
         }

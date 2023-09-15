@@ -1,40 +1,46 @@
-import Ball from "../Ball";
-import InputHandler from "../InputHandler";
-import Paddle from "../Paddle";
-import StateMachine from "../StateMachine";
+import Ball from "../Ball.js";
+import InputHandler from "../InputHandler.js";
+import Paddle from "../Paddle.js";
+import StateMachine from "../StateMachine.js";
 import BaseState from "./BaseState.js";
 import LevelMaker from "../LevelMaker.js";
 import Util from "../util.js";
 import Constants from "../constants.js";
 
+import type { enterParams } from "../StateMachine.js";
+
 export default class VictoryState extends BaseState {
-    level: number;
-    score: number;
-    paddle: Paddle;
-    health: number;
-    ball: Ball;
-    recoverPoints: number;
+    level: number | undefined;
+    score: number | undefined;
+    paddle: Paddle | undefined;
+    health: number | undefined;
+    ball: Ball | undefined;
+    recoverPoints: number | undefined;
 
     constructor() {
         super();
     }
 
-    enter(params?: Object): void {
-        this.level = params['level'];
-        this.score = params['score'];
-        this.paddle = params['paddle'];
-        this.health = params['health'];
-        this.ball = params['ball'];
-        this.recoverPoints = params['recoverPoints'];
+    enter(params: enterParams): void {
+        this.level = params.level;
+        this.score = params.score;
+        this.paddle = params.paddle;
+        this.health = params.health;
+        this.ball = params.ball;
+        this.recoverPoints = params.recoverPoints;
 
     }
 
     update(dt: number, inputHandler: InputHandler, stateMachine: StateMachine) {
+        if (this.paddle === undefined || this.ball === undefined) {
+            return;
+        }
+
         this.paddle.update(dt, inputHandler);
         this.ball.x = this.paddle.x + this.paddle.width * 0.50 - this.ball.width * 0.50;
         this.ball.y = this.paddle.y - this.ball.height;
 
-        if (inputHandler.isKeyPressed('Enter')) {
+        if (inputHandler.isKeyPressed('Enter') && this.level) {
             inputHandler.removeKey('Enter');
             stateMachine.change('serve', {
                 level: this.level + 1,
@@ -48,11 +54,14 @@ export default class VictoryState extends BaseState {
     }
 
     draw(ctx: CanvasRenderingContext2D): void {
+        if (this.paddle === undefined || this.ball === undefined) {
+            return;
+        }
         this.paddle.draw(ctx);
         this.ball.draw(ctx);
 
-        Util.drawHealth(ctx, this.health);
-        Util.drawScore(ctx, this.score);
+        this.health && Util.drawHealth(ctx, this.health);
+        this.score && Util.drawScore(ctx, this.score);
 
         // level complete text
         ctx.font = Constants.fonts.large;

@@ -1,7 +1,7 @@
 import BaseState from "./BaseState.js";
 
-import InputHandler from "../InputHandler";
-import StateMachine from "../StateMachine";
+import InputHandler from "../InputHandler.js";
+import StateMachine from "../StateMachine.js";
 import Constants from "../constants.js";
 import HighScores from "../HighScores.js";
 
@@ -19,7 +19,7 @@ export default class HighScoreState extends BaseState {
 
         if (inputHandler.isKeyPressed('Escape')) {
             inputHandler.removeKey('Escape');
-            stateMachine.change('start');
+            stateMachine.change('start', {});
         }
 
     }

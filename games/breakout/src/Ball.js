@@ -1,5 +1,5 @@
-import * as Mathf from "../../math/Mathf";
-import Constants from "./constants";
+import * as Mathf from "../../math/Mathf.js";
+import Constants from "./constants.js";
 export default class Ball {
     constructor() {
         this.width = 8;
@@ -16,6 +16,7 @@ export default class Ball {
         this.reset();
     }
     collides(target) {
+        console.log('here?');
         return !(this.x + this.width < target.x ||
             this.x > target.x + target.width ||
             this.y + this.height < target.y ||

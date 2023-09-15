@@ -1,10 +1,8 @@
 
 import BaseState from "./BaseState.js";
-import InputHandler from "../InputHandler";
+import InputHandler from "../InputHandler.js";
 import Constants from '../constants.js';
-import StateMachine from "../StateMachine";
-import Paddle from "../Paddle.js";
-import LevelMaker from "../LevelMaker.js";
+import StateMachine from "../StateMachine.js";
 
 export default class StartState extends BaseState {
     highlighted: number;
@@ -32,9 +30,9 @@ export default class StartState extends BaseState {
             Constants.sounds.confirm.play();
 
             if (this.highlighted === 0) {
-                stateMachine.change('paddleSelect');
+                stateMachine.change('paddleSelect', {});
             } else {
-                stateMachine.change('highScores');
+                stateMachine.change('highScores', {});
             }
         }
     }

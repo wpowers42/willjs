@@ -4,10 +4,13 @@ import HighScores from "../HighScores.js";
 export default class GameOverState extends BaseState {
     constructor() {
         super();
+        this.score = 0;
         this.highScores = new HighScores();
     }
     enter(params) {
-        this.score = params['score'];
+        if (params) {
+            this.score = params.score;
+        }
     }
     update(dt, inputHandler, stateMachine) {
         if (inputHandler.isKeyPressed('Enter')) {
@@ -19,7 +22,7 @@ export default class GameOverState extends BaseState {
                 });
             }
             else {
-                stateMachine.change('start');
+                stateMachine.change('start', {});
             }
         }
     }

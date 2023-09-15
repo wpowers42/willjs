@@ -1,5 +1,5 @@
 // constants.ts
-import Util from "./util";
+import Util from "./util.js";
 var Constants;
 (function (Constants) {
     Constants.canvasWidth = 1280;

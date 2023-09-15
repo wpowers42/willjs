@@ -1,7 +1,7 @@
-import InputHandler from "./InputHandler";
+import InputHandler from "./InputHandler.js";
 import BaseState from "./states/BaseState.js";
 
-export type enterParams = {
+export interface enterParams {
     [key: string]: any;
 }
 
@@ -14,11 +14,12 @@ export default class StateMachine {
         this.states = states || {};
     }
 
-    change(stateName: string, enterParams?: enterParams) {
+    change(stateName: string, enterParams: enterParams) {
         this.current.exit();
         this.current = this.states[stateName]();
         this.current.enter(enterParams);
     }
+
 
     update(dt: number, inputHandler: InputHandler) {
         this.current.update(dt, inputHandler, this);

@@ -33,7 +33,7 @@ window.onload = () => {
         'enterHighScore': () => new EnterHighScoreState(),
         'paddleSelect': () => new PaddleSelectState(),
     });
-    stateMachine.change('start');
+    stateMachine.change('start', {});
     Constants.sounds.music.loop = true;
     Constants.sounds.music.play();
     const dt = 1000 / Constants.FPS; // delta time using imported FPS constant

@@ -1,5 +1,4 @@
-import * as Mathf from "../../math/Mathf";
-import Constants from "./constants.js";
+import * as Mathf from "../../math/Mathf.js";
 
 interface NumberArrays {
     [key: number]: number[];

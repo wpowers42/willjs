@@ -1,7 +1,7 @@
 import BaseState from "./BaseState.js";
 
-import InputHandler from "../InputHandler";
-import StateMachine from "../StateMachine";
+import InputHandler from "../InputHandler.js";
+import StateMachine from "../StateMachine.js";
 import Constants from "../constants.js";
 import HighScores from "../HighScores.js";
 
@@ -21,7 +21,7 @@ export default class EnterHighScoreState extends BaseState {
         this.highlightedChar = 0;
     }
 
-    enter(params?: enterParams) {
+    enter(params: enterParams) {
         if (params) {
             this.score = params.score;
         }
@@ -34,7 +34,7 @@ export default class EnterHighScoreState extends BaseState {
             const name = this.chars.map(char => String.fromCharCode(char)).join('');
             this.highScores.submitScore(name, this.score);
 
-            stateMachine.change('highScores');
+            stateMachine.change('highScores', {});
         }
 
         // scroll through character slots

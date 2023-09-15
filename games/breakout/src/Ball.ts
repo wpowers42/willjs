@@ -1,5 +1,5 @@
-import * as Mathf from "../../math/Mathf";
-import Constants from "./constants";
+import * as Mathf from "../../math/Mathf.js";
+import Constants from "./constants.js";
 
 export default class Ball {
     width: number;

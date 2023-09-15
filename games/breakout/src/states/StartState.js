@@ -19,10 +19,10 @@ export default class StartState extends BaseState {
             inputHandler.removeKey('Enter');
             Constants.sounds.confirm.play();
             if (this.highlighted === 0) {
-                stateMachine.change('paddleSelect');
+                stateMachine.change('paddleSelect', {});
             }
             else {
-                stateMachine.change('highScores');
+                stateMachine.change('highScores', {});
             }
         }
     }

@@ -1,6 +1,6 @@
 // constants.ts
 
-import Util from "./util";
+import Util from "./util.js";
 
 interface Sounds {
     [key: string]: HTMLAudioElement;

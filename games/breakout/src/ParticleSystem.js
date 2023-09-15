@@ -1,4 +1,4 @@
-import * as Mathf from "../../math/Mathf";
+import * as Mathf from "../../math/Mathf.js";
 class ParticleSystem {
     constructor(maxParticles, particleLifetime, linearAcceleration, emissionArea) {
         this.maxParticles = maxParticles;

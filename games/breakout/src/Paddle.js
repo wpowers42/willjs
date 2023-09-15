@@ -1,4 +1,4 @@
-import * as Mathf from "../../math/Mathf";
+import * as Mathf from "../../math/Mathf.js";
 import Constants from "./constants.js";
 export default class Paddle {
     constructor(skin) {

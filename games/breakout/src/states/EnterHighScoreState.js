@@ -4,19 +4,22 @@ import HighScores from "../HighScores.js";
 export default class EnterHighScoreState extends BaseState {
     constructor() {
         super();
+        this.score = 0;
         this.highScores = new HighScores();
         this.chars = [65, 65, 65]; // AAA
         this.highlightedChar = 0;
     }
     enter(params) {
-        this.score = params['score'];
+        if (params) {
+            this.score = params.score;
+        }
     }
     update(dt, inputHandler, stateMachine) {
         if (inputHandler.isKeyPressed('Enter')) {
             inputHandler.removeKey('Enter');
             const name = this.chars.map(char => String.fromCharCode(char)).join('');
             this.highScores.submitScore(name, this.score);
-            stateMachine.change('highScores');
+            stateMachine.change('highScores', {});
         }
         // scroll through character slots
         if (inputHandler.isKeyPressed('ArrowLeft') && this.highlightedChar > 0) {

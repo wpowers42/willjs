@@ -1,4 +1,4 @@
-import * as Mathf from "../../math/Mathf";
+import * as Mathf from "../../math/Mathf.js";
 import Brick from "./Brick.js";
 class LevelMaker {
     constructor() {

@@ -3,6 +3,12 @@ import Ball from "../Ball.js";
 import Util from "../util.js";
 import Constants from "../constants.js";
 export default class ServeState extends BaseState {
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
     constructor() {
         super();
     }
@@ -16,6 +22,9 @@ export default class ServeState extends BaseState {
         this.recoverPoints = params['recoverPoints'];
     }
     update(dt, inputHandler, stateMachine) {
+        if (this.paddle === undefined || this.ball === undefined) {
+            return;
+        }
         this.paddle.update(dt, inputHandler);
         this.ball.x = this.paddle.x + this.paddle.width * 0.50 - this.ball.width * 0.50;
         this.ball.y = this.paddle.y - this.ball.height;
@@ -33,11 +42,14 @@ export default class ServeState extends BaseState {
         }
     }
     draw(ctx) {
+        if (this.paddle === undefined || this.ball === undefined || this.bricks === undefined) {
+            return;
+        }
         this.paddle.draw(ctx);
         this.ball.draw(ctx);
         this.bricks.forEach(brick => brick.draw(ctx));
-        Util.drawScore(ctx, this.score);
-        Util.drawHealth(ctx, this.health);
+        this.score && Util.drawScore(ctx, this.score);
+        this.health && Util.drawHealth(ctx, this.health);
         ctx.textAlign = 'center';
         ctx.font = Constants.fonts.large;
         ctx.fillText(`Level ${this.level}`, Constants.virtualWidth * 0.50, Constants.virtualHeight * 0.40);
