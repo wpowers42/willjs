@@ -1,4 +1,4 @@
-import Constants from "./constants.js";
+import Constants from "./Constants.js";
 var Util;
 (function (Util) {
     // Generate quads for the tiles in an atlas or spritesheet
@@ -101,4 +101,4 @@ var Util;
     };
 })(Util || (Util = {}));
 export default Util;
-//# sourceMappingURL=util.js.map
+//# sourceMappingURL=Util.js.map

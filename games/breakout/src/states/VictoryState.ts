@@ -4,8 +4,8 @@ import Paddle from "../Paddle.js";
 import StateMachine from "../StateMachine.js";
 import BaseState from "./BaseState.js";
 import LevelMaker from "../LevelMaker.js";
-import Util from "../util.js";
-import Constants from "../constants.js";
+import Util from "../Util.js";
+import Constants from "../Constants.js";
 
 import type { enterParams } from "../StateMachine.js";
 

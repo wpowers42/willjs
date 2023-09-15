@@ -1,4 +1,4 @@
-import Constants from "./constants.js";
+import Constants from "./Constants.js";
 import ParticleSystem from "./ParticleSystem.js";
 
 export default class Brick {

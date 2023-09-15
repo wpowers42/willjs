@@ -1,5 +1,5 @@
 import * as Mathf from "../../math/Mathf.js";
-import Constants from "./constants.js";
+import Constants from "./Constants.js";
 import InputHandler from "./InputHandler.js";
 
 export default class Paddle {

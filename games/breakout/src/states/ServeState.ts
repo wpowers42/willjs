@@ -5,8 +5,8 @@ import StateMachine from "../StateMachine.js";
 import Paddle from "../Paddle.js";
 import Brick from "../Brick.js";
 import Ball from "../Ball.js";
-import Util from "../util.js";
-import Constants from "../constants.js";
+import Util from "../Util.js";
+import Constants from "../Constants.js";
 
 import type { enterParams } from "../StateMachine.js";
 

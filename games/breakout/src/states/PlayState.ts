@@ -1,5 +1,5 @@
 import Ball from "../Ball.js";
-import Constants from "../constants.js";
+import Constants from "../Constants.js";
 import InputHandler from "../InputHandler.js";
 import Paddle from "../Paddle.js";
 import BaseState from "./BaseState.js";
@@ -7,7 +7,7 @@ import BaseState from "./BaseState.js";
 import Brick from "../Brick.js";
 import StateMachine from "../StateMachine.js";
 import * as Mathf from "../../../math/Mathf.js";
-import Util from "../util.js";
+import Util from "../Util.js";
 
 import type { enterParams } from "../StateMachine";
 

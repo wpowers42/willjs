@@ -1,5 +1,4 @@
-// constants.ts
-import Util from "./util.js";
+import Util from "./Util.js";
 var Constants;
 (function (Constants) {
     Constants.canvasWidth = 1280;
@@ -49,4 +48,4 @@ var Constants;
     };
 })(Constants || (Constants = {}));
 export default Constants;
-//# sourceMappingURL=constants.js.map
+//# sourceMappingURL=Constants.js.map

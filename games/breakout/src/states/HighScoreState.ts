@@ -2,7 +2,7 @@ import BaseState from "./BaseState.js";
 
 import InputHandler from "../InputHandler.js";
 import StateMachine from "../StateMachine.js";
-import Constants from "../constants.js";
+import Constants from "../Constants.js";
 import HighScores from "../HighScores.js";
 
 export default class HighScoreState extends BaseState {
