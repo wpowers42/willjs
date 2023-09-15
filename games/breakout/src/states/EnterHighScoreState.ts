@@ -2,8 +2,10 @@ import BaseState from "./BaseState.js";
 
 import InputHandler from "../InputHandler";
 import StateMachine from "../StateMachine";
-import { Constants } from "../constants.js";
+import Constants from "../constants.js";
 import HighScores from "../HighScores.js";
+
+import type { enterParams } from "../StateMachine";
 
 export default class EnterHighScoreState extends BaseState {
     highScores: HighScores;
@@ -13,13 +15,16 @@ export default class EnterHighScoreState extends BaseState {
 
     constructor() {
         super();
+        this.score = 0;
         this.highScores = new HighScores();
         this.chars = [65, 65, 65]; // AAA
         this.highlightedChar = 0;
     }
 
-    enter(params?: Object) {
-        this.score = params['score'];
+    enter(params?: enterParams) {
+        if (params) {
+            this.score = params.score;
+        }
     }
 
     update(dt: number, inputHandler: InputHandler, stateMachine: StateMachine) {

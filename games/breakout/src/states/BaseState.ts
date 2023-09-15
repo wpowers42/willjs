@@ -1,12 +1,18 @@
 import InputHandler from "../InputHandler";
 import StateMachine from "../StateMachine";
 
+import type enterParams from "../StateMachine";
+
 export default class BaseState {
-    stateMachine: StateMachine;
 
-    constructor() { }
+    static Params = enterParams;
 
-    enter(params?: Object) { }
+    stateMachine: StateMachine | undefined;
+
+    constructor() {
+    }
+
+    enter(params?: enterParams) { }
     exit() { }
     update(dt: number, inputHandler: InputHandler, stateMachine: StateMachine) { }
     draw(ctx: CanvasRenderingContext2D) { }

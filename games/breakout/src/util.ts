@@ -1,6 +1,6 @@
-import { Constants } from "./constants.js";
+import Constants from "./constants.js";
 
-export namespace Util {
+namespace Util {
 
     // Generate quads for the tiles in an atlas or spritesheet
     export const generateQuads = (atlas: HTMLImageElement, tileWidth: number, tileHeight: number): Quad[] => {
@@ -133,3 +133,4 @@ export namespace Util {
     }
 }
 
+export default Util;

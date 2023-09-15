@@ -1,6 +1,6 @@
 // constants.ts
-import { Util } from "./Util.js";
-export var Constants;
+import Util from "./util";
+var Constants;
 (function (Constants) {
     Constants.canvasWidth = 1280;
     Constants.canvasHeight = 720;
@@ -48,4 +48,5 @@ export var Constants;
         arrows: Util.generateQuads(Constants.textures.arrows, 24, 24),
     };
 })(Constants || (Constants = {}));
+export default Constants;
 //# sourceMappingURL=constants.js.map

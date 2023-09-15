@@ -11,12 +11,12 @@ export default class Audio {
         }
 
         Object.keys(this.sounds).forEach(sound => this.sounds[sound].volume = 0.20);
-        
+
         this.sounds.music.loop = true;
         this.sounds.music.play();
     }
 
-    play(sound : string) {
+    play(sound: string) {
         this.sounds[sound].play();
     }
 }

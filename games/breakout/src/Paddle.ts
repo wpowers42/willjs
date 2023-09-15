@@ -1,5 +1,5 @@
-import { Mathf } from "../../math/Mathf.js";
-import { Constants } from "./constants.js";
+import * as Mathf from "../../math/Mathf";
+import Constants from "./constants.js";
 import InputHandler from "./InputHandler";
 
 export default class Paddle {
@@ -11,7 +11,7 @@ export default class Paddle {
     skin: number;
     size: number;
 
-    constructor(skin : number) {
+    constructor(skin: number) {
         this.width = 64;
         this.height = 16;
         this.x = Constants.virtualWidth * 0.50 - this.width * 0.50;

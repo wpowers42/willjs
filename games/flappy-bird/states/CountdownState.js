@@ -3,7 +3,7 @@ The TitleScreenState is the starting screen of the game, shown on startup. It sh
     display "Press Enter" and also our highest score.
 */
 import BaseState from "./BaseState.js";
-export default class CountdownState extends BaseState {
+class CountdownState extends BaseState {
     constructor(game) {
         super();
         this.game = game;
@@ -29,4 +29,5 @@ export default class CountdownState extends BaseState {
     }
 }
 CountdownState.COUNTDOWN_TIME = 750;
+export default CountdownState;
 //# sourceMappingURL=CountdownState.js.map

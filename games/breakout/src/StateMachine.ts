@@ -1,6 +1,10 @@
 import InputHandler from "./InputHandler";
 import BaseState from "./states/BaseState.js";
 
+export type enterParams = {
+    [key: string]: any;
+}
+
 export default class StateMachine {
     private empty = new BaseState();
     private states: { [key: string]: () => any } = {};
@@ -10,7 +14,7 @@ export default class StateMachine {
         this.states = states || {};
     }
 
-    change(stateName: string, enterParams?: object) {
+    change(stateName: string, enterParams?: enterParams) {
         this.current.exit();
         this.current = this.states[stateName]();
         this.current.enter(enterParams);
@@ -20,7 +24,7 @@ export default class StateMachine {
         this.current.update(dt, inputHandler, this);
     }
 
-    draw(ctx : CanvasRenderingContext2D) {
+    draw(ctx: CanvasRenderingContext2D) {
         this.current.draw(ctx);
     }
 }

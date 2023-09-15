@@ -1,5 +1,5 @@
 import BaseState from "./BaseState.js";
-import { Constants } from "../constants.js";
+import Constants from "../constants.js";
 import HighScores from "../HighScores.js";
 export default class HighScoreState extends BaseState {
     constructor() {

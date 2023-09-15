@@ -1,28 +1,26 @@
 import BaseState from "./BaseState.js";
 
-import InputHandler from "../InputHandler";
-import StateMachine from "../StateMachine";
-import Paddle from "../Paddle";
-import Brick from "../Brick";
-import Ball from "../Ball.js";
-import { Constants } from "../constants.js";
+import InputHandler from "../InputHandler.js";
+import StateMachine from "../StateMachine.js";
+import Constants from "../constants.js";
 import HighScores from "../HighScores.js";
 
+import type { enterParams } from "../StateMachine";
+
 export default class GameOverState extends BaseState {
-    paddle: Paddle;
-    bricks: Brick[];
-    health: number;
     score: number;
-    ball: Ball;
     highScores: HighScores;
 
     constructor() {
         super();
+        this.score = 0;
         this.highScores = new HighScores();
     }
 
-    enter(params?: Object) {
-        this.score = params['score'];
+    enter(params?: enterParams) {
+        if (params) {
+            this.score = params.score;
+        }
     }
 
     update(dt: number, inputHandler: InputHandler, stateMachine: StateMachine) {

@@ -4,8 +4,8 @@ import Paddle from "../Paddle";
 import StateMachine from "../StateMachine";
 import BaseState from "./BaseState.js";
 import LevelMaker from "../LevelMaker.js";
-import { Util } from "../Util.js";
-import { Constants } from "../constants.js";
+import Util from "../util.js";
+import Constants from "../constants.js";
 
 export default class VictoryState extends BaseState {
     level: number;

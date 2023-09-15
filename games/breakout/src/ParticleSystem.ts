@@ -1,9 +1,13 @@
-import { Mathf } from "../../math/Mathf.js";
-import { Constants } from "./constants.js";
+import * as Mathf from "../../math/Mathf";
+import Constants from "./constants.js";
+
+interface NumberArrays {
+    [key: number]: number[];
+}
 
 export default class ParticleSystem {
 
-    static paletteColors = {
+    static paletteColors: NumberArrays = {
         1: [99, 155, 255], // blue
         2: [106, 190, 47], // greeen
         3: [217, 87, 99], // red
@@ -29,6 +33,8 @@ export default class ParticleSystem {
         this.linearAcceleration = linearAcceleration;
         this.emissionArea = emissionArea;
         this.particles = [];
+        this.startColor = [0, 0, 0];
+        this.endColor = [0, 0, 0];
     }
 
     emit(numParticles: number, x: number, y: number) {

@@ -1,5 +1,5 @@
-import { Constants } from "./constants.js";
-export var Util;
+import Constants from "./constants.js";
+var Util;
 (function (Util) {
     // Generate quads for the tiles in an atlas or spritesheet
     Util.generateQuads = (atlas, tileWidth, tileHeight) => {
@@ -100,4 +100,5 @@ export var Util;
         ctx.fillText(`${score}`, Constants.virtualWidth - 10, 10);
     };
 })(Util || (Util = {}));
-//# sourceMappingURL=Util.js.map
+export default Util;
+//# sourceMappingURL=util.js.map

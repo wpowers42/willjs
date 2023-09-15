@@ -1,11 +1,13 @@
-import { Mathf } from "../../math/Mathf.js";
-export default class ParticleSystem {
+import * as Mathf from "../../math/Mathf";
+class ParticleSystem {
     constructor(maxParticles, particleLifetime, linearAcceleration, emissionArea) {
         this.maxParticles = maxParticles;
         this.particleLifetime = particleLifetime;
         this.linearAcceleration = linearAcceleration;
         this.emissionArea = emissionArea;
         this.particles = [];
+        this.startColor = [0, 0, 0];
+        this.endColor = [0, 0, 0];
     }
     emit(numParticles, x, y) {
         // TODO: only remove the required number of particles
@@ -34,6 +36,7 @@ ParticleSystem.paletteColors = {
     4: [215, 123, 186],
     5: [251, 242, 54], // gold
 };
+export default ParticleSystem;
 class Particle {
     constructor(x, y, xForce, yForce, startColor, endColor, maxLifetime) {
         this.lifetime = 0;

@@ -1,4 +1,8 @@
+export type keyPresses = { [key: string]: number };
+
 export default class InputHandler {
+    keyPresses: keyPresses;
+
     constructor() {
         this.keyPresses = {
             'Enter': 0,
@@ -7,6 +11,7 @@ export default class InputHandler {
             'ArrowUp': 0,
             'ArrowDown': 0,
         };
+
         window.addEventListener('keydown', e => {
             this.keyPresses[e.key] = 1;
         });
@@ -14,5 +19,5 @@ export default class InputHandler {
             this.keyPresses[e.key] = 0;
         });
     }
+
 }
-//# sourceMappingURL=input.js.map

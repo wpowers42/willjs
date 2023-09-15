@@ -1,7 +1,7 @@
 
 import BaseState from "./BaseState.js";
 import InputHandler from "../InputHandler";
-import { Constants } from '../constants.js';
+import Constants from '../constants.js';
 import StateMachine from "../StateMachine";
 import Paddle from "../Paddle.js";
 import LevelMaker from "../LevelMaker.js";
@@ -66,15 +66,15 @@ export default class PaddleSelectState extends BaseState {
         ctx.drawImage(Constants.textures.arrows, sx, sy, sw, sh, Constants.virtualWidth * 0.25 - sw * 0.50, Constants.virtualHeight * 0.75 - sh * 0.50, sw, sh);
 
         // paddle
-        ({sx, sy, sw, sh} = Constants.frames.paddles[this.currentPaddle * 4 + 1]);
+        ({ sx, sy, sw, sh } = Constants.frames.paddles[this.currentPaddle * 4 + 1]);
         ctx.globalAlpha = 1.00;
         ctx.drawImage(Constants.textures.main, sx, sy, sw, sh, Constants.virtualWidth * 0.50 - sw * 0.50, Constants.virtualHeight * 0.75 - sh * 0.50, sw, sh);
-        
+
         // right arrow
-        ({sx, sy, sw, sh} = Constants.frames.arrows[1]);
+        ({ sx, sy, sw, sh } = Constants.frames.arrows[1]);
         ctx.globalAlpha = this.currentPaddle === 3 ? 0.50 : 1.00;
         ctx.drawImage(Constants.textures.arrows, sx, sy, sw, sh, Constants.virtualWidth * 0.75 - sw * 0.50, Constants.virtualHeight * 0.75 - sh * 0.50, sw, sh);
-        
+
         ctx.globalAlpha = 1.00;
     }
 }

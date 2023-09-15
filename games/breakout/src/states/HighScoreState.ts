@@ -2,7 +2,7 @@ import BaseState from "./BaseState.js";
 
 import InputHandler from "../InputHandler";
 import StateMachine from "../StateMachine";
-import { Constants } from "../constants.js";
+import Constants from "../constants.js";
 import HighScores from "../HighScores.js";
 
 export default class HighScoreState extends BaseState {
@@ -28,16 +28,16 @@ export default class HighScoreState extends BaseState {
         ctx.font = Constants.fonts.large;
         ctx.textAlign = 'center';
         ctx.fillText('High Scores', Constants.virtualWidth * 0.50, 25);
-        
+
         ctx.font = Constants.fonts.medium;
         this.highScores.scores.forEach((highScore, index) => {
             let [name, score] = highScore;
             ctx.textAlign = 'left';
-            ctx.fillText(`${index + 1}.`, Constants.virtualWidth * 0.25, 60 + index * 13 );
-            
+            ctx.fillText(`${index + 1}.`, Constants.virtualWidth * 0.25, 60 + index * 13);
+
             ctx.textAlign = 'right';
-            ctx.fillText(`${name}`, Constants.virtualWidth * 0.45, 60 + index * 13 );
-            ctx.fillText(`${score}`, Constants.virtualWidth * 0.75, 60 + index * 13 );
+            ctx.fillText(`${name}`, Constants.virtualWidth * 0.45, 60 + index * 13);
+            ctx.fillText(`${score}`, Constants.virtualWidth * 0.75, 60 + index * 13);
 
         })
 

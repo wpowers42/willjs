@@ -1,7 +1,7 @@
 
 import BaseState from "./BaseState.js";
 import InputHandler from "../InputHandler";
-import { Constants } from '../constants.js';
+import Constants from '../constants.js';
 import StateMachine from "../StateMachine";
 import Paddle from "../Paddle.js";
 import LevelMaker from "../LevelMaker.js";

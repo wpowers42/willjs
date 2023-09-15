@@ -1,4 +1,4 @@
-import { Constants } from "./constants.js";
+import Constants from "./constants.js";
 import ParticleSystem from "./ParticleSystem.js";
 
 export default class Brick {
@@ -58,7 +58,7 @@ export default class Brick {
         }
     }
 
-    update(dt : number) {
+    update(dt: number) {
         this.particleSystem.update(dt);
     }
 

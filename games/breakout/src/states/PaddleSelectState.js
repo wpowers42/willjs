@@ -1,5 +1,5 @@
 import BaseState from "./BaseState.js";
-import { Constants } from '../constants.js';
+import Constants from '../constants.js';
 import Paddle from "../Paddle.js";
 import LevelMaker from "../LevelMaker.js";
 export default class PaddleSelectState extends BaseState {

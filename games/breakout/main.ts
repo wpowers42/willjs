@@ -1,4 +1,4 @@
-import { Constants } from './src/constants.js';
+import Constants from './src/constants.js';
 import InputHandler from './src/InputHandler.js';
 import StateMachine from './src/StateMachine.js';
 import StartState from './src/states/StartState.js';
@@ -74,7 +74,7 @@ window.onload = () => {
 
     const createDisplayFPS = () => {
         // Create an array to store the last 60 frame times
-        const frameTimes = [];
+        const frameTimes: Array<number> = [];
 
         return (currentFrameTime: number) => {
             // Add the current frame time to the array

@@ -1,6 +1,6 @@
-import { Mathf } from "../../math/Mathf.js";
+import * as Mathf from "../../math/Mathf";
 import Brick from "./Brick.js";
-export default class LevelMaker {
+class LevelMaker {
     constructor() {
     }
 }
@@ -63,4 +63,5 @@ LevelMaker.createMap = (level) => {
     }
     return bricks;
 };
+export default LevelMaker;
 //# sourceMappingURL=LevelMaker.js.map

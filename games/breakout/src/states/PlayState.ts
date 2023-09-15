@@ -1,13 +1,13 @@
 import Ball from "../Ball.js";
-import { Constants } from "../constants.js";
+import Constants from "../constants.js";
 import InputHandler from "../InputHandler.js";
 import Paddle from "../Paddle.js";
 import BaseState from "./BaseState.js";
 
 import Brick from "../Brick";
 import StateMachine from "../StateMachine";
-import { Mathf } from "../../../math/Mathf.js";
-import { Util } from "../Util.js";
+import * as Mathf from "../../../math/Mathf";
+import Util from "../util.js";
 
 export default class PlayState extends BaseState {
     paddle: Paddle;

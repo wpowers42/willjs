@@ -1,5 +1,5 @@
 import BaseState from "./BaseState.js";
-import { Constants } from '../constants.js';
+import Constants from '../constants.js';
 export default class StartState extends BaseState {
     constructor() {
         super();

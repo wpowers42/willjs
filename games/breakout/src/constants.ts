@@ -1,8 +1,12 @@
 // constants.ts
 
-import { Util } from "./Util.js";
+import Util from "./util";
 
-export namespace Constants {
+interface Sounds {
+    [key: string]: HTMLAudioElement;
+}
+
+namespace Constants {
     export const canvasWidth = 1280;
     export const canvasHeight = 720;
     export const virtualWidth = 432;
@@ -27,7 +31,7 @@ export namespace Constants {
     }
 
     // define the sounds
-    export const sounds = {
+    export const sounds: Sounds = {
         brickHit1: <HTMLAudioElement>document.getElementById('brick-hit-1-sound'),
         brickHit2: <HTMLAudioElement>document.getElementById('brick-hit-2-sound'),
         confirm: <HTMLAudioElement>document.getElementById('confirm-sound'),
@@ -54,3 +58,5 @@ export namespace Constants {
         arrows: <Util.Quad[]>Util.generateQuads(textures.arrows, 24, 24),
     }
 }
+
+export default Constants;

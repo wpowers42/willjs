@@ -2,24 +2,51 @@ import Ball from "./Ball.js";
 import InputHandler from "./input.js";
 import { Player1, Player2 } from "./Paddle.js";
 import { GameState, StartGameState, ServeGameState, PlayGameState, DoneGameState } from "./GameState.js";
-import UI from "./ui.js";
+import UI from "./ui.js"
+
 export default class Game {
-    constructor(ctx) {
+    ctx: CanvasRenderingContext2D;
+    width: number;
+    height: number;
+    gameOver: boolean;
+    scoreToWin: number;
+    player1: Player1;
+    player2: Player2;
+    ball: Ball;
+    gameObjects: Array<Player1 | Player2>;
+    inputHandler: InputHandler;
+    ui: UI;
+    states: Array<StartGameState | ServeGameState | PlayGameState | DoneGameState>;
+    currentState: StartGameState | ServeGameState | PlayGameState | DoneGameState;
+    winningPlayer: number | undefined;
+    t: number;
+    targetFPS: number;
+    dt: number;
+    accumulator: number;
+    currentTime: number;
+    frameTimes: number;
+    frames: number;
+
+    constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
         this.width = this.ctx.canvas.width;
         this.height = this.ctx.canvas.height;
         this.gameOver = false;
         this.scoreToWin = 11;
+
         this.player1 = new Player1(this);
         this.player2 = new Player2(this);
         this.ball = new Ball(this.width * 0.50, this.height * 0.50, this);
         this.gameObjects = [this.player1, this.player2];
+
         this.inputHandler = new InputHandler();
         this.ui = new UI(this);
+
         this.states = [new StartGameState(this), new ServeGameState(this),
-            new PlayGameState(this), new DoneGameState(this)];
+        new PlayGameState(this), new DoneGameState(this)];
         this.currentState = this.states[GameState.START];
         this.setState(GameState.START);
+
         this.t = 0;
         this.targetFPS = 60;
         this.dt = 1000 / this.targetFPS;
@@ -27,7 +54,9 @@ export default class Game {
         this.currentTime = performance.now();
         this.frameTimes = 0;
         this.frames = 0;
+
     }
+
     reset() {
         this.winningPlayer = undefined;
         this.player1.reset();
@@ -39,16 +68,20 @@ export default class Game {
         this.frameTimes = 0;
         this.frames = 0;
     }
+
     update() {
         let newTime = performance.now();
         let frameTime = newTime - this.currentTime;
         this.currentTime = newTime;
+
         if (this.frames >= 60) {
             this.frameTimes -= this.frameTimes / this.frames;
             this.frames -= 1;
         }
         this.frameTimes += frameTime;
         this.frames += 1;
+
+
         this.accumulator += frameTime;
         while (this.accumulator >= this.dt) {
             this.currentState.handleInput(this.inputHandler.keyPresses);
@@ -60,16 +93,19 @@ export default class Game {
             this.accumulator -= this.dt;
             this.t += this.dt;
         }
+
     }
+
     draw() {
         this.player1.draw(this.ctx);
         this.player2.draw(this.ctx);
         this.ball.draw(this.ctx);
         this.ui.draw(this.ctx);
     }
-    setState(state) {
+
+    setState(state: number) {
         this.currentState = this.states[state];
         this.currentState.enter();
     }
+
 }
-//# sourceMappingURL=Game.js.map

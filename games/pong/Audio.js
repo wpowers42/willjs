@@ -1,14 +1,11 @@
-export default class Audio {
-    static PaddleHit = 1;
-    static WallHit = 2;
-    static Score = 3;
-
+class Audio {
+    // Remove the duplicate declarations
     constructor() {
+        // Add the 'this' keyword to assign the values to the class properties
         this.paddleHit = document.getElementById('paddleHitSound');
         this.score = document.getElementById('scoreSound');
         this.wallHit = document.getElementById('wallHitSound');
     }
-
     play(event) {
         switch (event) {
             case Audio.PaddleHit:
@@ -23,3 +20,8 @@ export default class Audio {
         }
     }
 }
+Audio.PaddleHit = 1;
+Audio.WallHit = 2;
+Audio.Score = 3;
+export default Audio;
+//# sourceMappingURL=Audio.js.map
