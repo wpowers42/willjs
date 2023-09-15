@@ -16,7 +16,6 @@ export default class Ball {
         this.reset();
     }
     collides(target) {
-        console.log('here?');
         return !(this.x + this.width < target.x ||
             this.x > target.x + target.width ||
             this.y + this.height < target.y ||

@@ -60,7 +60,7 @@ export default class PlayState extends BaseState {
         // TODO: reset ball position to edge of brick if the ball is getting stuck
         for (const brick of this.bricks) {
             brick.update(dt);
-            if (brick.inPlay && this.ball.collides(brick) && this.score) {
+            if (brick.inPlay && this.ball.collides(brick) && this.score !== undefined) {
                 this.score += brick.tier * 200 + brick.color * 25;
                 brick.hit();
                 // if we have enough points, recover a point of health
