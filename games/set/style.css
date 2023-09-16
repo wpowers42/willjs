@@ -1,0 +1,96 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.game-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 800px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#board {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.card {
+    border: 1px solid black;
+    width: 60px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 5px;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.card.selected {
+    border: 3px solid blue;
+}
+
+.shape {
+    width: 80%;
+    height: 20px;
+    margin: 3px 0;
+    position: relative;
+    background-color: currentColor;
+}
+
+.diamond {
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.squiggle {
+    /* Just a simple squiggle shape as an example */
+    border-radius: 10px;
+    transform: scaleX(0.6);
+}
+
+.oval {
+    border-radius: 50px;
+}
+
+.empty .shape {
+    background-color: transparent;
+    border: 2px solid currentColor;
+}
+
+.striped .shape {
+    background-image: repeating-linear-gradient(45deg, currentColor, currentColor 10px, transparent 10px, transparent 20px);
+}
+
+#reset-button {
+    display: block;
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 auto;
+    transition: background-color 0.3s;
+}
+
+#reset-button:hover {
+    background-color: #555;
+}
