@@ -17,9 +17,13 @@ export default class Graphics {
     }
 }
 class Scene {
-    constructor() {
+    constructor(image, width, height, dx) {
         this.x = 0;
         this.y = 0;
+        this.dx = dx;
+        this.image = image;
+        this.width = width;
+        this.height = height;
     }
     update(dt) {
         this.x -= this.dx * dt;
@@ -43,20 +47,20 @@ class Scene {
 }
 class Background extends Scene {
     constructor() {
-        super();
-        this.image = document.getElementById('backgroundImage');
-        this.width = this.image.width;
-        this.height = this.image.height;
-        this.dx = 0.04;
+        const image = document.getElementById('backgroundImage');
+        const width = image.width;
+        const height = image.height;
+        const dx = 0.04;
+        super(image, width, height, dx);
     }
 }
 class Ground extends Scene {
     constructor(gameHeight) {
-        super();
-        this.image = document.getElementById('groundImage');
-        this.width = this.image.width;
-        this.height = this.image.height;
-        this.dx = 0.05;
+        const image = document.getElementById('groundImage');
+        const width = image.width;
+        const height = image.height;
+        const dx = 0.05;
+        super(image, width, height, dx);
         this.y = gameHeight - this.height;
     }
 }

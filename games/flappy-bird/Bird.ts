@@ -1,5 +1,5 @@
-import Game from "./Game";
-import Pipe from "./Pipe";
+import Game from "./Game.js";
+import Pipe from "./Pipe.js";
 
 export default class Bird {
     game: Game;

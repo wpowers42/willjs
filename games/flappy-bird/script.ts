@@ -14,7 +14,7 @@ function animate(game: Game) {
 window.onload = () => {
 
     const canvas = <HTMLCanvasElement>document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
     canvas.width = 512;
     canvas.height = 288;

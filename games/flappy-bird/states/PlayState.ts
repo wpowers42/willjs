@@ -4,15 +4,14 @@ avoids pipes. When the player collides with a pipe, we should go to the GameOver
 we then go back to the main menu.
 */
 
-import Game from "../Game";
+import Game from "../Game.js";
 import Bird from "../Bird.js";
-import * as Mathf from "../../math/Mathf";
+import * as Mathf from "../../math/Mathf.js";
 import PipePair from "../PipePair.js";
 import BaseState from "./BaseState.js";
 
 export default class PlayState extends BaseState {
     game: Game;
-    ctx: CanvasRenderingContext2D;
     bird: Bird;
     pipePairs: PipePair[];
     pipePairY: number;

@@ -43,7 +43,7 @@ export default class Game {
             'countdown': () => new CountdownState(this),
             'paused': () => new PausedState(this),
         });
-        this.stateMachine.change('title');
+        this.stateMachine.change('title', {});
         this.debug = false;
         this.fps = 60;
         this.t = 0;

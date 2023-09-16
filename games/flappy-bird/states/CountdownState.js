@@ -18,7 +18,7 @@ class CountdownState extends BaseState {
             this.count -= 1;
             this.timer -= CountdownState.COUNTDOWN_TIME;
             if (this.count === 0) {
-                this.game.stateMachine.change('play');
+                this.game.stateMachine.change('play', {});
             }
         }
     }

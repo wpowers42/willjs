@@ -3,7 +3,7 @@ The TitleScreenState is the starting screen of the game, shown on startup. It sh
     display "Press Enter" and also our highest score.
 */
 
-import Game from "../Game";
+import Game from "../Game.js";
 import BaseState from "./BaseState.js";
 
 export default class TitleScreenState extends BaseState {
@@ -19,7 +19,7 @@ export default class TitleScreenState extends BaseState {
 
     update(dt: number) {
         if (this.game.input.isKeyPressed('Enter')) {
-            this.game.stateMachine.change('countdown');
+            this.game.stateMachine.change('countdown', {});
         }
     }
 

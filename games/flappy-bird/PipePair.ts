@@ -1,7 +1,7 @@
-import Bird from "./Bird";
+import Bird from "./Bird.js";
 import Pipe from "./Pipe.js";
-import StateMachine from "./StateMachine";
-import PlayState from "./states/PlayState";
+import StateMachine from "./StateMachine.js";
+import PlayState from "./states/PlayState.js";
 
 export default class PipePair {
     y: number;

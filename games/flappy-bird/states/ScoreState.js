@@ -1,7 +1,4 @@
-/*
-
-*/
-import * as Mathf from "../../math/Mathf";
+import * as Mathf from "../../math/Mathf.js";
 import BaseState from "./BaseState.js";
 export default class ScoreState extends BaseState {
     constructor(game) {
@@ -13,6 +10,7 @@ export default class ScoreState extends BaseState {
         this.medalWidth = this.medalSpriteWidth * 0.50;
         this.medalHeight = this.medalSpriteHeight * 0.50;
         this.medalGap = 20;
+        this.score = 0;
     }
     enter(enterParams) {
         this.score = enterParams['score'];
@@ -20,7 +18,7 @@ export default class ScoreState extends BaseState {
     exit() { }
     update(dt) {
         if (this.game.input.isKeyPressed('Enter')) {
-            this.game.stateMachine.change('countdown');
+            this.game.stateMachine.change('countdown', {});
         }
     }
     draw(ctx) {

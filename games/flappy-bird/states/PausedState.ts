@@ -1,5 +1,7 @@
-import Game from "../Game";
+import Game from "../Game.js";
 import BaseState from "./BaseState.js";
+
+import type { enterParams } from "../StateMachine";
 
 export default class PausedState extends BaseState {
     game: Game;
@@ -10,9 +12,9 @@ export default class PausedState extends BaseState {
         this.game = game;
     }
 
-    enter(enterParams: object) {
+    enter(enterParams: enterParams) {
         this.priorState = enterParams['state'];
-     }
+    }
 
     exit() { }
 

@@ -1,14 +1,10 @@
-/*
-
-*/
-
-import Game from "../Game";
-import StateMachine from "../StateMachine";
-import * as Mathf from "../../math/Mathf";
+import Game from "../Game.js";
+import * as Mathf from "../../math/Mathf.js";
 import BaseState from "./BaseState.js";
 
+import type { enterParams } from "../StateMachine";
+
 export default class ScoreState extends BaseState {
-    stateMachine: StateMachine;
     game: Game;
     score: number;
     medalImage: HTMLImageElement;
@@ -27,9 +23,10 @@ export default class ScoreState extends BaseState {
         this.medalWidth = this.medalSpriteWidth * 0.50;
         this.medalHeight = this.medalSpriteHeight * 0.50;
         this.medalGap = 20;
+        this.score = 0;
     }
 
-    enter(enterParams: { string: any }) {
+    enter(enterParams: enterParams) {
         this.score = enterParams['score'];
     }
 
@@ -37,7 +34,7 @@ export default class ScoreState extends BaseState {
 
     update(dt: number) {
         if (this.game.input.isKeyPressed('Enter')) {
-            this.game.stateMachine.change('countdown');
+            this.game.stateMachine.change('countdown', {});
         }
     }
 
