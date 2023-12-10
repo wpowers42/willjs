@@ -4,8 +4,6 @@ class BreathingCircle {
         this.y = y;
         this.radius = radius;
         this.lineWidth = 4;
-        this.startAlpha = 1.0;
-        this.endAlpha = 0.1;
         this.radiansPerSegment = Math.PI * 2 / this.segments;
         this.alphaRadians = Math.PI * 2 / 16; // 1/16 of a circle
         this.alphaSegments = this.alphaRadians / this.radiansPerSegment;
@@ -13,7 +11,7 @@ class BreathingCircle {
         this.color = 'white';
         this.loopTimeMS = 16000;
         this.angularSpeed = Math.PI * 2 / this.loopTimeMS;
-        this.baseAngle = Math.PI * 0.75; // starting angle top left
+        this.baseAngle = Math.PI * 1.25;
         this.angle = this.baseAngle;
         this.activeSegment = 0;
     }
@@ -25,8 +23,7 @@ class BreathingCircle {
     }
 
     update(timestamp) {
-        let angle = -(timestamp * this.angularSpeed) % (Math.PI * 2.0);
-        this.angle = angle + this.baseAngle;
+        this.angle = (timestamp * this.angularSpeed + this.baseAngle) % (Math.PI * 2.0);
         this.activeSegment = Math.floor(timestamp / 1000 / 4.0) % 4;
     }
 
@@ -34,10 +31,9 @@ class BreathingCircle {
 
         ctx.save();
 
-
         // Define the start and end angles for 1/4 of the circle
-        const startAngle = -this.angle - Math.PI / 2;
-        const endAngle = startAngle + Math.PI / 2;
+        const endAngle = this.angle;
+        const startAngle = endAngle - Math.PI / 4.0;
 
         // Create a gradient for the stroke
         const gradient = ctx.createLinearGradient(
@@ -48,9 +44,9 @@ class BreathingCircle {
         );
 
         // Add color stops to the gradient
-        gradient.addColorStop(1, `rgba(255, 255, 255, ${this.startAlpha})`);
-        gradient.addColorStop(.75, `rgba(255, 255, 255, 0.1)`); // Fade to transparent
-        gradient.addColorStop(0, `rgba(255, 255, 255, 0)`); // Fade to transparent
+        gradient.addColorStop(1.00, `rgba(255, 255, 255, 1.00`);
+        gradient.addColorStop(0.66, `rgba(255, 255, 255, 0.10)`);
+        gradient.addColorStop(0.00, `rgba(255, 255, 255, 0.10)`);
 
         // Set the stroke style to the gradient
         ctx.strokeStyle = gradient;
@@ -71,7 +67,7 @@ class BreathingCircle {
             ctx.globalAlpha = this.activeSegment == i ||
                 this.activeSegment == (i - 1 + 4) % 4 ? 1.0 : 0.10;
             ctx.translate(this.x, this.y);
-            ctx.rotate(Math.PI * 2 * i / 4 + this.baseAngle);
+            ctx.rotate(Math.PI * 2 * i / 4 - this.baseAngle);
             ctx.translate(0, this.radius);
             ctx.fillRect(0, -8, 1, 16);
             ctx.restore();
