@@ -5,7 +5,7 @@ class TextInstructions {
         this.radius = radius;
         this.font = '24px Courier';
         this.activeAlpha = 1.0;
-        this.inactiveAlpha = 0.1;
+        this.inactiveAlpha = 0.15;
         this.color = 'white';
         this.activeSegment = 0;
     }

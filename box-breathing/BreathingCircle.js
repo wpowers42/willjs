@@ -3,7 +3,6 @@ class BreathingCircle {
         this.x = x;
         this.y = y;
         this.radius = radius;
-        this.segments = 360 * 2;
         this.lineWidth = 4;
         this.startAlpha = 1.0;
         this.endAlpha = 0.1;
@@ -26,7 +25,7 @@ class BreathingCircle {
     }
 
     update(timestamp) {
-        let angle = -(timestamp * this.angularSpeed) % (Math.PI * 2.0) ;
+        let angle = -(timestamp * this.angularSpeed) % (Math.PI * 2.0);
         this.angle = angle + this.baseAngle;
         this.activeSegment = Math.floor(timestamp / 1000 / 4.0) % 4;
     }
@@ -35,25 +34,42 @@ class BreathingCircle {
 
         ctx.save();
 
-        ctx.globalAlpha = this.startAlpha;
+
+        // Define the start and end angles for 1/4 of the circle
+        const startAngle = -this.angle - Math.PI / 2;
+        const endAngle = startAngle + Math.PI / 2;
+
+        // Create a gradient for the stroke
+        const gradient = ctx.createLinearGradient(
+            this.x + this.radius * Math.cos(startAngle), // x start of gradient
+            this.y + this.radius * Math.sin(startAngle), // y start of gradient
+            this.x + this.radius * Math.cos(endAngle),   // x end of gradient
+            this.y + this.radius * Math.sin(endAngle)    // y end of gradient
+        );
+
+        // Add color stops to the gradient
+        gradient.addColorStop(1, `rgba(255, 255, 255, ${this.startAlpha})`);
+        gradient.addColorStop(.75, `rgba(255, 255, 255, 0.1)`); // Fade to transparent
+        gradient.addColorStop(0, `rgba(255, 255, 255, 0)`); // Fade to transparent
+
+        // Set the stroke style to the gradient
+        ctx.strokeStyle = gradient;
         ctx.lineWidth = this.lineWidth;
-        ctx.strokeStyle = this.color;
         ctx.fillStyle = this.color;
 
-        for (let i = 0; i < this.segments; i++) {
-            ctx.beginPath();
-            // negative to move counter clockwise
-            let start = -i / this.segments * Math.PI * 2 - this.angle;
-            let stop = -(i + 1) / this.segments * Math.PI * 2 - this.angle;
-            ctx.globalAlpha = Math.max(this.startAlpha - i * this.alphaDecayPerSegment, this.endAlpha);
-            ctx.arc(this.x, this.y, this.radius, start, stop, true);
-            ctx.stroke();
-        }
+
+        // Draw the arc for 1/4 of the circle
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, startAngle, endAngle);
+
+        ctx.stroke();
+
+        ctx.strokeStyle = this.color;
 
         for (let i = 0; i < 4; i++) {
             ctx.save();
             ctx.globalAlpha = this.activeSegment == i ||
-                              this.activeSegment == (i - 1 + 4) % 4 ? 1.0 : 0.10;
+                this.activeSegment == (i - 1 + 4) % 4 ? 1.0 : 0.10;
             ctx.translate(this.x, this.y);
             ctx.rotate(Math.PI * 2 * i / 4 + this.baseAngle);
             ctx.translate(0, this.radius);
