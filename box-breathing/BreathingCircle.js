@@ -27,7 +27,14 @@ class BreathingCircle {
 
         ctx.save();
 
-        // Define the start and end angles for 1/4 of the circle
+        ctx.lineWidth = this.lineWidth;
+
+        // Draw the circle
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.stroke();
+
         const endAngle = this.angle;
         const startAngle = endAngle - Math.PI / 4.0;
 
