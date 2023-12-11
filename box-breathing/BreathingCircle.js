@@ -3,6 +3,7 @@ class BreathingCircle {
         this.x = x;
         this.y = y;
         this.radius = radius;
+        this.lineWidth = 8;
         this.color = 'white';
         this.loopTimeMS = 16000;
         this.angularSpeed = Math.PI * 2 / this.loopTimeMS;
