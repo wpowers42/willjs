@@ -47,15 +47,15 @@ class BreathingCircle {
         );
 
         // Add color stops to the gradient
-        gradient.addColorStop(1.00, `rgba(255, 255, 255, 1.00`);
-        gradient.addColorStop(0.66, `rgba(255, 255, 255, 0.10)`);
-        gradient.addColorStop(0.00, `rgba(255, 255, 255, 0.10)`);
 
         // Set the stroke style to the gradient
         ctx.strokeStyle = gradient;
         ctx.lineWidth = this.lineWidth;
         ctx.fillStyle = this.color;
 
+        gradient.addColorStop(1.00, 'rgba(255, 255, 255, 1.00)');
+        gradient.addColorStop(0.75, 'rgba(255, 255, 255, 0.05)');
+        gradient.addColorStop(0.00, 'rgba(255, 255, 255, 0.00)');
 
         // Draw the arc for 1/4 of the circle
         ctx.beginPath();
