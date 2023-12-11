@@ -36,7 +36,7 @@ class BreathingCircle {
         ctx.stroke();
 
         const endAngle = this.angle;
-        const startAngle = endAngle - Math.PI / 4.0;
+        const startAngle = endAngle - Math.PI / 2;
 
         // Create a gradient for the stroke
         const gradient = ctx.createLinearGradient(
