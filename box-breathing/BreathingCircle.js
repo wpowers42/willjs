@@ -47,12 +47,6 @@ class BreathingCircle {
         );
 
         // Add color stops to the gradient
-
-        // Set the stroke style to the gradient
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = this.lineWidth;
-        ctx.fillStyle = this.color;
-
         gradient.addColorStop(1.00, 'rgba(255, 255, 255, 1.00)');
         gradient.addColorStop(0.75, 'rgba(255, 255, 255, 0.05)');
         gradient.addColorStop(0.00, 'rgba(255, 255, 255, 0.00)');
@@ -60,10 +54,8 @@ class BreathingCircle {
         // Draw the arc for 1/4 of the circle
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, startAngle, endAngle);
-
+        ctx.strokeStyle = gradient;
         ctx.stroke();
-
-        ctx.strokeStyle = this.color;
 
         for (let i = 0; i < 4; i++) {
             ctx.save();
@@ -72,6 +64,7 @@ class BreathingCircle {
             ctx.translate(this.x, this.y);
             ctx.rotate(Math.PI * 2 * i / 4 - this.baseAngle);
             ctx.translate(0, this.radius);
+            ctx.fillStyle = this.color;
             ctx.fillRect(0, -8, 1, 16);
             ctx.restore();
         }
