@@ -1,8 +1,8 @@
 // setup canvas and context
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-canvas.width = 800;
-canvas.height = 600;
+canvas.width = Math.min(800, window.innerWidth);
+canvas.height = Math.min(600, window.innerHeight);
 
 
 class ProjectivePlane {
@@ -257,29 +257,29 @@ class Card {
     constructor(symbols, icons) {
         this.symbols = symbols;
         this.icons = icons;
+        this.padding = 5;
+        this.cardSize = Math.min(300 + this.padding * 4, (canvas.width - this.padding * 3) / 2);
+        this.symbolSize = (this.cardSize - this.padding * 4) / 3;
     }
 
     renderIcon(iconIndex, x, y) {
         const icon = this.icons[iconIndex];
-        ctx.drawImage(icon, x, y, 100, 100);
+        const size = this.symbolSize;
+        ctx.drawImage(icon, x, y, size, size);
     }
 
     render(cardNumber) {
-        const SYMBOL_SIZE = 100;
-        const PADDING = 20;
-        const CARD_SIZE = SYMBOL_SIZE * 3 + PADDING * 4;
-
-        const deltaX = (canvas.width - CARD_SIZE * 2) / 3;
-        const x = deltaX + cardNumber * (CARD_SIZE + deltaX);
-        const y = (canvas.height - CARD_SIZE) / 2;
+        const deltaX = (canvas.width - this.cardSize * 2) / 3;
+        const x = deltaX + cardNumber * (this.cardSize + deltaX);
+        const y = (canvas.height - this.cardSize) / 2;
 
         // create a 3x3 grid of positions
         const positions = [];
         for (let row = 0; row < 3; row++) {
             for (let col = 0; col < 3; col++) {
-                positions.push([x + PADDING + col * (SYMBOL_SIZE + PADDING), y + PADDING + row * (SYMBOL_SIZE + PADDING)]);
+                positions.push([x + this.padding + col * (this.symbolSize + this.padding), y + this.padding + row * (this.symbolSize + this.padding)]);
                 if (row === 2) {
-                    positions[positions.length - 1][0] += SYMBOL_SIZE * 0.5;
+                    positions[positions.length - 1][0] += this.symbolSize * 0.5;
                 }
             }
         }
@@ -288,7 +288,7 @@ class Card {
         ctx.fillStyle = 'white';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(x, y, CARD_SIZE, CARD_SIZE, 10);
+        ctx.roundRect(x, y, this.cardSize, this.cardSize, 10);
         ctx.fill();
         ctx.stroke();
         ctx.closePath();
