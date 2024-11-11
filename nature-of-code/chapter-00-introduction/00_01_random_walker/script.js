@@ -1,9 +1,10 @@
 import { canvas } from "../../shared/js/utils.js";
 
 // setup canvas and context
-const canvasElement = canvas.create(800, 800);
+const canvasElement = canvas.create(800, 600);
 document.body.appendChild(canvasElement);
 const ctx = canvasElement.getContext("2d");
+ctx.canvas.style.backgroundColor = "white";
 
 class Walker {
     constructor(ctx) {
