@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03 - Random Walker Right</title>
+    <style>
+        h1 {
+            text-align: center;
+        }
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>03 - Random Walker Right</h1>
+    <canvas id="canvas"></canvas>
+    <script type="module">
+
+        import { Vector } from "../engine/core/Vector.js";
+
+        const canvas = document.getElementById("canvas");
+        canvas.width = 800;
+        canvas.height = 600;
+
+        const ctx = canvas.getContext("2d");
+        ctx.canvas.style.backgroundColor = "white";
+
+        class Walker {
+
+            static RIGHT = new Vector(1, 0);
+            static LEFT = new Vector(-1, 0);
+            static UP = new Vector(0, -1);
+            static DOWN = new Vector(0, 1);
+
+            constructor(ctx) {
+                this.ctx = ctx;
+                this.width = ctx.canvas.width;
+                this.height = ctx.canvas.height;
+                this.position = new Vector(this.width / 2, this.height / 2);
+                this.steps = 0;
+                this.colorChangeRate = 360;
+            }
+
+            update() {
+                const dx = Math.floor(Math.random() * 100);
+                const dy = Math.floor(Math.random() * 3);
+                if (dx < 50) {
+                    this.position.add(Walker.RIGHT);
+                } else if (dx < 75) {
+                    this.position.add(Walker.LEFT);
+                }
+                if (dy === 0) {
+                    this.position.add(Walker.DOWN);
+                } else if (dy === 1) {
+                    this.position.add(Walker.UP);
+                }
+
+                this.steps++;
+
+                // if out of bounds, wrap around
+                if (this.position.x < 0) this.position.x = this.width;
+                if (this.position.x > this.width) this.position.x = 0;
+                if (this.position.y < 0) this.position.y = this.height;
+                if (this.position.y > this.height) this.position.y = 0;
+            }
+
+            render() {
+                // color based on modulus of steps and cycling through hues
+                const hue = Math.floor(this.steps / this.colorChangeRate) % 360;
+                this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                this.ctx.fillRect(this.position.x, this.position.y, 1, 1);
+            }
+        }
+
+
+
+        const walker = new Walker(ctx);
+
+        function animate() {
+            // ctx.clearRect(0, 0, width, height);
+            for (let i = 0; i < 100; i++) {
+                walker.update();
+                walker.render();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+    </script>
+</body>
+
+</html>

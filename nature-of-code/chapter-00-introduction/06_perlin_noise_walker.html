@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06 - Perlin Noise Walker</title>
+    <style>
+        h1 {
+            text-align: center;
+        }
+
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>06 - Perlin Noise Walker</h1>
+    <canvas id="canvas"></canvas>
+    <script type="module">
+
+        import { Vector } from "../engine/core/Vector.js";
+        import { Noise } from "../engine/math/Noise.js";
+        import { Math as MathUtils } from "../engine/math/Math.js";
+        const canvas = document.getElementById("canvas");
+        canvas.width = 800;
+        canvas.height = 600;
+
+        const ctx = canvas.getContext("2d");
+        ctx.canvas.style.backgroundColor = "white";
+
+        const noise = new Noise();
+
+        class Walker {
+
+            constructor(ctx) {
+                this.ctx = ctx;
+                this.width = ctx.canvas.width;
+                this.height = ctx.canvas.height;
+                this.position = new Vector(this.width / 2, this.height / 2);
+                this.steps = 0;
+                this.xOffset = 0;
+                this.yOffset = 1;
+                this.colorChangeRate = 360;
+                this.history = [];
+                this.maxHistory = 2 ** 14;
+            }
+
+            update() {
+                const x = MathUtils.map(noise.noise(this.xOffset), 0, 1, 0, this.ctx.canvas.width);
+                const y = MathUtils.map(noise.noise(this.yOffset), 0, 1, 0, this.ctx.canvas.height);
+
+                this.position = new Vector(x, y);
+                this.history.push(this.position);
+                if (this.history.length > this.maxHistory) {
+                    this.history.shift();
+                }
+                this.xOffset += 0.001;
+                this.yOffset += 0.001;
+                this.steps++;
+
+            }
+
+            render() {
+                for (let i = 0; i < this.history.length; i++) {
+                    const { x, y } = this.history[i];
+                    const opacity = i / this.history.length;
+                    this.ctx.fillStyle = `rgba(0, 0, 0, ${opacity})`;
+                    this.ctx.fillRect(x, y, 1, 1);
+                }
+                // draw the head as a solid circle. cycle the color based on the hue
+                const hue = this.steps / 10 % 360;
+                this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                this.ctx.strokeStyle = `rgba(0, 0, 0, 1)`;
+                this.ctx.beginPath();
+                this.ctx.arc(this.position.x, this.position.y, 4, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.stroke();
+            }
+        }
+
+
+
+        const walker = new Walker(ctx);
+
+        function animate() {
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            for (let i = 0; i < 4; i++) {
+                walker.update();
+            }
+            walker.render();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+    </script>
+</body>
+
+</html>

@@ -1,10 +1,11 @@
 // Canvas Utilities
 const canvas = {
     // Create and setup a canvas with given dimensions
-    create: (width, height) => {
+    create: (width, height, id) => {
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
+        canvas.id = id;
         return canvas;
     },
 
