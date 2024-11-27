@@ -5,22 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>02 - Random Number Distribution</title>
-    <style>
-        h1 {
-            text-align: center;
-        }
-
-        canvas {
-            border: 1px solid black;
-            display: block;
-            margin: 0 auto;
-        }
-    </style>
+    <link rel="stylesheet" href="../shared/styles.css">
 </head>
 
 <body>
 
-    <h1>02 - Random Number Distribution</h1>
     <canvas id="canvas"></canvas>
     <script type="module">
 
@@ -55,9 +44,6 @@
             }
 
             render() {
-                // render the bins as a bar chart
-                this.ctx.fillStyle = "white";
-                this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
                 // scale the bins to the height of the canvas
                 const scaledBins = this.bins.map(bin => bin * this.binHeightRatio);
@@ -90,23 +76,23 @@
                 this.ctx.strokeStyle = "black";
                 this.ctx.beginPath();
                 this.ctx.moveTo(this.x, this.y);
-                this.ctx.lineTo(this.x, 0);
+                this.ctx.lineTo(this.x, this.y - this.ctx.canvas.height * 0.8);
                 this.ctx.stroke();
 
-                // show the total number of samples in the top left corner
+                // show the total number of samples in the top right corner
                 this.ctx.fillStyle = "black";
                 this.ctx.font = "12px Arial";
-                this.ctx.fillText(`Total Samples: ${this.bins.reduce((a, b) => a + b, 0)}`, this.x + 10, 20);
+                this.ctx.fillText(`Total Samples: ${this.bins.reduce((a, b) => a + b, 0)}`, this.ctx.canvas.width - 140, 20);
 
                 // show the mean below the total samples
                 this.ctx.fillStyle = "black";
                 this.ctx.font = "12px Arial";
-                this.ctx.fillText(`Mean: ${this.calculateMean().toFixed(1)}`, this.x + 10, 35);
+                this.ctx.fillText(`Mean: ${this.calculateMean().toFixed(1)}`, this.ctx.canvas.width - 140, 35);
 
                 // show the standard deviation below the total samples
                 this.ctx.fillStyle = "black";
                 this.ctx.font = "12px Arial";
-                this.ctx.fillText(`Standard Deviation: ${this.calculateStandardDeviation().toFixed(1)}`, this.x + 10, 50);
+                this.ctx.fillText(`Standard Deviation: ${this.calculateStandardDeviation().toFixed(1)}`, this.ctx.canvas.width - 140, 50);
             }
 
             calculateMean() {
@@ -126,6 +112,12 @@
             for (let i = 0; i < 10; i++) {
                 plotter.update();
             }
+            // render the bins as a bar chart
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.fillStyle = "black";
+            ctx.font = "24px Arial";
+            ctx.fillText("02 - Random Number Distribution", 10, 30);
             plotter.render();
             requestAnimationFrame(animate);
         }

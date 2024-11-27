@@ -5,21 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>03 - Random Walker Right</title>
-    <style>
-        h1 {
-            text-align: center;
-        }
-        canvas {
-            border: 1px solid black;
-            display: block;
-            margin: 0 auto;
-        }
-    </style>
+    <link rel="stylesheet" href="../shared/styles.css">
 </head>
 
 <body>
 
-    <h1>03 - Random Walker Right</h1>
     <canvas id="canvas"></canvas>
     <script type="module">
 
@@ -91,6 +81,10 @@
             }
             requestAnimationFrame(animate);
         }
+
+        ctx.font = "24px Arial";
+        ctx.fillStyle = "black";
+        ctx.fillText("03 - Random Walker Right", 10, 30);
 
         animate();
 

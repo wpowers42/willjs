@@ -5,22 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>06 - Perlin Noise Walker</title>
-    <style>
-        h1 {
-            text-align: center;
-        }
-
-        canvas {
-            border: 1px solid black;
-            display: block;
-            margin: 0 auto;
-        }
-    </style>
+    <link rel="stylesheet" href="../shared/styles.css">
 </head>
 
 <body>
 
-    <h1>06 - Perlin Noise Walker</h1>
     <canvas id="canvas"></canvas>
     <script type="module">
 
@@ -28,8 +17,8 @@
         import { Noise } from "../engine/math/Noise.js";
         import { Math as MathUtils } from "../engine/math/Math.js";
         const canvas = document.getElementById("canvas");
-        canvas.width = 800;
-        canvas.height = 600;
+        canvas.width = Math.min(window.innerWidth * 0.9, 800);
+        canvas.height = Math.min(window.innerHeight * 0.9, 600);
 
         const ctx = canvas.getContext("2d");
         ctx.canvas.style.backgroundColor = "white";
@@ -90,6 +79,10 @@
 
         function animate() {
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            // show the title as an inset text
+            ctx.fillStyle = "black";
+            ctx.font = "24px Arial";
+            ctx.fillText("06 - Perlin Noise Walker", 10, 30);
 
             for (let i = 0; i < 4; i++) {
                 walker.update();

@@ -55,20 +55,24 @@ class Creature {
     render() {
         // draw a line from the cycle position to the current position
         this.ctx.beginPath();
-        this.ctx.moveTo(this.cyclePosition.x, this.cyclePosition.y);
-        this.ctx.lineTo(this.position.x, this.position.y);
+        this.ctx.moveTo(this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+        const randX = Math.random() * this.ctx.canvas.width;
+        const randY = Math.random() * this.ctx.canvas.height;
+        this.ctx.lineTo(randX, randY);
         this.ctx.strokeStyle = `hsl(${this.hue % 360}, 100%, 50%)`;
         this.ctx.stroke();
     }
 }
 
 function animate() {
-    creature.update();
-    creature.render();
+    for (let i = 0; i < 100; i++) {
+        creature.update();
+        creature.render();
+    }
     requestAnimationFrame(animate);
 }
 
-const gravity = new Vector(0, 0.05);
+const gravity = new Vector(0, 0.01);
 const wind = new Vector(0.0, 0);
 
 const creature = new Creature(ctx, [gravity, wind]);
