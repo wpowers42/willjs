@@ -89,26 +89,8 @@
                 this.ctx.font = "12px Arial";
                 this.ctx.fillText(`Total Samples: ${this.bins.reduce((a, b) => a + b, 0)}`, this.ctx.canvas.width - 160, 20);
 
-                // show the mean below the total samples
-                this.ctx.fillStyle = "black";
-                this.ctx.font = "12px Arial";
-                this.ctx.fillText(`Mean: ${this.calculateMean().toFixed(1)}`, this.ctx.canvas.width - 160, 35);
-
-                // show the standard deviation below the total samples
-                this.ctx.fillStyle = "black";
-                this.ctx.font = "12px Arial";
-                this.ctx.fillText(`Standard Deviation: ${this.calculateStandardDeviation().toFixed(1)}`, this.ctx.canvas.width - 160, 50);
             }
 
-            calculateMean() {
-                return this.bins.reduce((a, b) => a + b, 0) / this.numberOfBins;
-            }
-
-            calculateStandardDeviation() {
-                const mean = this.bins.reduce((a, b) => a + b, 0) / this.numberOfBins;
-                const variance = this.bins.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / this.numberOfBins;
-                return Math.sqrt(variance);
-            }
         }
 
         const plotter = new Plotter(ctx);
