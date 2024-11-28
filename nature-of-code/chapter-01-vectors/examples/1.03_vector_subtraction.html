@@ -36,11 +36,16 @@
             ctx.fillText("1.03 - Vector Subtraction", 10, 30);
 
             // adjust mouse position to be relative to top left corner of canvas
-            const mousePosition = new Vector(inputManager.getMousePosition().x, inputManager.getMousePosition().y);
+            const mousePosition = Vector.copy(inputManager.getLatestMouseTouchPosition());
             const rect = canvas.getBoundingClientRect();
             const canvasTopLeftAbsolute = new Vector(rect.left, rect.top);
             mousePosition.sub(canvasTopLeftAbsolute);
 
+            // Scale the touch/mouse position based on the difference between canvas size and display size
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            mousePosition.x *= scaleX;
+            mousePosition.y *= scaleY;
 
             // draw grey line from (0, 0) to mouse position
             ctx.strokeStyle = "grey";
