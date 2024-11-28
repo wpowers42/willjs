@@ -41,6 +41,11 @@
             // clear the canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // show the title in the top left corner of the canvas
+            ctx.font = "24px Arial";
+            ctx.fillStyle = "black";
+            ctx.fillText("0.10 - Perlin Noise Landscape", 10, 30);
+
             ctx.lineWidth = 1;
             ctx.setLineDash([8, 1]);
             ctx.strokeStyle = "black";
@@ -54,8 +59,7 @@
 
 
                 if (point.x === points[0].x) {
-                    const opacity = MathUtils.map(projectedY - point.y, -FACTOR * 2, FACTOR * 8, 0, 1);
-                    ctx.strokeStyle = `rgba(0, 0, 0, ${opacity})`;
+                    ctx.strokeStyle = `rgba(0, 0, 0, 0.25)`;
                     ctx.stroke();
                     ctx.beginPath();
                 }
