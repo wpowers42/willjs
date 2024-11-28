@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.02 - Bouncing Ball With Vectors</title>
+    <link rel="stylesheet" href="../../shared/styles.css">
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <script type="module">
+        import { Vector } from "../../engine/core/vector.js";
+
+        const canvas = document.getElementById("canvas");
+        canvas.width = 800;
+        canvas.height = 600;
+
+        const ctx = canvas.getContext("2d");
+
+        const ball = {
+            position: new Vector(canvas.width / 2, canvas.height / 2),
+            velocity: new Vector(2.5, 2),
+            radius: 50,
+        }
+
+        function update() {
+            ball.position.add(ball.velocity);
+
+            if (ball.position.x + ball.radius > canvas.width || ball.position.x - ball.radius < 0) {
+                ball.velocity.x = -ball.velocity.x;
+            }
+
+            if (ball.position.y + ball.radius > canvas.height || ball.position.y - ball.radius < 0) {
+                ball.velocity.y = -ball.velocity.y;
+            }
+        }
+
+        function draw() {
+            // fill white
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // draw the title in the top left corner
+            ctx.fillStyle = "black";
+            ctx.font = "24px Arial";
+            ctx.fillText("1.02 - Bouncing Ball With Vectors", 10, 30);
+
+            // draw the ball
+            ctx.fillStyle = "black";
+            ctx.beginPath();
+            ctx.arc(ball.position.x, ball.position.y, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function animate() {
+            update();
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+
+</html>
