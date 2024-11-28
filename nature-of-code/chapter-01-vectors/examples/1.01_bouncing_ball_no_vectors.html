@@ -39,12 +39,14 @@
         }
 
         function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // fill white
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // draw the title in the top left corner
             ctx.fillStyle = "black";
             ctx.font = "24px Arial";
-            ctx.fillText("Bouncing Ball No Vectors", 10, 30);
+            ctx.fillText("1.01 - Bouncing Ball No Vectors", 10, 30);
 
             // draw the ball
             ctx.fillStyle = "black";
