@@ -1,7 +1,10 @@
 // MouseListener.js
+import { Vector } from "../core/Vector.js";
+
 export class MouseListener {
     constructor() {
-        this.position = { x: 0, y: 0 };
+        this.position = new Vector(0, 0);
+        this.positionUpdatedAt = 0;
         this.buttons = new Set();
     }
 
@@ -14,6 +17,7 @@ export class MouseListener {
     onMouseMove(event) {
         this.position.x = event.clientX;
         this.position.y = event.clientY;
+        this.positionUpdatedAt = performance.now();
     }
 
     onMouseDown(event) {
@@ -30,5 +34,9 @@ export class MouseListener {
 
     isButtonPressed(buttonCode) {
         return this.buttons.has(buttonCode);
+    }
+
+    getMousePositionUpdatedAt() {
+        return this.positionUpdatedAt;
     }
 }
