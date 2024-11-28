@@ -1,4 +1,4 @@
-export class Math {
+export class Calculation {
     /**
      * Linear interpolation between two values
      * @param {number} a - The starting value

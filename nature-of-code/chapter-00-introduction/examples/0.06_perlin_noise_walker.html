@@ -15,7 +15,7 @@
 
         import { Vector } from "../../engine/core/Vector.js";
         import { Noise } from "../../engine/math/Noise.js";
-        import { Math as MathUtils } from "../../engine/math/Math.js";
+        import { Calculation } from "../../engine/math/Calculation.js";
         const canvas = document.getElementById("canvas");
         canvas.width = 800;
         canvas.height = 600;
@@ -41,8 +41,8 @@
             }
 
             update() {
-                const x = MathUtils.map(noise.noise(this.xOffset), 0, 1, 0, this.ctx.canvas.width);
-                const y = MathUtils.map(noise.noise(this.yOffset), 0, 1, 0, this.ctx.canvas.height);
+                const x = Calculation.map(noise.noise(this.xOffset), 0, 1, 0, this.ctx.canvas.width);
+                const y = Calculation.map(noise.noise(this.yOffset), 0, 1, 0, this.ctx.canvas.height);
 
                 this.position = new Vector(x, y);
                 this.history.push(this.position);

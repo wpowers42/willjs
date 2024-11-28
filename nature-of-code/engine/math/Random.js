@@ -1,5 +1,7 @@
 // random number generation
 
+import { Calculation } from "./Calculation.js";
+
 export class Random {
 
     static random() {
