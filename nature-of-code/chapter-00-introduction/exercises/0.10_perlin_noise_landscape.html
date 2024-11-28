@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise 0.10 - Perlin Noise Landscape</title>
+    <link rel="stylesheet" href="../../shared/styles.css">
+</head>
+
+<body>
+
+    <canvas id="canvas"></canvas>
+    <script type="module">
+
+        import { Vector } from "../../engine/core/Vector.js";
+        import { Noise } from "../../engine/math/Noise.js";
+        import { Math as MathUtils } from "../../engine/math/Math.js";
+        const canvas = document.getElementById("canvas");
+        canvas.width = 800;
+        canvas.height = 600;
+
+        const ctx = canvas.getContext("2d");
+
+        const noise = new Noise();
+
+        let frame = 0;
+
+        const ROWS = 800;
+        const COLUMNS = 100;
+        const FACTOR = 100;
+
+        const points = [];
+        for (let row = 0; row < ROWS; row++) {
+            for (let column = 0; column < COLUMNS; column++) {
+                points.push(new Vector(column * (canvas.width / (COLUMNS - 1)), row * ((canvas.height + FACTOR) / ROWS)));
+            }
+        }
+
+        function animate() {
+            // clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.lineWidth = 1;
+            ctx.setLineDash([8, 1]);
+            ctx.strokeStyle = "black";
+            ctx.beginPath();
+
+
+            // Connect all subsequent points
+            for (const point of points) {
+                const projectedX = point.x;
+                const projectedY = point.y + noise.noise(point.x * 0.005, (point.y - frame) * 0.01) * FACTOR - FACTOR;
+
+
+                if (point.x === points[0].x) {
+                    const opacity = MathUtils.map(projectedY - point.y, -FACTOR * 2, FACTOR * 8, 0, 1);
+                    ctx.strokeStyle = `rgba(0, 0, 0, ${opacity})`;
+                    ctx.stroke();
+                    ctx.beginPath();
+                }
+                ctx.lineTo(projectedX, projectedY);
+            }
+
+
+            frame += 0.5;
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+    </script>
+</body>
+
+</html>
