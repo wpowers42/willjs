@@ -64,4 +64,8 @@ export class Vector {
     static copy(vector) {
         return new Vector(vector.x, vector.y, vector.z);
     }
+
+    static zero() {
+        return new Vector(0, 0, 0);
+    }
 }
