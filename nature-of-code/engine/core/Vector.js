@@ -68,8 +68,4 @@ export class Vector {
     static zero() {
         return new Vector(0, 0, 0);
     }
-
-    static random2D() {
-        return new Vector(Math.random() - 0.5, Math.random() - 0.5);
-    }
 }
