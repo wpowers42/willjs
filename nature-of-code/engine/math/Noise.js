@@ -3,8 +3,8 @@ export class Noise {
     static PERLIN_YWRAP = 1 << Noise.PERLIN_YWRAPB;
     static PERLIN_ZWRAPB = 8;
     static PERLIN_ZWRAP = 1 << Noise.PERLIN_ZWRAPB;
-    static PERLIN_SIZE = 4095;
-    
+    static PERLIN_SIZE = 2047;
+
     constructor() {
         this.perlin_octaves = 8; // default to medium smooth
         this.perlin_amp_falloff = 0.5; // 50% reduction/octave
@@ -24,7 +24,7 @@ export class Noise {
 
         // Convert negative coordinates to positive
         if (x < 0) x = -x;
-        if (y < 0) y = -y; 
+        if (y < 0) y = -y;
         if (z < 0) z = -z;
 
         // Get integer and fractional parts of coordinates
