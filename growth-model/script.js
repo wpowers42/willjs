@@ -87,8 +87,7 @@ function drawCell(x, y, width, height, data) {
     ctx.save();
 
     // Cell background
-    ctx.fillStyle = data.is_1d_active ? COLORS.active :
-        (data.id === 1 ? COLORS.acquired : COLORS.inactive);
+    ctx.fillStyle = data.is_1d_active ? (data.id === 1 ? COLORS.acquired : COLORS.active) : COLORS.inactive;
     ctx.beginPath();
     ctx.roundRect(x, y, width, height, 8);
     ctx.fill();
