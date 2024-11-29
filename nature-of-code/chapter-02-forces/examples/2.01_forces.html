@@ -70,6 +70,11 @@
             ctx.font = "24px Arial";
             ctx.fillText("2.01 - Forces", 10, 30);
 
+            // add instructions under the title
+            ctx.fillStyle = "black";
+            ctx.font = "16px Arial";
+            ctx.fillText("click or touch to add wind", 10, 60);
+
             movers.forEach(mover => mover.draw(ctx));
         }
 
