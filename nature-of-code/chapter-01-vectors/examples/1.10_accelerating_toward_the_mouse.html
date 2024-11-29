@@ -30,7 +30,7 @@
         const mover = new Mover(position, Vector.zero(), Vector.zero(), 5);
 
         function update() {
-            const accelerationVector = Vector.copy(inputManager.getMousePosition());
+            const accelerationVector = Vector.copy(inputManager.getLatestMouseTouchPosition());
             const rect = canvas.getBoundingClientRect();
             const canvasTopLeft = new Vector(rect.left, rect.top);
             accelerationVector.sub(canvasTopLeft);
