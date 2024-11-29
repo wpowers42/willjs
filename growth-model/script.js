@@ -1,4 +1,33 @@
-const GRID_SIZE = 42;
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// Set canvas size
+canvas.width = 800;
+canvas.height = 600;
+
+const BUTTON_ROW_HEIGHT = 70;
+const TITLE_HEIGHT = 35;
+const BUTTON_HEIGHT = 30;
+const BUTTON_WIDTH = 80;
+const BUTTON_GAP = 20;
+const COLUMNS = 7;
+const ROWS = 6;
+const GRID_SIZE = COLUMNS * ROWS;
+const GAP = 10;
+const CELL_WIDTH = (canvas.width - GAP * (COLUMNS + 1)) / COLUMNS;
+const CELL_HEIGHT = (canvas.height - GAP * (ROWS + 1) - BUTTON_ROW_HEIGHT) / ROWS;
+
+// Colors
+const COLORS = {
+    inactive: '#d3d3d3',
+    active: '#a3e635',
+    acquired: '#60a5fa',
+    text: '#111827',
+    lightText: '#6b7280'
+};
+
+// Keep track of current data
+let currentData = [];
 
 function createTables(db) {
     const sqlActiveDates = `
@@ -54,112 +83,171 @@ function createTables(db) {
     db.exec(sqlDailySummaryView);
 }
 
+function drawCell(x, y, width, height, data) {
+    ctx.save();
+
+    // Cell background
+    ctx.fillStyle = data.is_1d_active ? COLORS.active :
+        (data.id === 1 ? COLORS.acquired : COLORS.inactive);
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, 8);
+    ctx.fill();
+
+    // Draw day number
+    ctx.fillStyle = COLORS.lightText;
+    ctx.font = '10px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`d${data.id}`, x + 4, y + 12);
+
+    // Draw state text
+    ctx.fillStyle = COLORS.text;
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(data.state || '', x + width / 2, y + height / 2 + 10);
+
+    ctx.restore();
+}
+
+function drawButton(x, y, width, height, text) {
+    ctx.save();
+
+    // Button background
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, 8);
+    ctx.fill();
+    ctx.stroke();
+
+    // Button text
+    ctx.fillStyle = '#000000';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x + width / 2, y + height / 2);
+
+    ctx.restore();
+}
+
+function getGridPosition(index) {
+    const row = Math.floor(index / COLUMNS);
+    const col = index % COLUMNS;
+    const x = GAP + col * (CELL_WIDTH + GAP);
+    const y = GAP + row * (CELL_HEIGHT + GAP) + BUTTON_ROW_HEIGHT; // Add offset for buttons
+    return { x, y };
+}
+
+function handleClick(e, db) {
+    const rect = canvas.getBoundingClientRect();
+    const rawClickX = e.clientX;
+    const rawClickY = e.clientY;
+
+    // adjust for the canvas scale (rect vs canvas)
+    const scaleFactorX = canvas.width / rect.width;
+    const scaleFactorY = canvas.height / rect.height;
+
+    const clickX = rawClickX * scaleFactorX - rect.left;
+    const clickY = rawClickY * scaleFactorY - rect.top;
+
+    // Check button clicks
+    if (clickY > TITLE_HEIGHT && clickY < TITLE_HEIGHT + BUTTON_HEIGHT) {
+        const totalButtonWidth = (BUTTON_WIDTH * 2 + BUTTON_GAP);
+        const startX = (canvas.width - totalButtonWidth) / 2;
+        if (clickX >= startX && clickX <= startX + BUTTON_WIDTH) {
+            reset(db);
+            return;
+        }
+        if (clickX >= startX + BUTTON_WIDTH + BUTTON_GAP && clickX <= startX + totalButtonWidth) {
+            randomize(db);
+            return;
+        }
+    }
+
+    // Calculate the index of the clicked cell
+    const row = Math.floor((clickY - BUTTON_ROW_HEIGHT) / (CELL_HEIGHT + GAP));
+    const col = Math.floor(clickX / (CELL_WIDTH + GAP));
+    const index = row * COLUMNS + col;
+
+    // Toggle the state of the clicked cell
+    if (index >= 0 && index < GRID_SIZE && index !== 0) {
+        toggleDay(index, db);
+    }
+}
+
+function drawGrid() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw title
+    ctx.save();
+    ctx.fillStyle = COLORS.text;
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Active User State Model', canvas.width / 2, TITLE_HEIGHT / 2 + 10);
+    ctx.restore();
+
+    // Draw buttons - centered
+    const totalButtonWidth = (BUTTON_WIDTH * 2 + BUTTON_GAP);
+    const startX = (canvas.width - totalButtonWidth) / 2;
+    drawButton(startX, TITLE_HEIGHT + 5, BUTTON_WIDTH, BUTTON_HEIGHT, 'Reset');
+    drawButton(startX + BUTTON_WIDTH + BUTTON_GAP, TITLE_HEIGHT + 5, BUTTON_WIDTH, BUTTON_HEIGHT, 'Randomize');
+
+    // Draw cells
+    currentData.forEach((data, i) => {
+        const pos = getGridPosition(i);
+        drawCell(pos.x, pos.y, CELL_WIDTH, CELL_HEIGHT, data);
+    });
+}
+
+function update(db) {
+    const sql = `select * from daily_summary`;
+    currentData = [];
+
+    db.exec({
+        sql: sql,
+        rowMode: 'object',
+        callback: function (row) {
+            currentData.push(row);
+        }
+    });
+
+    drawGrid();
+}
+
 window.sqlite3InitModule().then(function (sqlite3) {
-    // The module is now loaded and the sqlite3 namespace
-    // object was passed to this function.
     globalThis.sqlite3 = sqlite3;
-
-    const oo = sqlite3.oo1 /*high-level OO API*/;
-
+    const oo = sqlite3.oo1;
     const dbStorage = 0 ? 'session' : 'local';
-    const theStore = 's' === dbStorage[0] ? sessionStorage : localStorage;
     const db = new oo.JsStorageDb(dbStorage);
 
     createTables(db);
-    main(db);
+
+    // Add click handler
+    canvas.addEventListener('click', e => handleClick(e, db));
+
+    // Initial update
+    update(db);
 });
 
-function main(db) {
-    const GRID = document.getElementById('activityGrid');
+function reset(db) {
+    const sql = `update active_dates set active = 0 where id != 1`;
+    db.exec(sql);
+    update(db);
+}
 
-    const resetGrid = document.getElementById('resetGrid');
+function randomize(db) {
+    reset(db);
+    const sql = `update active_dates set active = 1 - active where id != 1 and abs(random()) % 10 = 1`;
+    db.exec(sql);
+    update(db);
+}
 
-    resetGrid.addEventListener('click', () => reset(db));
-
-    const randomizeGrid = document.getElementById('randomizeGrid');
-
-    randomizeGrid.addEventListener('click', () => randomize(db));
-
-    function reset(db) {
-        const sql = `update active_dates set active = 0 where id != 1`;
-
-        db.exec(sql);
-        update(db);
-    }
-
-    function randomize(db) {
-        reset(db);
-        const sql = `update active_dates set active = 1 - active where id != 1 and abs(random()) % 10 = 1`;
-
-        db.exec(sql);
-        update(db);
-    }
-
-    function update(db) {
-        const sql = `select * from daily_summary`;
-
-        db.exec({
-            sql: sql,
-            rowMode: 'object',
-            callback: function (row) {
-                updateGrid(GRID, row);
-            }
-        });
-    }
-
-
-    function toggleDay(index, db) {
-
-        sql = `
-                    update active_dates
-                    set active = 1 - active
-                    where id = ${index + 1};
-                `;
-
-        db.exec(sql);
-        update(db);
-    }
-
-
-    // Create grid cells
-    for (let i = 0; i < GRID_SIZE; i++) {
-        const cell = document.createElement('div');
-
-        // Add dX text to top left corner of cell
-        const day = document.createElement('div');
-        day.classList.add('day');
-        day.textContent = `d${i + 1}`;
-        cell.appendChild(day);
-
-        const state = document.createElement('div');
-        state.classList.add('state');
-
-        cell.classList.add('cell');
-        cell.dataset.index = i;
-        if (i === 0) {
-            cell.classList.add('acquired');
-        } else {
-            cell.addEventListener('click', () => toggleDay(i, db));
-        }
-
-        cell.appendChild(state);
-        GRID.appendChild(cell);
-    }
-
-
-    // Update the grid display
-    function updateGrid(GRID, day) {
-        const cell = GRID.children[day.id - 1];
-
-        if (day.is_1d_active) {
-            cell.classList.add('active');
-        } else {
-            cell.classList.remove('active');
-        }
-
-        cell.children[1].textContent = day.state;
-
-    }
-
+function toggleDay(index, db) {
+    const sql = `
+        update active_dates
+        set active = 1 - active
+        where id = ${index + 1};
+    `;
+    db.exec(sql);
     update(db);
 }
