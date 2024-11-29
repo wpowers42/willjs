@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.01 - Forces</title>
+    <link rel="stylesheet" href="../../shared/styles.css">
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <script type="module">
+        import { Vector } from "../../engine/v2/core/Vector.js";
+        import { Mover } from "../../engine/v2/core/Mover.js";
+        import { InputManager } from "../../engine/v2/input/InputManager.js";
+        import { CanvasTransform } from "../../engine/v2/input/CanvasTransform.js";
+
+        const canvas = document.getElementById("canvas");
+        canvas.width = 800;
+        canvas.height = 600;
+
+        const ctx = canvas.getContext("2d");
+
+        const inputManager = new InputManager(canvas);
+        inputManager.initialize();
+
+        const canvasTransform = new CanvasTransform(canvas);
+
+        const positionA = new Vector(Math.random() * canvas.width, Math.random() * canvas.height);
+        const moverA = new Mover(positionA, Vector.zero(), 5);
+        const positionB = new Vector(Math.random() * canvas.width, Math.random() * canvas.height);
+        const moverB = new Mover(positionB, Vector.zero(), 1);
+        const movers = [moverA, moverB];
+
+        const gravity = new Vector(0, 0.1);
+        const wind = new Vector(0.01, 0);
+
+        function update() {
+            if (inputManager.isMousePressed()) {
+                movers.forEach(mover => mover.applyForce(wind));
+            }
+            movers.forEach(mover => {
+                mover.applyForce(gravity);
+                mover.update();
+                mover.checkEdges(canvas.width, canvas.height);
+            });
+        }
+
+        function draw() {
+            // fill white
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // draw wind like effect if the mouse is pressed
+            // accomplish this by drawing three lines from the mouse position in the direction of the wind force
+            if (inputManager.isMousePressed()) {
+                const mousePosition = canvasTransform.vectorWindowToCanvas(inputManager.getLatestMouseTouchPosition());
+                const windForce = Vector.copy(wind);
+                windForce.normalize();
+                windForce.mult(50);
+
+                ctx.strokeStyle = "black";
+                ctx.lineCap = "round";
+                ctx.translate(mousePosition.x, mousePosition.y);
+                const numLines = 5;
+                const totalHeight = 25;
+                for (let i = -numLines; i < numLines; i++) {
+                    ctx.moveTo(0, i * totalHeight / numLines);
+                    ctx.beginPath();
+                    for (let j = 0; j < 100; j++) {
+                        ctx.lineTo(windForce.x / 100 * j, i * totalHeight / numLines + Math.sin(j * 0.2));
+                    }
+                    ctx.stroke();
+                }
+                ctx.resetTransform();
+            }
+
+            // draw the title in the top left corner
+            ctx.fillStyle = "black";
+            ctx.font = "24px Arial";
+            ctx.fillText("2.01 - Forces", 10, 30);
+
+            movers.forEach(mover => mover.draw(ctx));
+        }
+
+        function animate() {
+            update();
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+
+</html>
