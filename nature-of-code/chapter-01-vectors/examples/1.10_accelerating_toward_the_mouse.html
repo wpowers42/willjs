@@ -15,7 +15,7 @@
         import { Mover } from "../../engine/core/Mover.js";
         import { Random } from "../../engine/math/Random.js";
         import { InputManager } from "../../engine/input/InputManager.js";
-
+        import { CanvasTransform } from "../../engine/input/CanvasTransform.js";
 
         const canvas = document.getElementById("canvas");
         canvas.width = 800;
@@ -26,14 +26,13 @@
         const inputManager = new InputManager();
         inputManager.initialize();
 
+        const canvasTransform = new CanvasTransform(canvas);
+
         const position = new Vector(Math.random() * canvas.width, Math.random() * canvas.height);
         const mover = new Mover(position, Vector.zero(), Vector.zero(), 5);
 
         function update() {
-            const accelerationVector = Vector.copy(inputManager.getLatestMouseTouchPosition());
-            const rect = canvas.getBoundingClientRect();
-            const canvasTopLeft = new Vector(rect.left, rect.top);
-            accelerationVector.sub(canvasTopLeft);
+            const accelerationVector = canvasTransform.vectorWindowToCanvas(inputManager.getLatestMouseTouchPosition());
             accelerationVector.sub(position);
             accelerationVector.normalize();
             accelerationVector.mult(1);
