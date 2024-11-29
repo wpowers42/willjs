@@ -13,6 +13,7 @@ export class MouseListener {
         this.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
         this.canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
         this.canvas.addEventListener('mouseup', this.onMouseUp.bind(this));
+        this.canvas.addEventListener('contextmenu', this.onContextMenu.bind(this));
     }
 
     onMouseMove(event) {
@@ -27,6 +28,11 @@ export class MouseListener {
 
     onMouseUp(event) {
         this.buttons.delete(event.button);
+    }
+
+    onContextMenu(event) {
+        event.preventDefault();
+        event.stopPropagation();
     }
 
     getPosition() {
