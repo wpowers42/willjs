@@ -44,7 +44,9 @@
                 movers.forEach(mover => mover.applyForce(wind));
             }
             movers.forEach(mover => {
-                mover.applyForce(gravity);
+                const force = Vector.copy(gravity);
+                force.mult(mover.mass);
+                mover.applyForce(force);
                 mover.update();
                 mover.checkEdges(canvas.width, canvas.height);
             });
