@@ -1,8 +1,15 @@
 import { Vector } from '../engine/v1/core/Vector.js';
 
-// setup canvas
-const canvas = document.getElementById("canvas");
+/** @type {HTMLCanvasElement} */
+const canvas = document.createElement("canvas");
+canvas.id = "canvas";
+document.body.appendChild(canvas);
+
+
 const ctx = canvas.getContext("2d");
+if (!ctx) {
+    throw new Error("Could not get canvas context");
+}
 
 // setup canvas size
 canvas.width = 800;
@@ -12,6 +19,10 @@ canvas.height = 600;
 ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
 class Creature {
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {Vector[]} forces
+     */
     constructor(ctx, forces) {
         this.ctx = ctx;
         this.position = new Vector(0, ctx.canvas.height / 2);
@@ -25,14 +36,23 @@ class Creature {
         this.cyclePosition = new Vector(this.ctx.canvas.width / 2, 0);
     }
 
+    /**
+     * @param {Vector} force
+     */
     addForce(force) {
         this.acceleration.add(force);
     }
 
+    /**
+     * @returns {void}
+     */
     flap() {
         this.addForce(this.flapForce);
     }
 
+    /**
+     * @returns {void}
+     */
     update() {
         this.forces.forEach(force => {
             this.addForce(force);
@@ -52,6 +72,9 @@ class Creature {
         }
     }
 
+    /**
+     * @returns {void}
+     */
     render() {
         // draw a line from the cycle position to the current position
         this.ctx.beginPath();

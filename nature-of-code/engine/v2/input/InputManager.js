@@ -4,6 +4,9 @@ import { KeyboardListener } from './KeyboardListener.js';
 import { TouchListener } from './TouchListener.js';
 
 export class InputManager {
+    /**
+     * @param {HTMLCanvasElement} canvas
+     */
     constructor(canvas) {
         this.canvas = canvas;
         this.mouse = new MouseListener(canvas);
@@ -18,14 +21,24 @@ export class InputManager {
     }
 
     // Methods to retrieve input states
+    /**
+     * @param {string} keyCode
+     * @returns {boolean}
+     */
     isKeyPressed(keyCode) {
         return this.keyboard.isKeyPressed(keyCode);
     }
 
+    /**
+     * @returns {boolean}
+     */
     isMousePressed() {
         return this.mouse.isMousePressed();
     }
 
+    /**
+     * @returns {{x: number, y: number}}
+     */
     getMousePosition() {
         if (this.mouse.getMousePositionUpdatedAt() > this.touch.getTouchPositionUpdatedAt()) {
             return this.mouse.getPosition();
@@ -34,6 +47,9 @@ export class InputManager {
         }
     }
 
+    /**
+     * @returns {boolean}
+     */
     isTouchPressed() {
         return this.touch.isTouchPressed();
     }

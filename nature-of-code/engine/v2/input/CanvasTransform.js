@@ -3,6 +3,9 @@
 import { Vector } from "../core/Vector.js";
 
 export class CanvasTransform {
+    /**
+     * @param {HTMLCanvasElement} canvas
+     */
     constructor(canvas) {
         this.canvas = canvas;
     }
