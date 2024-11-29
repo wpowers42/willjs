@@ -2,16 +2,17 @@
 import { Vector } from "../core/Vector.js";
 
 export class MouseListener {
-    constructor() {
+    constructor(canvas) {
+        this.canvas = canvas;
         this.position = new Vector(0, 0);
         this.positionUpdatedAt = 0;
         this.buttons = new Set();
     }
 
     attachListeners() {
-        window.addEventListener('mousemove', this.onMouseMove.bind(this));
-        window.addEventListener('mousedown', this.onMouseDown.bind(this));
-        window.addEventListener('mouseup', this.onMouseUp.bind(this));
+        this.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
+        this.canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
+        this.canvas.addEventListener('mouseup', this.onMouseUp.bind(this));
     }
 
     onMouseMove(event) {
