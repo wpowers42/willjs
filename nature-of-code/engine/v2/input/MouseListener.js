@@ -36,6 +36,10 @@ export class MouseListener {
         return this.buttons.has(buttonCode);
     }
 
+    isMousePressed() {
+        return this.isButtonPressed(0);
+    }
+
     getMousePositionUpdatedAt() {
         return this.positionUpdatedAt;
     }

@@ -4,8 +4,9 @@ import { KeyboardListener } from './KeyboardListener.js';
 import { TouchListener } from './TouchListener.js';
 
 export class InputManager {
-    constructor() {
-        this.mouse = new MouseListener();
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.mouse = new MouseListener(canvas);
         this.keyboard = new KeyboardListener();
         this.touch = new TouchListener();
     }
@@ -19,6 +20,10 @@ export class InputManager {
     // Methods to retrieve input states
     isKeyPressed(keyCode) {
         return this.keyboard.isKeyPressed(keyCode);
+    }
+
+    isMousePressed() {
+        return this.mouse.isMousePressed();
     }
 
     getMousePosition() {
