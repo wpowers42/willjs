@@ -16,6 +16,9 @@ export class TouchListener {
     }
 
     onTouchStart(event) {
+        // prevent the default touch action
+        // specifically, prevent magnification on double tap plus hold
+        event.preventDefault();
         const touch = event.touches[0];
         this.position = new Vector(touch.clientX, touch.clientY);
         this.positionUpdatedAt = performance.now();
