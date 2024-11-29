@@ -3,6 +3,11 @@
 import { Vector } from "./Vector.js";
 
 export class Mover {
+    /**
+     * @param {Vector} position
+     * @param {Vector} velocity
+     * @param {number} mass
+     */
     constructor(position, velocity, mass) {
         this.position = position;
         this.velocity = velocity || Vector.zero();
@@ -12,16 +17,25 @@ export class Mover {
         this.radius = mass * 5;
     }
 
+    /**
+     * @param {number} maxSpeed
+     */
     setMaxSpeed(maxSpeed) {
         this.maxSpeed = maxSpeed;
     }
 
+    /**
+     * @param {Vector} force
+     */
     applyForce(force) {
         const forceVector = Vector.copy(force);
         forceVector.div(this.mass);
         this.acceleration.add(forceVector);
     }
 
+    /**
+     * @returns {void}
+     */
     update() {
         this.position.add(this.velocity);
         this.velocity.add(this.acceleration);
@@ -31,6 +45,10 @@ export class Mover {
         this.acceleration.mult(0);
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @returns {void}
+     */
     draw(ctx) {
         ctx.fillStyle = "black";
         ctx.beginPath();
@@ -38,6 +56,11 @@ export class Mover {
         ctx.stroke();
     }
 
+    /**
+     * @param {number} width
+     * @param {number} height
+     * @returns {void}
+     */
     checkEdges(width, height) {
         if (this.position.x + this.radius > width) {
             this.position.x = width - this.radius;

@@ -8,18 +8,25 @@ export class Noise {
     constructor() {
         this.perlin_octaves = 8; // default to medium smooth
         this.perlin_amp_falloff = 0.5; // 50% reduction/octave
-        this.scaled_cosine = i => 0.5 * (1.0 - Math.cos(i * Math.PI));
-        this.perlin; // will be initialized lazily by noise() or noiseSeed()
+        this.perlin = new Array(Noise.PERLIN_SIZE + 1);
         this.initialize();
     }
 
+    /**
+     * @returns {void}
+     */
     initialize() {
-        this.perlin = new Array(Noise.PERLIN_SIZE + 1);
         for (let i = 0; i < Noise.PERLIN_SIZE + 1; i++) {
             this.perlin[i] = Math.random();
         }
     }
 
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} z
+     * @returns {number}
+     */
     noise(x, y = 0, z = 0) {
 
         // Convert negative coordinates to positive
@@ -47,8 +54,8 @@ export class Noise {
             let offset = integerX + (integerY << Noise.PERLIN_YWRAPB) + (integerZ << Noise.PERLIN_ZWRAPB);
 
             // Calculate smoothed coordinate values
-            smoothedX = this.scaled_cosine(fractionalX);
-            smoothedY = this.scaled_cosine(fractionalY);
+            smoothedX = this.scaledCosine(fractionalX);
+            smoothedY = this.scaledCosine(fractionalY);
 
             // Interpolate between noise values
             noise1 = this.perlin[offset & Noise.PERLIN_SIZE];
@@ -65,7 +72,7 @@ export class Noise {
             noise2 += smoothedY * (noise3 - noise2);
 
             // Interpolate along z dimension
-            noise1 += this.scaled_cosine(fractionalZ) * (noise2 - noise1);
+            noise1 += this.scaledCosine(fractionalZ) * (noise2 - noise1);
 
             // Accumulate weighted result
             result += noise1 * amplitude;
@@ -94,5 +101,13 @@ export class Noise {
             }
         }
         return result;
-    };
+    }
+
+    /**
+     * @param {number} i
+     * @returns {number}
+     */
+    scaledCosine(i) {
+        return 0.5 * (1.0 - Math.cos(i * Math.PI));
+    }
 }

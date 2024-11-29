@@ -10,6 +10,14 @@ export class Calculation {
         return a + t * (b - a);
     }
 
+    /**
+     * @param {number} value
+     * @param {number} start1
+     * @param {number} stop1
+     * @param {number} start2
+     * @param {number} stop2
+     * @returns {number}
+     */
     static map(value, start1, stop1, start2, stop2) {
         return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1));
     }
