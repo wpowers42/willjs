@@ -27,14 +27,6 @@ export class InputManager {
     }
 
     getMousePosition() {
-        return this.mouse.getPosition();
-    }
-
-    getTouchPosition() {
-        return this.touch.getTouchPosition();
-    }
-
-    getLatestMouseTouchPosition() {
         if (this.mouse.getMousePositionUpdatedAt() > this.touch.getTouchPositionUpdatedAt()) {
             return this.mouse.getPosition();
         } else {
