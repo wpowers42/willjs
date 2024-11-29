@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.10 - Accelerating Toward the Mouse</title>
+    <link rel="stylesheet" href="../../shared/styles.css">
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <script type="module">
+        import { Vector } from "../../engine/core/Vector.js";
+        import { Mover } from "../../engine/core/Mover.js";
+        import { Random } from "../../engine/math/Random.js";
+        import { InputManager } from "../../engine/input/InputManager.js";
+
+
+        const canvas = document.getElementById("canvas");
+        canvas.width = 800;
+        canvas.height = 600;
+
+        const ctx = canvas.getContext("2d");
+
+        const inputManager = new InputManager();
+        inputManager.initialize();
+
+        const position = new Vector(Math.random() * canvas.width, Math.random() * canvas.height);
+        const mover = new Mover(position, Vector.zero(), Vector.zero(), 5);
+
+        function update() {
+            const accelerationVector = Vector.copy(inputManager.getMousePosition());
+            const rect = canvas.getBoundingClientRect();
+            const canvasTopLeft = new Vector(rect.left, rect.top);
+            accelerationVector.sub(canvasTopLeft);
+            accelerationVector.sub(position);
+            accelerationVector.normalize();
+            accelerationVector.mult(1);
+
+            mover.acceleration = accelerationVector;
+            mover.update();
+            mover.checkEdges(canvas.width, canvas.height);
+        }
+
+        function draw() {
+            // fill white
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // draw the title in the top left corner
+            ctx.fillStyle = "black";
+            ctx.font = "24px Arial";
+            ctx.fillText("1.10 - Accelerating Toward the Mouse", 10, 30);
+
+            mover.draw(ctx);
+
+            // print the current velocity and speed
+            ctx.fillStyle = "black";
+            ctx.font = "12px Arial";
+            ctx.fillText(`Speed: ${mover.velocity.mag().toFixed(2)}`, 10, 60);
+        }
+
+        function animate() {
+            update();
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+
+</html>
