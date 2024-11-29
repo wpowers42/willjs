@@ -1,4 +1,4 @@
-import { Vector } from '../engine/core/Vector.js';
+import { Vector } from '../engine/v1/core/Vector.js';
 
 // setup canvas
 const canvas = document.getElementById("canvas");
