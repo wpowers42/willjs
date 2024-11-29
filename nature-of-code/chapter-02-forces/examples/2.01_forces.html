@@ -55,28 +55,14 @@
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // draw wind like effect if the mouse is pressed
-            // accomplish this by drawing three lines from the mouse position in the direction of the wind force
-            if (inputManager.isMousePressed()) {
-                const mousePosition = canvasTransform.vectorWindowToCanvas(inputManager.getLatestMouseTouchPosition());
-                const windForce = Vector.copy(wind);
-                windForce.normalize();
-                windForce.mult(50);
-
-                ctx.strokeStyle = "black";
-                ctx.lineCap = "round";
-                ctx.translate(mousePosition.x, mousePosition.y);
-                const numLines = 5;
-                const totalHeight = 25;
-                for (let i = -numLines; i < numLines; i++) {
-                    ctx.moveTo(0, i * totalHeight / numLines);
-                    ctx.beginPath();
-                    for (let j = 0; j < 100; j++) {
-                        ctx.lineTo(windForce.x / 100 * j, i * totalHeight / numLines + Math.sin(j * 0.2));
-                    }
-                    ctx.stroke();
-                }
-                ctx.resetTransform();
+            // if wind is active, color the screen with a lightblue gradient
+            // in the direction of the wind force (left to right)
+            if (inputManager.isMousePressed() || inputManager.isTouchPressed()) {
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+                gradient.addColorStop(0, "lightblue");
+                gradient.addColorStop(1, "white");
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
             // draw the title in the top left corner
