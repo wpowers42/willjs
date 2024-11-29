@@ -27,11 +27,14 @@
 
         const canvasTransform = new CanvasTransform(canvas);
 
-        const positionA = new Vector(Math.random() * canvas.width, Math.random() * canvas.height);
-        const moverA = new Mover(positionA, Vector.zero(), 5);
-        const positionB = new Vector(Math.random() * canvas.width, Math.random() * canvas.height);
-        const moverB = new Mover(positionB, Vector.zero(), 1);
-        const movers = [moverA, moverB];
+        // create 100 movers with a map, include a random z to handle the z-index
+        const movers = Array.from({ length: 100 }, (_, i) => {
+            const position = new Vector(Math.random() * canvas.width, Math.random() * canvas.height);
+            return new Mover(position, Vector.zero(), Math.random() * 10, i);
+        });
+
+        // sort the movers by z
+        movers.sort((a, b) => a.z - b.z);
 
         const gravity = new Vector(0, 0.1);
         const wind = new Vector(0.1, 0);
