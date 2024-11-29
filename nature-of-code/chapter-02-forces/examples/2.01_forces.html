@@ -40,7 +40,7 @@
         const wind = new Vector(0.1, 0);
 
         function update() {
-            if (inputManager.isMousePressed()) {
+            if (inputManager.isMousePressed() || inputManager.isTouchPressed()) {
                 movers.forEach(mover => mover.applyForce(wind));
             }
             movers.forEach(mover => {
