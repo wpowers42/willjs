@@ -41,4 +41,8 @@ export class InputManager {
             return this.touch.getTouchPosition();
         }
     }
+
+    isTouchPressed() {
+        return this.touch.isTouchPressed();
+    }
 }
