@@ -2,14 +2,15 @@ import { Vector } from "../core/Vector.js";
 
 // TouchListener.js
 export class TouchListener {
-    constructor() {
+    constructor(canvas) {
+        this.canvas = canvas;
         this.position = new Vector(0, 0);
         this.positionUpdatedAt = 0;
     }
 
     attachListeners() {
-        window.addEventListener('touchstart', this.onTouchStart.bind(this));
-        window.addEventListener('touchmove', this.onTouchMove.bind(this));
+        this.canvas.addEventListener('touchstart', this.onTouchStart.bind(this));
+        this.canvas.addEventListener('touchmove', this.onTouchMove.bind(this));
     }
 
     onTouchStart(event) {

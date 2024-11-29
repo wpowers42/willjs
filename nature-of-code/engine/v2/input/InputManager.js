@@ -8,7 +8,7 @@ export class InputManager {
         this.canvas = canvas;
         this.mouse = new MouseListener(canvas);
         this.keyboard = new KeyboardListener();
-        this.touch = new TouchListener();
+        this.touch = new TouchListener(canvas);
     }
 
     initialize() {
