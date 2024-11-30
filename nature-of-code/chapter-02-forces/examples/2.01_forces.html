@@ -15,6 +15,7 @@
         import { Mover } from "../../engine/v2/core/Mover.js";
         import { InputManager } from "../../engine/v2/input/InputManager.js";
         import { CanvasTransform } from "../../engine/v2/input/CanvasTransform.js";
+        import { Random } from "../../engine/v2/math/Random.js";
 
         const canvas = document.getElementById("canvas");
         canvas.width = 800;
@@ -27,27 +28,28 @@
 
         const canvasTransform = new CanvasTransform(canvas);
 
-        // create 100 movers with a map, include a random z to handle the z-index
-        const movers = Array.from({ length: 100 }, (_, i) => {
-            const position = new Vector(Math.random() * canvas.width, Math.random() * canvas.height);
-            return new Mover(position, Vector.zero(), Math.random() * 10, i);
+        const movers = Array.from({ length: 50 }, (_, i) => {
+            const x = Random.random(0, canvas.width);
+            const y = Random.randomGaussian(canvas.height / 2, 50);
+            const position = new Vector(x, y, i);
+            return new Mover(position, Vector.zero(), Random.random(1, 8));
         });
 
         // sort the movers by z
-        movers.sort((a, b) => a.z - b.z);
+        movers.sort((a, b) => a.position.z - b.position.z);
 
-        const gravity = new Vector(0, 0.1);
-        const wind = new Vector(0.1, 0);
+        const gravity = new Vector(0, 0.001);
+        const wind = new Vector(0.0005, -0.005);
 
-        function update() {
-            if (inputManager.isMousePressed() || inputManager.isTouchPressed()) {
-                movers.forEach(mover => mover.applyForce(wind));
-            }
+        function update(dt) {
             movers.forEach(mover => {
+                if (inputManager.isMousePressed() || inputManager.isTouchPressed()) {
+                    mover.applyForce(wind);
+                }
                 const force = Vector.copy(gravity);
                 force.mult(mover.mass);
                 mover.applyForce(force);
-                mover.update();
+                mover.update(dt);
                 mover.checkEdges(canvas.width, canvas.height);
             });
         }
@@ -80,8 +82,21 @@
             movers.forEach(mover => mover.draw(ctx));
         }
 
+        let lastTime = performance.now();
+        let accumulator = 0;
+        const dt = 0.01;
+
         function animate() {
-            update();
+            let newTime = performance.now();
+            let frameTime = newTime - lastTime;
+            lastTime = newTime;
+            accumulator += frameTime;
+
+            while (dt < accumulator) {
+                update(dt);
+                accumulator -= dt;
+            }
+
             draw();
             requestAnimationFrame(animate);
         }

@@ -34,11 +34,19 @@ export class Mover {
     }
 
     /**
+     * @param {number} dt
      * @returns {void}
      */
-    update() {
-        this.position.add(this.velocity);
-        this.velocity.add(this.acceleration);
+    update(dt) {
+        const velocity = Vector.copy(this.velocity);
+        velocity.mult(dt);
+
+        const acceleration = Vector.copy(this.acceleration);
+        acceleration.mult(dt);
+
+        this.position.add(velocity);
+        this.velocity.add(acceleration);
+
         if (this.maxSpeed > 0) {
             this.velocity.limit(this.maxSpeed);
         }
