@@ -83,7 +83,8 @@
         }
 
         let lastTime = performance.now();
-        let accumulator = 0;
+        let accumulator = 0.0;
+        const maxAccumulator = 250;
         const dt = 0.01;
 
         function animate() {
@@ -91,6 +92,7 @@
             let frameTime = newTime - lastTime;
             lastTime = newTime;
             accumulator += frameTime;
+            accumulator = Math.min(accumulator, maxAccumulator);
 
             while (dt < accumulator) {
                 update(dt);
