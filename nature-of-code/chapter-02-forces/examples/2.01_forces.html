@@ -39,7 +39,7 @@
         movers.sort((a, b) => a.position.z - b.position.z);
 
         const gravity = new Vector(0, 0.001);
-        const wind = new Vector(0.0005, -0.005);
+        const wind = new Vector(0.0005, 0);
 
         function update(dt) {
             movers.forEach(mover => {
