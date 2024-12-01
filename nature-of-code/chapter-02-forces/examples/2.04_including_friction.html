@@ -30,7 +30,7 @@
 
         const movers = Array.from({ length: 100 }, (_, i) => {
             const x = Random.random(0, canvas.width);
-            const y = Random.randomGaussian(canvas.height / 2, 100);
+            const y = Random.randomGaussian(canvas.height / 2, 40);
             const position = new Vector(x, y, i);
             return new Mover(position, Vector.zero(), Random.random(1, 8));
         });
