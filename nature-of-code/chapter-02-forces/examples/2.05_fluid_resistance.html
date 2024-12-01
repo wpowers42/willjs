@@ -36,7 +36,8 @@
             return new Mover(position, Vector.zero(), size);
         });
 
-        const liquid = new Liquid(new Vector(0, canvas.height / 3 * 2), new Vector(canvas.width, canvas.height), 0.1);
+        const dragCoefficient = 0.47;
+        const liquid = new Liquid(0, canvas.height / 2, canvas.width, canvas.height / 3, dragCoefficient);
 
         // sort the movers by z
         movers.sort((a, b) => a.position.z - b.position.z);
@@ -44,7 +45,6 @@
         const gravity = new Vector(0, 0.001);
         const frictionCoefficient = 0.0001;
         const elasticity = 0.9;
-        const dragCoefficient = 0.47;
 
         function update(dt) {
             movers.forEach(mover => {
@@ -53,23 +53,9 @@
                     mover.applyForce(frictionForce);
                 }
 
-                if (mover.position.y + mover.radius >= liquid.position.y && mover.velocity.mag() > 0) {
-                    const density = 0.005;
-                    const velocity = mover.velocity.mag();
-                    const velocitySquared = velocity * velocity;
-                    const surfaceArea = Math.PI * Math.pow(mover.radius, 2);
-                    let velocityUnitVector = Vector.copy(mover.velocity);
-                    velocityUnitVector.normalize();
-                    let dragForce = -0.5;
-                    dragForce *= density;
-                    dragForce *= velocitySquared;
-                    dragForce *= surfaceArea;
-                    dragForce *= dragCoefficient;
-                    // limit the drag force to -100 to prevent extreme values
-                    dragForce = Math.max(dragForce, -100);
-
-                    velocityUnitVector.mult(dragForce);
-                    mover.applyForce(velocityUnitVector);
+                if (liquid.contains(mover) && mover.velocity.mag() > 0) {
+                    const dragForceVector = liquid.drag(mover);
+                    mover.applyForce(dragForceVector);
                 }
                 const force = Vector.copy(gravity);
                 force.mult(mover.mass);
