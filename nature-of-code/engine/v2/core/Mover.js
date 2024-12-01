@@ -33,6 +33,8 @@ export class Mover {
         this.acceleration.add(forceVector);
     }
 
+
+
     /**
      * @param {number} dt
      * @returns {void}
@@ -67,27 +69,40 @@ export class Mover {
     /**
      * @param {number} width
      * @param {number} height
+     * @param {number} elasticity
      * @returns {void}
      */
-    checkEdges(width, height) {
+    checkEdges(width, height, elasticity = 1) {
         if (this.position.x + this.radius > width) {
             this.position.x = width - this.radius;
-            this.velocity.x *= -1;
+            this.velocity.x *= -elasticity;
         }
 
         if (this.position.x - this.radius < 0) {
             this.position.x = this.radius;
-            this.velocity.x *= -1;
+            this.velocity.x *= -elasticity;
         }
 
         if (this.position.y + this.radius > height) {
             this.position.y = height - this.radius;
-            this.velocity.y *= -1;
+            this.velocity.y *= -elasticity;
         }
 
         if (this.position.y - this.radius < 0) {
             this.position.y = this.radius;
+            // don't bounce off the ceiling
             this.velocity.y *= -1;
         }
+    }
+
+    /**
+     * @param {number} height
+     * @returns {boolean}
+     * 
+     * @description
+     * 1px tolerance so we don't have to make friction a huge number
+     */
+    isTouchingBottom(height) {
+        return this.position.y + this.radius >= height - 1;
     }
 }
