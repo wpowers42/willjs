@@ -33,7 +33,26 @@ export class Mover {
         this.acceleration.add(forceVector);
     }
 
-
+    /**
+     * Calculates the friction force vector based on the current velocity and mass
+     * @param {number} frictionCoefficient
+     * @returns {Vector} The calculated friction force vector
+     * 
+     * f = -μN(v̂)
+     * 
+     * where:
+     * f = friction force
+     * μ = friction coefficient
+     * N = normal force
+     * v̂ = normalized velocity
+     */
+    getFrictionForce(frictionCoefficient) {
+        const friction = Vector.copy(this.velocity);
+        const normal = this.mass;
+        friction.normalize();
+        friction.setMag(-1 * frictionCoefficient * normal);
+        return friction;
+    }
 
     /**
      * @param {number} dt

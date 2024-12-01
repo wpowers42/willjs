@@ -51,10 +51,8 @@
 
 
                 if (mover.isTouchingBottom(canvas.height) && mover.velocity.mag() > 0) {
-                    const friction = Vector.copy(mover.velocity);
-                    friction.mult(-1);
-                    friction.setMag(frictionCoefficient);
-                    mover.applyForce(friction);
+                    const frictionForce = mover.getFrictionForce(frictionCoefficient);
+                    mover.applyForce(frictionForce);
                 }
 
                 const force = Vector.copy(gravity);
