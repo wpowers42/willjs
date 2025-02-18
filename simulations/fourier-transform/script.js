@@ -93,27 +93,21 @@ class FourierAnimation {
         
         // Updated styling for better appearance and mobile-friendliness
         button.style.position = 'absolute';
-        button.style.padding = '12px 20px';
-        button.style.fontSize = '24px';
+        button.style.fontSize = '85px';
         button.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
         button.style.border = '2px solid #333';
         button.style.borderRadius = '12px';
         button.style.cursor = 'pointer';
-        button.style.transition = 'all 0.3s ease';
-        button.style.width = '120px';
-        button.style.height = '120px';
-        button.style.boxShadow = '0 2px 6px rgba(0,0,0,0.1)';
-        button.style.display = 'flex';
-        button.style.alignItems = 'center';
-        button.style.justifyContent = 'center';
+        button.style.width = '100px';
+        button.style.height = '100px';
         
         // Center the button at the bottom of the canvas
         const updateButtonPosition = () => {
             const canvasRect = this.canvas.getBoundingClientRect();
-            const buttonLeft = canvasRect.left + 80;
-            const buttonBottom = canvasRect.bottom - 80;
+            const buttonLeft = canvasRect.left + 40;
+            const buttonBottom = canvasRect.bottom - 40;
             button.style.left = `${buttonLeft}px`;
-            button.style.top = `${buttonBottom - 120}px`;
+            button.style.top = `${buttonBottom - 100}px`;
         };
         
         // Initial position
