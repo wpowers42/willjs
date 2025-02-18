@@ -12,9 +12,14 @@ class FourierAnimation {
         this.timeScale = 0.01;
         this.currentTime = 0;
         this.waves = 12;
+        this.paused = false;
         
-        // Bind the animate method to the class instance
+        // Bind methods to the class instance
         this.animate = this.animate.bind(this);
+        this.togglePause = this.togglePause.bind(this);
+        
+        // Add pause button
+        this.setupPauseButton();
     }
 
     drawCircle(x, y, radius) {
@@ -74,53 +79,73 @@ class FourierAnimation {
         return translateY;
     }
 
-    animate(timestamp) {
-        const deltaTime = (timestamp - this.lastTime) / 250;
-        this.lastTime = timestamp;
-        this.currentTime += deltaTime * this.timeScale;
-
-        // Clear canvas
-        this.ctx.fillStyle = "white";
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Initial translation
-        this.ctx.translate(150, 150);
-
-        // Calculate and draw wave circles
-        const { x, y, waveComponentHeights } = this.calculateWavePoints();
-
-        // Update history arrays
-        this.ys.unshift(waveComponentHeights);
-        this.points.unshift(y);
-        if (this.ys.length > 500) this.ys.pop();
-        if (this.points.length > 500) this.points.pop();
-
-        // Draw waveforms
-        this.ctx.translate(150, 0);
-        const translateY = this.drawWaveforms(x, waveComponentHeights);
-        this.ctx.translate(0, -translateY);
-
-        // Draw final wave
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, this.points[0]);
-        for (let i = 0; i < this.points.length; i++) {
-            this.ctx.lineTo(i, this.points[i]);
+    togglePause() {
+        this.paused = !this.paused;
+        if (!this.paused) {
+            this.lastTime = performance.now();
+            this.animate(this.lastTime);
         }
-        this.ctx.stroke();
+    }
 
-        // Draw connecting line
-        this.ctx.translate(-150, 0);
-        this.drawLine(x, this.points[0], 150, this.points[0]);
+    setupPauseButton() {
+        const button = document.createElement('button');
+        button.textContent = 'Pause/Resume';
+        button.style.position = 'absolute';
+        button.style.left = '10px';
+        button.style.top = '40px';
+        this.canvas.parentNode.appendChild(button);
+        button.addEventListener('click', this.togglePause);
+    }
 
-        // Reset translation
-        this.ctx.translate(-150, -150);
+    animate(timestamp) {
+        if (!this.paused) {
+            const deltaTime = (timestamp - this.lastTime) / 250;
+            this.lastTime = timestamp;
+            this.currentTime += deltaTime * this.timeScale;
 
-        // draw the title in the top left corner
-        this.ctx.fillStyle = "black";
-        this.ctx.font = "24px Arial";
-        this.ctx.fillText("Fourier Transform", 10, 30);
+            // Clear canvas
+            this.ctx.fillStyle = "white";
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        requestAnimationFrame(this.animate);
+            // Initial translation
+            this.ctx.translate(150, 150);
+
+            // Calculate and draw wave circles
+            const { x, y, waveComponentHeights } = this.calculateWavePoints();
+
+            // Update history arrays
+            this.ys.unshift(waveComponentHeights);
+            this.points.unshift(y);
+            if (this.ys.length > 500) this.ys.pop();
+            if (this.points.length > 500) this.points.pop();
+
+            // Draw waveforms
+            this.ctx.translate(150, 0);
+            const translateY = this.drawWaveforms(x, waveComponentHeights);
+            this.ctx.translate(0, -translateY);
+
+            // Draw final wave
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, this.points[0]);
+            for (let i = 0; i < this.points.length; i++) {
+                this.ctx.lineTo(i, this.points[i]);
+            }
+            this.ctx.stroke();
+
+            // Draw connecting line
+            this.ctx.translate(-150, 0);
+            this.drawLine(x, this.points[0], 150, this.points[0]);
+
+            // Reset translation
+            this.ctx.translate(-150, -150);
+
+            // draw the title in the top left corner
+            this.ctx.fillStyle = "black";
+            this.ctx.font = "24px Arial";
+            this.ctx.fillText("Fourier Transform", 10, 30);
+
+            requestAnimationFrame(this.animate);
+        }
     }
 
     start() {
