@@ -82,8 +82,8 @@ class FourierAnimation {
     togglePause() {
         this.paused = !this.paused;
         if (!this.paused) {
-            this.lastTime = performance.now();
-            this.animate(this.lastTime);
+            this.lastTime = null;  // Reset lastTime when resuming
+            requestAnimationFrame(this.animate);
         }
     }
 
@@ -100,7 +100,7 @@ class FourierAnimation {
 
     animate(timestamp) {
         if (!this.paused) {
-            const deltaTime = (timestamp - this.lastTime) / 250;
+            const deltaTime = this.lastTime ? (timestamp - this.lastTime) / 250 : 0;
             this.lastTime = timestamp;
             this.currentTime += deltaTime * this.timeScale;
 
