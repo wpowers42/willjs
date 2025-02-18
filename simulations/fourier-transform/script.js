@@ -91,7 +91,8 @@ class FourierAnimation {
         const button = document.createElement('button');
         button.textContent = '⏸';
 
-        const buttonWidth = document.getElementById('canvas').width / 8;
+        const canvasRect = this.canvas.getBoundingClientRect();
+        const buttonWidth = canvasRect.width / 8;
         const buttonHeight = buttonWidth;
         
         // Updated styling for better appearance and mobile-friendliness
@@ -107,8 +108,9 @@ class FourierAnimation {
         // Center the button at the bottom of the canvas
         const updateButtonPosition = () => {
             const canvasRect = this.canvas.getBoundingClientRect();
-            const buttonLeft = canvasRect.left + 40;
-            const buttonBottom = canvasRect.bottom - 40;
+            const offset = canvasRect.width * 0.05;
+            const buttonLeft = canvasRect.left + offset;
+            const buttonBottom = canvasRect.bottom - offset;
             button.style.left = `${buttonLeft}px`;
             button.style.top = `${buttonBottom - 100}px`;
         };
@@ -118,19 +120,6 @@ class FourierAnimation {
         
         // Update position when window resizes
         window.addEventListener('resize', updateButtonPosition);
-        
-        // Enhanced hover effects
-        button.addEventListener('mouseover', () => {
-            button.style.backgroundColor = '#333';
-            button.style.color = 'white';
-            button.style.transform = 'scale(1.05)';
-        });
-        
-        button.addEventListener('mouseout', () => {
-            button.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-            button.style.color = '#333';
-            button.style.transform = 'scale(1)';
-        });
 
         // Update the toggle function to change the symbol
         const originalToggle = this.togglePause;
