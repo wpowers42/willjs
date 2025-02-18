@@ -11,7 +11,7 @@ class FourierAnimation {
         this.lastTime = 0;
         this.timeScale = 0.01;
         this.currentTime = 0;
-        this.waves = 8;
+        this.waves = 12;
         
         // Bind the animate method to the class instance
         this.animate = this.animate.bind(this);
@@ -54,7 +54,7 @@ class FourierAnimation {
     }
 
     drawWaveforms(x, waveComponentHeights) {
-        let translateY = 20;
+        let translateY = 15;
         const deltaY = 100;
         this.ctx.translate(0, translateY);
 
@@ -75,7 +75,7 @@ class FourierAnimation {
     }
 
     animate(timestamp) {
-        const deltaTime = (timestamp - this.lastTime) / 200;
+        const deltaTime = (timestamp - this.lastTime) / 250;
         this.lastTime = timestamp;
         this.currentTime += deltaTime * this.timeScale;
 
@@ -114,6 +114,11 @@ class FourierAnimation {
 
         // Reset translation
         this.ctx.translate(-150, -150);
+
+        // draw the title in the top left corner
+        this.ctx.fillStyle = "black";
+        this.ctx.font = "24px Arial";
+        this.ctx.fillText("Fourier Transform", 10, 30);
 
         requestAnimationFrame(this.animate);
     }
