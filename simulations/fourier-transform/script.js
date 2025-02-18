@@ -90,16 +90,19 @@ class FourierAnimation {
     setupPauseButton() {
         const button = document.createElement('button');
         button.textContent = '⏸';
+
+        const buttonWidth = document.getElementById('canvas').width / 8;
+        const buttonHeight = buttonWidth;
         
         // Updated styling for better appearance and mobile-friendliness
         button.style.position = 'absolute';
-        button.style.fontSize = '85px';
+        button.style.fontSize = `${buttonWidth * 0.8}px`;
         button.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
         button.style.border = '2px solid #333';
         button.style.borderRadius = '12px';
         button.style.cursor = 'pointer';
-        button.style.width = '100px';
-        button.style.height = '100px';
+        button.style.width = `${buttonWidth}px`;
+        button.style.height = `${buttonHeight}px`;
         
         // Center the button at the bottom of the canvas
         const updateButtonPosition = () => {
