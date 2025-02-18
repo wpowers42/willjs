@@ -89,39 +89,57 @@ class FourierAnimation {
 
     setupPauseButton() {
         const button = document.createElement('button');
-        button.textContent = '⏸'; // Pause symbol to start
+        button.textContent = '⏸';
+        
+        // Updated styling for better appearance and mobile-friendliness
         button.style.position = 'absolute';
-        button.style.padding = '8px 16px';
-        button.style.fontSize = '20px';
-        button.style.backgroundColor = 'white';
-        button.style.border = '2px solid black';
-        button.style.borderRadius = '5px';
+        button.style.padding = '12px 20px';
+        button.style.fontSize = '24px';
+        button.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+        button.style.border = '2px solid #333';
+        button.style.borderRadius = '12px';
         button.style.cursor = 'pointer';
-        button.style.transition = 'all 0.2s ease';
-        button.style.width = '48px'; // Fixed width
-        button.style.height = '40px'; // Fixed height
+        button.style.transition = 'all 0.3s ease';
+        button.style.width = '120px';
+        button.style.height = '120px';
+        button.style.boxShadow = '0 2px 6px rgba(0,0,0,0.1)';
+        button.style.display = 'flex';
+        button.style.alignItems = 'center';
+        button.style.justifyContent = 'center';
         
-        // Position the button
-        const canvasRect = this.canvas.getBoundingClientRect();
-        button.style.left = `${canvasRect.left + 10}px`;
-        button.style.bottom = `${canvasRect.bottom - canvasRect.top - 40}px`;
+        // Center the button at the bottom of the canvas
+        const updateButtonPosition = () => {
+            const canvasRect = this.canvas.getBoundingClientRect();
+            const buttonLeft = canvasRect.left + 80;
+            const buttonBottom = canvasRect.bottom - 80;
+            button.style.left = `${buttonLeft}px`;
+            button.style.top = `${buttonBottom - 120}px`;
+        };
         
-        // Add hover effect
+        // Initial position
+        updateButtonPosition();
+        
+        // Update position when window resizes
+        window.addEventListener('resize', updateButtonPosition);
+        
+        // Enhanced hover effects
         button.addEventListener('mouseover', () => {
-            button.style.backgroundColor = 'black';
+            button.style.backgroundColor = '#333';
             button.style.color = 'white';
+            button.style.transform = 'scale(1.05)';
         });
         
         button.addEventListener('mouseout', () => {
-            button.style.backgroundColor = 'white';
-            button.style.color = 'black';
+            button.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+            button.style.color = '#333';
+            button.style.transform = 'scale(1)';
         });
 
         // Update the toggle function to change the symbol
         const originalToggle = this.togglePause;
         this.togglePause = () => {
             originalToggle.call(this);
-            button.textContent = this.paused ? '⏵' : '⏸'; // Play/Pause symbols
+            button.textContent = this.paused ? '⏵' : '⏸';
         };
 
         this.canvas.parentNode.appendChild(button);
