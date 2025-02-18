@@ -89,7 +89,7 @@ class FourierAnimation {
 
     setupPauseButton() {
         const button = document.createElement('button');
-        button.textContent = '⏸';
+        button.textContent = 'Pause';
 
         const canvasRect = this.canvas.getBoundingClientRect();
         const buttonWidth = canvasRect.width / 8;
@@ -97,7 +97,7 @@ class FourierAnimation {
         
         // Updated styling for better appearance and mobile-friendliness
         button.style.position = 'absolute';
-        button.style.fontSize = `${buttonWidth * 0.8}px`;
+        button.style.fontSize = `${buttonWidth * 0.30}px`;
         button.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
         button.style.border = '2px solid #333';
         button.style.borderRadius = '12px';
@@ -112,7 +112,7 @@ class FourierAnimation {
             const buttonLeft = canvasRect.left + offset;
             const buttonBottom = canvasRect.bottom - offset;
             button.style.left = `${buttonLeft}px`;
-            button.style.top = `${buttonBottom - 100}px`;
+            button.style.top = `${buttonBottom - buttonHeight}px`;
         };
         
         // Initial position
@@ -125,7 +125,7 @@ class FourierAnimation {
         const originalToggle = this.togglePause;
         this.togglePause = () => {
             originalToggle.call(this);
-            button.textContent = this.paused ? '⏵' : '⏸';
+            button.textContent = this.paused ? 'Play' : 'Pause';
         };
 
         this.canvas.parentNode.appendChild(button);
