@@ -91,8 +91,9 @@ class FourierAnimation {
         const button = document.createElement('button');
         button.textContent = 'Pause/Resume';
         button.style.position = 'absolute';
-        button.style.left = '10px';
-        button.style.top = '40px';
+        const canvasRect = this.canvas.getBoundingClientRect();
+        button.style.left = `${canvasRect.left + 10}px`;
+        button.style.top = `${canvasRect.bottom - 40}px`;
         this.canvas.parentNode.appendChild(button);
         button.addEventListener('click', this.togglePause);
     }
