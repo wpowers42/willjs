@@ -89,11 +89,41 @@ class FourierAnimation {
 
     setupPauseButton() {
         const button = document.createElement('button');
-        button.textContent = 'Pause/Resume';
+        button.textContent = '⏸'; // Pause symbol to start
         button.style.position = 'absolute';
+        button.style.padding = '8px 16px';
+        button.style.fontSize = '20px';
+        button.style.backgroundColor = 'white';
+        button.style.border = '2px solid black';
+        button.style.borderRadius = '5px';
+        button.style.cursor = 'pointer';
+        button.style.transition = 'all 0.2s ease';
+        button.style.width = '48px'; // Fixed width
+        button.style.height = '40px'; // Fixed height
+        
+        // Position the button
         const canvasRect = this.canvas.getBoundingClientRect();
         button.style.left = `${canvasRect.left + 10}px`;
-        button.style.top = `${canvasRect.bottom - 40}px`;
+        button.style.bottom = `${canvasRect.bottom - canvasRect.top - 40}px`;
+        
+        // Add hover effect
+        button.addEventListener('mouseover', () => {
+            button.style.backgroundColor = 'black';
+            button.style.color = 'white';
+        });
+        
+        button.addEventListener('mouseout', () => {
+            button.style.backgroundColor = 'white';
+            button.style.color = 'black';
+        });
+
+        // Update the toggle function to change the symbol
+        const originalToggle = this.togglePause;
+        this.togglePause = () => {
+            originalToggle.call(this);
+            button.textContent = this.paused ? '⏵' : '⏸'; // Play/Pause symbols
+        };
+
         this.canvas.parentNode.appendChild(button);
         button.addEventListener('click', this.togglePause);
     }
