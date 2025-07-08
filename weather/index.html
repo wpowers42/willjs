@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Utrecht Weather Forecast</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -25,53 +26,18 @@
             margin-bottom: 30px;
         }
         
-        .table-container {
+        .chart-container {
             background: white;
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 200px;
+            height: min(400px, 50vh);
         }
         
-        table {
+        #rainfallChart {
             width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ecf0f1;
-        }
-        
-        th {
-            background-color: #3498db;
-            color: white;
-            font-weight: 600;
-        }
-        
-        tr:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .rainfall-value {
-            font-weight: 600;
-        }
-        
-        .no-rain {
-            color: #95a5a6;
-        }
-        
-        .light-rain {
-            color: #f39c12;
-        }
-        
-        .moderate-rain {
-            color: #e67e22;
-        }
-        
-        .heavy-rain {
-            color: #e74c3c;
+            height: 100%;
         }
         
         .loading {
@@ -94,22 +60,15 @@
         <p id="lastUpdated">Loading...</p>
     </div>
     
-    <div class="table-container">
+    <div class="chart-container">
         <div id="loading" class="loading">Loading forecast data...</div>
         <div id="error" class="error" style="display: none;">Failed to load forecast data. Please try again later.</div>
-        <table id="forecastTable" style="display: none;">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Rainfall (mm/hr)</th>
-                </tr>
-            </thead>
-            <tbody id="forecastBody">
-            </tbody>
-        </table>
+        <canvas id="rainfallChart" style="display: none;"></canvas>
     </div>
 
     <script>
+        let rainfallChart = null;
+        
         async function loadForecast() {
             try {
                 const response = await fetch('data.json');
@@ -119,43 +78,109 @@
                 
                 const data = await response.json();
                 
-                // Update last updated time
-                const lastUpdated = new Date(data.last_updated);
+                // Update last updated time with custom format in local timezone
+                const lastUpdatedUTC = new Date(data.last_updated);
+                const lastUpdated = new Date(lastUpdatedUTC.getTime() - (lastUpdatedUTC.getTimezoneOffset() * 60000));
+                const year = lastUpdated.getFullYear();
+                const month = String(lastUpdated.getMonth() + 1).padStart(2, '0');
+                const day = String(lastUpdated.getDate()).padStart(2, '0');
+                const hours = String(lastUpdated.getHours()).padStart(2, '0');
+                const minutes = String(lastUpdated.getMinutes()).padStart(2, '0');
+                const formattedTime = `${year}-${month}-${day} ${hours}:${minutes}`;
+                
                 document.getElementById('lastUpdated').textContent = 
-                    `Last updated: ${lastUpdated.toLocaleString()}`;
+                    `Last updated: ${formattedTime}`;
                 
-                // Populate table
-                const tbody = document.getElementById('forecastBody');
-                tbody.innerHTML = '';
-                
-                data.forecast.forEach(item => {
-                    const row = document.createElement('tr');
-                    
-                    // Format time
-                    const time = new Date(item.time);
-                    const timeStr = time.toLocaleTimeString([], {
+                // Prepare chart data with local timezone
+                const labels = data.forecast.map(item => {
+                    const utcTime = new Date(item.time);
+                    const localTime = new Date(utcTime.getTime() - (utcTime.getTimezoneOffset() * 60000));
+                    return localTime.toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit'
                     });
-                    
-                    // Format rainfall with color coding
-                    const rainfall = item.rainfall_mm_per_hr;
-                    let rainfallClass = 'no-rain';
-                    if (rainfall > 0.1) rainfallClass = 'light-rain';
-                    if (rainfall > 2.5) rainfallClass = 'moderate-rain';
-                    if (rainfall > 10) rainfallClass = 'heavy-rain';
-                    
-                    row.innerHTML = `
-                        <td>${timeStr}</td>
-                        <td class="rainfall-value ${rainfallClass}">${rainfall.toFixed(1)}</td>
-                    `;
-                    
-                    tbody.appendChild(row);
                 });
                 
-                // Show table and hide loading
+                const rainfallData = data.forecast.map(item => item.rainfall_mm_per_hr);
+                
+                // Create or update chart
+                const ctx = document.getElementById('rainfallChart').getContext('2d');
+                
+                if (rainfallChart) {
+                    rainfallChart.destroy();
+                }
+                
+                rainfallChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Rainfall (mm/hr)',
+                            data: rainfallData,
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.1,
+                            pointBackgroundColor: function(context) {
+                                const value = context.parsed.y;
+                                if (value === 0) return '#95a5a6';
+                                if (value > 0.1 && value <= 2.5) return '#f39c12';
+                                if (value > 2.5 && value <= 10) return '#e67e22';
+                                if (value > 10) return '#e74c3c';
+                                return '#95a5a6';
+                            },
+                            pointBorderColor: function(context) {
+                                const value = context.parsed.y;
+                                if (value === 0) return '#95a5a6';
+                                if (value > 0.1 && value <= 2.5) return '#f39c12';
+                                if (value > 2.5 && value <= 10) return '#e67e22';
+                                if (value > 10) return '#e74c3c';
+                                return '#95a5a6';
+                            },
+                            pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        aspectRatio: 2,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.parsed.y.toFixed(1)} mm/hr`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time'
+                                },
+                                ticks: {
+                                    maxTicksLimit: 8
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Rainfall (mm/hr)'
+                                },
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+                // Show chart and hide loading
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('forecastTable').style.display = 'table';
+                document.getElementById('rainfallChart').style.display = 'block';
                 
             } catch (error) {
                 console.error('Error loading forecast:', error);
