@@ -1,0 +1,60 @@
+name: Update Weather Forecast
+
+on:
+  schedule:
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Allow manual triggering
+  push:
+    paths:
+      - 'tools/weather/**'
+      - '.github/workflows/weather.yml'
+
+jobs:
+  update-weather:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      
+    - name: Install dependencies
+      run: |
+        cd tools/weather
+        uv pip install --system -r pyproject.toml
+        
+    - name: Run weather script
+      env:
+        KNMI_API_KEY: ${{ secrets.KNMI_API_KEY }}
+      run: |
+        cd tools/weather
+        python main.py
+        
+    - name: Commit and push changes
+      run: |
+        cd tools/weather
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data.json
+        if ! git diff --cached --quiet; then
+          git commit -m "Update weather forecast data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          git push
+        else
+          echo "No changes to commit"
+        fi
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./tools/weather
+        destination_dir: weather
