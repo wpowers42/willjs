@@ -12,8 +12,8 @@ API_KEY = os.environ.get("KNMI_API_KEY")
 if not API_KEY:
     raise ValueError("KNMI_API_KEY environment variable is required")
 BASE_URL = "https://api.dataplatform.knmi.nl/open-data/v1/datasets/radar_forecast/versions/2.0/files"
-# UTRECHT_LAT, UTRECHT_LON = 52.0907, 5.1214
-UTRECHT_LAT, UTRECHT_LON = 51.21989, 4.40346
+
+UTRECHT_LAT, UTRECHT_LON = 52.0907, 5.1214
 
 dx = dy = 1.0  # Grid resolution in km
 n_steps = 25
