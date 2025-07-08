@@ -71,7 +71,12 @@
         
         async function loadForecast() {
             try {
-                const response = await fetch('data.json');
+                const response = await fetch(`data.json?t=${Date.now()}`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
                 if (!response.ok) {
                     throw new Error('Failed to fetch data');
                 }
