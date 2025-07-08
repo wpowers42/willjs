@@ -119,11 +119,6 @@
                 const currentTimeLocal = new Date();
                 const currentTimeUTC = new Date(currentTimeLocal.getTime() + (currentTimeLocal.getTimezoneOffset() * 60000));
                 
-                console.log('Current time local:', currentTimeLocal);
-                console.log('Current time UTC:', currentTimeUTC);
-                console.log('Timezone offset minutes:', currentTimeLocal.getTimezoneOffset());
-                console.log('First forecast time (UTC):', new Date(data.forecast[0].time));
-                console.log('Last forecast time (UTC):', new Date(data.forecast[data.forecast.length - 1].time));
                 
                 // Find the closest forecast time to current time (both in UTC)
                 let currentTimeIndex = -1;
@@ -138,28 +133,19 @@
                     }
                 });
                 
-                console.log('Current time index:', currentTimeIndex);
-                console.log('Time difference (minutes):', minTimeDiff / (1000 * 60));
-                console.log('Matched forecast time:', new Date(data.forecast[currentTimeIndex].time));
-                
                 // Define triangle plugin
                 const trianglePlugin = {
                     id: 'triangleIndicator',
                     afterDraw: function(chart) {
-                        console.log('Triangle plugin called, currentTimeIndex:', currentTimeIndex);
                         if (currentTimeIndex >= 0) {
                             const ctx = chart.ctx;
                             const meta = chart.getDatasetMeta(0);
                             const bar = meta.data[currentTimeIndex];
                             
-                            console.log('Bar at index:', bar);
-                            console.log('Bar coordinates:', bar ? {x: bar.x, y: bar.y, width: bar.width, height: bar.height} : 'no bar');
                             
                             if (bar) {
                                 const x = bar.x;
                                 const y = bar.y - 10;
-                                
-                                console.log('Drawing triangle at:', x, y);
                                 
                                 ctx.save();
                                 ctx.fillStyle = '#2c3e50';
