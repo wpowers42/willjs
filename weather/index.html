@@ -71,7 +71,12 @@
         
         async function loadForecast() {
             try {
-                const response = await fetch('data.json');
+                const response = await fetch(`data.json?t=${Date.now()}`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
                 if (!response.ok) {
                     throw new Error('Failed to fetch data');
                 }
@@ -110,35 +115,90 @@
                     rainfallChart.destroy();
                 }
                 
+                // Find current time index for highlighting
+                const currentTimeLocal = new Date();
+                const currentTimeUTC = new Date(currentTimeLocal.getTime() + (currentTimeLocal.getTimezoneOffset() * 60000));
+                
+                console.log('Current time local:', currentTimeLocal);
+                console.log('Current time UTC:', currentTimeUTC);
+                console.log('Timezone offset minutes:', currentTimeLocal.getTimezoneOffset());
+                console.log('First forecast time (UTC):', new Date(data.forecast[0].time));
+                console.log('Last forecast time (UTC):', new Date(data.forecast[data.forecast.length - 1].time));
+                
+                // Find the closest forecast time to current time (both in UTC)
+                let currentTimeIndex = -1;
+                let minTimeDiff = Infinity;
+                
+                data.forecast.forEach((item, index) => {
+                    const forecastTime = new Date(item.time); // This is already in UTC
+                    const timeDiff = Math.abs(forecastTime - currentTimeUTC);
+                    if (timeDiff < minTimeDiff) {
+                        minTimeDiff = timeDiff;
+                        currentTimeIndex = index;
+                    }
+                });
+                
+                console.log('Current time index:', currentTimeIndex);
+                console.log('Time difference (minutes):', minTimeDiff / (1000 * 60));
+                console.log('Matched forecast time:', new Date(data.forecast[currentTimeIndex].time));
+                
+                // Define triangle plugin
+                const trianglePlugin = {
+                    id: 'triangleIndicator',
+                    afterDraw: function(chart) {
+                        console.log('Triangle plugin called, currentTimeIndex:', currentTimeIndex);
+                        if (currentTimeIndex >= 0) {
+                            const ctx = chart.ctx;
+                            const meta = chart.getDatasetMeta(0);
+                            const bar = meta.data[currentTimeIndex];
+                            
+                            console.log('Bar at index:', bar);
+                            console.log('Bar coordinates:', bar ? {x: bar.x, y: bar.y, width: bar.width, height: bar.height} : 'no bar');
+                            
+                            if (bar) {
+                                const x = bar.x;
+                                const y = bar.y - 10;
+                                
+                                console.log('Drawing triangle at:', x, y);
+                                
+                                ctx.save();
+                                ctx.fillStyle = '#2c3e50';
+                                ctx.strokeStyle = '#2c3e50';
+                                ctx.lineWidth = 2;
+                                ctx.beginPath();
+                                ctx.moveTo(x, y);
+                                ctx.lineTo(x - 6, y - 8);
+                                ctx.lineTo(x + 6, y - 8);
+                                ctx.closePath();
+                                ctx.fill();
+                                ctx.stroke();
+                                ctx.restore();
+                            }
+                        }
+                    }
+                };
+                
                 rainfallChart = new Chart(ctx, {
-                    type: 'line',
+                    type: 'bar',
                     data: {
                         labels: labels,
                         datasets: [{
                             label: 'Rainfall (mm/hr)',
                             data: rainfallData,
-                            borderColor: '#3498db',
-                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.1,
-                            pointBackgroundColor: function(context) {
+                            backgroundColor: function(context) {
                                 const value = context.parsed.y;
-                                if (value === 0) return '#95a5a6';
-                                if (value > 0.1 && value <= 2.5) return '#f39c12';
-                                if (value > 2.5 && value <= 10) return '#e67e22';
-                                if (value > 10) return '#e74c3c';
-                                return '#95a5a6';
+                                
+                                let color;
+                                if (value === 0) color = '#95a5a6';
+                                else if (value > 0.1 && value <= 2.5) color = '#f39c12';
+                                else if (value > 2.5 && value <= 10) color = '#e67e22';
+                                else if (value > 10) color = '#e74c3c';
+                                else color = '#95a5a6';
+                                
+                                return color;
                             },
-                            pointBorderColor: function(context) {
-                                const value = context.parsed.y;
-                                if (value === 0) return '#95a5a6';
-                                if (value > 0.1 && value <= 2.5) return '#f39c12';
-                                if (value > 2.5 && value <= 10) return '#e67e22';
-                                if (value > 10) return '#e74c3c';
-                                return '#95a5a6';
-                            },
-                            pointRadius: 3
+                            barThickness: 'flex',
+                            maxBarThickness: 50
                         }]
                     },
                     options: {
@@ -155,7 +215,7 @@
                                         return `${context.parsed.y.toFixed(1)} mm/hr`;
                                     }
                                 }
-                            }
+                            },
                         },
                         scales: {
                             x: {
@@ -172,10 +232,12 @@
                                     display: true,
                                     text: 'Rainfall (mm/hr)'
                                 },
-                                beginAtZero: true
+                                beginAtZero: true,
+                                max: Math.max(...rainfallData) + 1.0
                             }
                         }
-                    }
+                    },
+                    plugins: [trianglePlugin]
                 });
                 
                 // Show chart and hide loading
