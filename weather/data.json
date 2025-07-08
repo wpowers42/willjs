@@ -1,0 +1,106 @@
+{
+  "last_updated": "2025-07-08T08:11:54.880488",
+  "location": "Utrecht",
+  "forecast": [
+    {
+      "time": "2025-07-08T08:10:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T08:15:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T08:20:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T08:25:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T08:30:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T08:35:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T08:40:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T08:45:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T08:50:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T08:55:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T09:00:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T09:05:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T09:10:00",
+      "rainfall_mm_per_hr": 0.12
+    },
+    {
+      "time": "2025-07-08T09:15:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T09:20:00",
+      "rainfall_mm_per_hr": 0.12
+    },
+    {
+      "time": "2025-07-08T09:25:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T09:30:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T09:35:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T09:40:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T09:45:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T09:50:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T09:55:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T10:00:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T10:05:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-08T10:10:00",
+      "rainfall_mm_per_hr": 0.0
+    }
+  ]
+}
