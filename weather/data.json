@@ -1,39 +1,7 @@
 {
-  "last_updated": "2025-07-10T02:25:44.635790",
+  "last_updated": "2025-07-10T03:02:56.705976",
   "location": "Utrecht",
   "forecast": [
-    {
-      "time": "2025-07-10T02:20:00",
-      "rainfall_mm_per_hr": 0.0
-    },
-    {
-      "time": "2025-07-10T02:25:00",
-      "rainfall_mm_per_hr": 0.0
-    },
-    {
-      "time": "2025-07-10T02:30:00",
-      "rainfall_mm_per_hr": 0.0
-    },
-    {
-      "time": "2025-07-10T02:35:00",
-      "rainfall_mm_per_hr": 0.0
-    },
-    {
-      "time": "2025-07-10T02:40:00",
-      "rainfall_mm_per_hr": 0.0
-    },
-    {
-      "time": "2025-07-10T02:45:00",
-      "rainfall_mm_per_hr": 0.0
-    },
-    {
-      "time": "2025-07-10T02:50:00",
-      "rainfall_mm_per_hr": 0.0
-    },
-    {
-      "time": "2025-07-10T02:55:00",
-      "rainfall_mm_per_hr": 0.0
-    },
     {
       "time": "2025-07-10T03:00:00",
       "rainfall_mm_per_hr": 0.0
@@ -100,6 +68,38 @@
     },
     {
       "time": "2025-07-10T04:20:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-10T04:25:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-10T04:30:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-10T04:35:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-10T04:40:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-10T04:45:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-10T04:50:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-10T04:55:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-10T05:00:00",
       "rainfall_mm_per_hr": 0.0
     }
   ]
