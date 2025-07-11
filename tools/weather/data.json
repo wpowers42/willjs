@@ -1,11 +1,7 @@
 {
-  "last_updated": "2025-07-11T14:49:52.638797",
+  "last_updated": "2025-07-11T14:56:31.288612",
   "location": "Utrecht",
   "forecast": [
-    {
-      "time": "2025-07-11T14:45:00",
-      "rainfall_mm_per_hr": 0.0
-    },
     {
       "time": "2025-07-11T14:50:00",
       "rainfall_mm_per_hr": 0.0
@@ -100,6 +96,10 @@
     },
     {
       "time": "2025-07-11T16:45:00",
+      "rainfall_mm_per_hr": 0.0
+    },
+    {
+      "time": "2025-07-11T16:50:00",
       "rainfall_mm_per_hr": 0.0
     }
   ]
