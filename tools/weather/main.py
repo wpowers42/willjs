@@ -11,6 +11,13 @@ import os
 API_KEY = os.environ.get("KNMI_API_KEY")
 if not API_KEY:
     raise ValueError("KNMI_API_KEY environment variable is required")
+
+JSONBIN_API_KEY = os.environ.get("JSONBIN_API_KEY")
+if not JSONBIN_API_KEY:
+    raise ValueError("JSONBIN_API_KEY environment variable is required")
+
+JSONBIN_BIN_ID = "687255286063391d31ac20d2"
+
 BASE_URL = "https://api.dataplatform.knmi.nl/open-data/v1/datasets/radar_forecast/versions/2.0/files"
 
 UTRECHT_LAT, UTRECHT_LON = 52.0907, 5.1214
@@ -84,6 +91,32 @@ def process_radar_data(filepath):
     
     return rainrate
 
+def upload_to_jsonbin(data):
+    """Upload data to JSONBin.io"""
+    headers = {
+        "Content-Type": "application/json",
+        "X-Master-key": JSONBIN_API_KEY
+    }
+    
+    if JSONBIN_BIN_ID:
+        # Update existing bin
+        url = f"https://api.jsonbin.io/v3/b/{JSONBIN_BIN_ID}"
+        response = requests.put(url, json=data, headers=headers)
+    else:
+        # Create new bin
+        url = "https://api.jsonbin.io/v3/b"
+        response = requests.post(url, json=data, headers=headers)
+    
+    response.raise_for_status()
+    result = response.json()
+    
+    if not JSONBIN_BIN_ID and "metadata" in result:
+        print(f"Created new bin with ID: {result['metadata']['id']}")
+        print(f"Public URL: https://api.jsonbin.io/v3/b/{result['metadata']['id']}")
+        print("Set JSONBIN_BIN_ID environment variable to this ID for future updates")
+    
+    return result
+
 # Main execution
 filename = list_latest_file()
 print("Latest file:", filename)
@@ -126,8 +159,14 @@ data = {
     ]
 }
 
-# Write JSON data
-with open("data.json", "w") as f:
-    json.dump(data, f, indent=2)
-
-print(f"\nJSON data written to data.json with {len(data['forecast'])} forecasts")
+# Upload to JSONBin.io
+try:
+    result = upload_to_jsonbin(data)
+    print(f"\nJSON data uploaded to JSONBin.io successfully with {len(data['forecast'])} forecasts")
+    if JSONBIN_BIN_ID:
+        print(f"Updated bin: {JSONBIN_BIN_ID}")
+    else:
+        print(f"Created new bin: {result['metadata']['id']}")
+except Exception as e:
+    print(f"\nError uploading to JSONBin.io: {e}")
+    raise

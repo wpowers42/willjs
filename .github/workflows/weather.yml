@@ -34,14 +34,8 @@ jobs:
     - name: Run weather script
       env:
         KNMI_API_KEY: ${{ secrets.KNMI_API_KEY }}
+        JSONBIN_API_KEY: ${{ secrets.JSONBIN_API_KEY }}
+        JSONBIN_BIN_ID: ${{ secrets.JSONBIN_BIN_ID }}
       run: |
         cd tools/weather
         python main.py
-        
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/main'
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./tools/weather
-        destination_dir: weather
