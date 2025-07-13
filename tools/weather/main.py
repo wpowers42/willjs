@@ -66,14 +66,6 @@ def download_file(url, path):
             for chunk in r.iter_content(8192):
                 f.write(chunk)
 
-def is_file_recent(filepath, max_age_minutes=15):
-    """Check if file exists and is newer than max_age_minutes"""
-    if not filepath.exists():
-        return False
-    
-    file_age_seconds = time.time() - filepath.stat().st_mtime
-    file_age_minutes = file_age_seconds / 60
-    return file_age_minutes < max_age_minutes
 
 def process_radar_data(filepath, city_name, city_lat, city_lon):
     # Read projection & timing
@@ -143,14 +135,10 @@ print("Latest file:", filename)
 
 local_path = Path(filename)
 
-# Only download if file doesn't exist or is older than 15 minutes
-if is_file_recent(local_path):
-    print(f"Using existing file {local_path} (less than 15 minutes old)")
-else:
-    print(f"Downloading {filename} (file missing or older than 15 minutes)")
-    dl_url = get_download_url(filename)
-    download_file(dl_url, local_path)
-    print("Saved to", local_path)
+print(f"Downloading {filename}")
+dl_url = get_download_url(filename)
+download_file(dl_url, local_path)
+print("Saved to", local_path)
 
 # Process radar data for all cities
 import json
