@@ -20,7 +20,27 @@ JSONBIN_BIN_ID = "687255286063391d31ac20d2"
 
 BASE_URL = "https://api.dataplatform.knmi.nl/open-data/v1/datasets/radar_forecast/versions/2.0/files"
 
-UTRECHT_LAT, UTRECHT_LON = 52.0907, 5.1214
+# City coordinates for major Dutch cities
+CITIES = {
+    "Utrecht": {"lat": 52.092876, "lon": 5.104480},
+    "Amsterdam": {"lat": 52.377956, "lon": 4.897070},
+    "Rotterdam": {"lat": 51.926517, "lon": 4.462456},
+    "The Hague": {"lat": 52.078663, "lon": 4.288788},
+    "Eindhoven": {"lat": 51.441642, "lon": 5.469722},
+    "Groningen": {"lat": 53.219383, "lon": 6.566502},
+    "Tilburg": {"lat": 51.555351, "lon": 5.091600},
+    "Almere": {"lat": 52.371353, "lon": 5.222124},
+    "Breda": {"lat": 51.586151, "lon": 4.776150},
+    "Nijmegen": {"lat": 51.812565, "lon": 5.837226},
+    "Haarlem": {"lat": 52.387386, "lon": 4.646219},
+    "Leiden": {"lat": 52.160114, "lon": 4.497010},
+    "Dordrecht": {"lat": 51.813297, "lon": 4.690093},
+    "Zaandam": {"lat": 52.442039, "lon": 4.829199},
+    "Deventer": {"lat": 52.266075, "lon": 6.155217},
+    "Lelystad": {"lat": 52.518536, "lon": 5.471422},
+    "Emmen": {"lat": 52.785805, "lon": 6.897585},
+    "Gouda": {"lat": 52.011112, "lon": 4.711111}
+}
 
 dx = dy = 1.0  # Grid resolution in km
 n_steps = 25
@@ -55,7 +75,7 @@ def is_file_recent(filepath, max_age_minutes=15):
     file_age_minutes = file_age_seconds / 60
     return file_age_minutes < max_age_minutes
 
-def process_radar_data(filepath):
+def process_radar_data(filepath, city_name, city_lat, city_lon):
     # Read projection & timing
     with h5py.File(filepath, "r") as f:
         nrows, ncols = f["image1/image_data"].shape
@@ -64,18 +84,18 @@ def process_radar_data(filepath):
     
     start = pd.to_datetime(start_raw, format="%d-%b-%Y;%H:%M:%S.%f")
     
-    # Locate Utrecht in pixel space
+    # Locate city in pixel space
     proj = Proj(proj4)
-    uX, uY = proj(UTRECHT_LON, UTRECHT_LAT)
+    cX, cY = proj(city_lon, city_lat)
     x_min, y_max = proj(0.0, 55.97)  # West/North bounds
     
     # Compute grid position
-    col = int(round((uX - x_min) / dx))
-    row = int(round((y_max - uY) / dy))
+    col = int(round((cX - x_min) / dx))
+    row = int(round((y_max - cY) / dy))
     row = max(0, min(nrows-1, row))
     col = max(0, min(ncols-1, col))
     
-    print(f"Using grid cell row={row}, col={col}")
+    print(f"{city_name}: Using grid cell row={row}, col={col}")
     
     # Read & calibrate all time steps
     values = []
@@ -132,37 +152,40 @@ else:
     download_file(dl_url, local_path)
     print("Saved to", local_path)
 
-# Process radar data
-rainrate = process_radar_data(local_path)
-
-print("\n5-minute rate (mm/hr) near Utrecht:")
-print(rainrate)
-
-# Hourly totals
-hourly = rainrate.resample("1h").sum()
-print("\nHourly totals (mm):")
-print(hourly)
-
-# Generate JSON data for website
+# Process radar data for all cities
 import json
 from datetime import datetime
 
+cities_data = {}
+print("\nProcessing cities:")
+
+for city_name, coords in CITIES.items():
+    rainrate = process_radar_data(local_path, city_name, coords["lat"], coords["lon"])
+    
+    cities_data[city_name] = {
+        "forecast": [
+            {
+                "time": timestamp.isoformat(),
+                "rainfall_mm_per_hr": float(value)
+            }
+            for timestamp, value in rainrate.items()
+        ]
+    }
+    
+    print(f"{city_name}: Processed {len(rainrate)} forecast points")
+
+# Generate JSON data for website
 data = {
     "last_updated": datetime.now().isoformat(),
-    "location": "Utrecht",
-    "forecast": [
-        {
-            "time": timestamp.isoformat(),
-            "rainfall_mm_per_hr": float(value)
-        }
-        for timestamp, value in rainrate.items()
-    ]
+    "cities": cities_data
 }
 
 # Upload to JSONBin.io
 try:
     result = upload_to_jsonbin(data)
-    print(f"\nJSON data uploaded to JSONBin.io successfully with {len(data['forecast'])} forecasts")
+    total_forecasts = sum(len(city_data['forecast']) for city_data in data['cities'].values())
+    print(f"\nJSON data uploaded to JSONBin.io successfully")
+    print(f"Processed {len(data['cities'])} cities with {total_forecasts} total forecast points")
     if JSONBIN_BIN_ID:
         print(f"Updated bin: {JSONBIN_BIN_ID}")
     else:

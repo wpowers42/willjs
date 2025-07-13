@@ -2,3 +2,4 @@
 data.js
 *.map
 node_modules
+*.h5
