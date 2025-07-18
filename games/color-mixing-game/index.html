@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Mixing Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .instructions {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            line-height: 1.4;
+        }
+
+        .color-mix-section {
+            margin-bottom: 40px;
+        }
+
+        .source-colors {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .color-swatch {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid #ddd;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.05);
+        }
+
+        .plus-sign {
+            font-size: 3em;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .choices-section {
+            margin-bottom: 30px;
+        }
+
+        .choices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .choice-button {
+            background: none;
+            border: 4px solid #ddd;
+            border-radius: 15px;
+            padding: 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .choice-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .choice-color {
+            width: 100%;
+            height: 100px;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .choice-button.correct {
+            border-color: #4CAF50;
+            animation: pulse-correct 0.6s ease;
+        }
+
+        .choice-button.wrong {
+            border-color: #f44336;
+            animation: shake 0.5s ease;
+        }
+
+
+        .new-game-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .new-game-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            background: transparent;
+            border: 1px solid transparent;
+        }
+
+        .feedback.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.wrong {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #FFD700;
+            border-radius: 50%;
+            animation: confetti 1s ease-out forwards;
+        }
+
+        @keyframes pulse-correct {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes confetti {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .color-swatch {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .source-colors {
+                gap: 10px;
+            }
+            
+            .plus-sign {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="game-container">
+        <h1>🎨 Color Mixing Game</h1>
+        
+        <div class="instructions">
+            Mix these two colors together and choose the result!
+        </div>
+        
+        <div class="color-mix-section">
+            <div class="source-colors">
+                <div class="color-swatch" id="color1"></div>
+                <div class="plus-sign">+</div>
+                <div class="color-swatch" id="color2"></div>
+            </div>
+        </div>
+        
+        <div class="choices-section">
+            <h3>Which color do you get?</h3>
+            <div class="choices-grid" id="choices">
+                <!-- Choices will be generated here -->
+            </div>
+        </div>
+        
+        
+        <button class="new-game-button" onclick="newGame()">New Colors</button>
+        
+        <div class="feedback" id="feedback">🎉 Correct! Great color mixing!</div>
+    </div>
+
+    <script src="https://scrtwpns.com/mixbox.js"></script>
+    <script>
+        let currentCorrectAnswer = null;
+        let gameActive = true;
+
+        // Accurate subtractive color mixing using Mixbox
+        function mixColors(color1, color2) {
+            // Convert RGB objects to arrays for Mixbox
+            const rgb1 = [color1.r, color1.g, color1.b];
+            const rgb2 = [color2.r, color2.g, color2.b];
+            
+            // Mix colors using Mixbox (t=0.5 for equal mixing)
+            const mixedRgb = mixbox.lerp(rgb1, rgb2, 0.5);
+            
+            // Return as RGB object
+            return {
+                r: Math.round(mixedRgb[0]),
+                g: Math.round(mixedRgb[1]),
+                b: Math.round(mixedRgb[2])
+            };
+        }
+
+        function getRandomColor() {
+            return {
+                r: Math.floor(Math.random() * 256),
+                g: Math.floor(Math.random() * 256),
+                b: Math.floor(Math.random() * 256)
+            };
+        }
+
+
+
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            particles.innerHTML = '';
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 0.5 + 's';
+                particle.style.background = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                particles.appendChild(particle);
+            }
+            
+            setTimeout(() => {
+                particles.innerHTML = '';
+            }, 1000);
+        }
+
+        let currentColors = null;
+
+        function showFeedback(correct) {
+            const feedback = document.getElementById('feedback');
+            feedback.className = `feedback ${correct ? 'correct' : 'wrong'} show`;
+            
+            if (correct) {
+                feedback.innerHTML = `🎉 Correct! Great color mixing!`;
+                gameActive = false;
+            } else {
+                feedback.innerHTML = `❌ Not quite right. Try again!`;
+            }
+        }
+
+        function makeChoice(choiceIndex) {
+            if (!gameActive) return;
+            
+            gameActive = false;
+            const choices = document.querySelectorAll('.choice-button');
+            
+            choices.forEach((choice, index) => {
+                if (index === currentCorrectAnswer) {
+                    choice.style.borderColor = '#4CAF50';
+                } else if (index === choiceIndex) {
+                    choice.classList.add('wrong');
+                }
+            });
+            
+            const correct = choiceIndex === currentCorrectAnswer;
+            showFeedback(correct);
+            
+            if (!correct) {
+                setTimeout(() => {
+                    choices.forEach(choice => {
+                        choice.classList.remove('wrong');
+                        choice.style.borderColor = '';
+                    });
+                    gameActive = true;
+                }, 1500);
+            }
+        }
+
+        function newGame() {
+            // Reset game state
+            gameActive = true;
+            
+            // Clear feedback
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('show');
+            
+            // Generate two random colors
+            const color1 = getRandomColor();
+            const color2 = getRandomColor();
+            
+            // Mix them using Mixbox for realistic pigment mixing
+            const mixedColor = mixColors(color1, color2);
+            
+            // Store current colors for feedback display
+            currentColors = { color1, color2, mixedColor };
+            
+            // Display source colors
+            document.getElementById('color1').style.backgroundColor = `rgb(${color1.r}, ${color1.g}, ${color1.b})`;
+            document.getElementById('color2').style.backgroundColor = `rgb(${color2.r}, ${color2.g}, ${color2.b})`;
+            
+            // Generate choices: correct answer + 2 random colors
+            const choices = [mixedColor, getRandomColor(), getRandomColor()];
+            
+            // Shuffle choices
+            for (let i = choices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [choices[i], choices[j]] = [choices[j], choices[i]];
+            }
+            
+            // Find where the correct answer ended up
+            currentCorrectAnswer = choices.findIndex(choice => 
+                choice.r === mixedColor.r && choice.g === mixedColor.g && choice.b === mixedColor.b
+            );
+            
+            // Display choices
+            const choicesContainer = document.getElementById('choices');
+            choicesContainer.innerHTML = '';
+            
+            choices.forEach((choice, index) => {
+                const button = document.createElement('button');
+                button.className = 'choice-button';
+                button.onclick = () => makeChoice(index);
+                
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'choice-color';
+                colorDiv.style.backgroundColor = `rgb(${choice.r}, ${choice.g}, ${choice.b})`;
+                
+                button.appendChild(colorDiv);
+                choicesContainer.appendChild(button);
+            });
+        }
+
+        // Initialize game
+        newGame();
+    </script>
+</body>
+</html>
