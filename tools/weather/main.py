@@ -104,30 +104,45 @@ def process_radar_data(filepath, city_name, city_lat, city_lon):
     return rainrate
 
 def upload_to_jsonbin(data):
-    """Upload data to JSONBin.io"""
+    """Upload data to JSONBin.io with retry logic for 502/504 errors"""
     headers = {
         "Content-Type": "application/json",
         "X-Master-key": JSONBIN_API_KEY
     }
     
-    if JSONBIN_BIN_ID:
-        # Update existing bin
-        url = f"https://api.jsonbin.io/v3/b/{JSONBIN_BIN_ID}"
-        response = requests.put(url, json=data, headers=headers)
-    else:
-        # Create new bin
-        url = "https://api.jsonbin.io/v3/b"
-        response = requests.post(url, json=data, headers=headers)
+    max_retries = 3
+    base_delay = 1  # seconds
     
-    response.raise_for_status()
-    result = response.json()
-    
-    if not JSONBIN_BIN_ID and "metadata" in result:
-        print(f"Created new bin with ID: {result['metadata']['id']}")
-        print(f"Public URL: https://api.jsonbin.io/v3/b/{result['metadata']['id']}")
-        print("Set JSONBIN_BIN_ID environment variable to this ID for future updates")
-    
-    return result
+    for attempt in range(max_retries + 1):
+        try:
+            if JSONBIN_BIN_ID:
+                # Update existing bin
+                url = f"https://api.jsonbin.io/v3/b/{JSONBIN_BIN_ID}"
+                response = requests.put(url, json=data, headers=headers)
+            else:
+                # Create new bin
+                url = "https://api.jsonbin.io/v3/b"
+                response = requests.post(url, json=data, headers=headers)
+            
+            response.raise_for_status()
+            result = response.json()
+            
+            if not JSONBIN_BIN_ID and "metadata" in result:
+                print(f"Created new bin with ID: {result['metadata']['id']}")
+                print(f"Public URL: https://api.jsonbin.io/v3/b/{result['metadata']['id']}")
+                print("Set JSONBIN_BIN_ID environment variable to this ID for future updates")
+            
+            return result
+            
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code in [502, 504] and attempt < max_retries:
+                delay = base_delay * (2 ** attempt)
+                print(f"JSONBin.io {e.response.status_code} error, retrying in {delay}s (attempt {attempt + 1}/{max_retries + 1})")
+                time.sleep(delay)
+                continue
+            else:
+                # Re-raise for non-retryable errors or if max retries exceeded
+                raise
 
 # Main execution
 filename = list_latest_file()
