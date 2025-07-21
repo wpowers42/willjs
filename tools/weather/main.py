@@ -110,7 +110,7 @@ def upload_to_jsonbin(data):
         "X-Master-key": JSONBIN_API_KEY
     }
     
-    max_retries = 7
+    max_retries = 20
     base_delay = 1  # seconds
     
     for attempt in range(max_retries + 1):
@@ -136,7 +136,7 @@ def upload_to_jsonbin(data):
             
         except requests.exceptions.HTTPError as e:
             if e.response.status_code in [502, 504] and attempt < max_retries:
-                delay = base_delay * (2 ** attempt)
+                delay = min(base_delay * (2 ** attempt), 256)
                 print(f"JSONBin.io {e.response.status_code} error, retrying in {delay}s (attempt {attempt + 1}/{max_retries + 1})")
                 time.sleep(delay)
                 continue
