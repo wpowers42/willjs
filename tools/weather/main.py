@@ -110,7 +110,7 @@ def upload_to_jsonbin(data):
         "X-Master-key": JSONBIN_API_KEY
     }
     
-    max_retries = 3
+    max_retries = 7
     base_delay = 1  # seconds
     
     for attempt in range(max_retries + 1):
