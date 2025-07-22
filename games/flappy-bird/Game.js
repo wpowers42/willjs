@@ -7,7 +7,9 @@ import CountdownState from "./states/CountdownState.js";
 import Audio from "./Audio.js";
 import InputHandler from "./InputHandler.js";
 import PausedState from "./states/PausedState.js";
+
 export default class Game {
+
     constructor(ctx) {
         this.ctx = ctx;
         this.width = this.ctx.canvas.width;
@@ -17,7 +19,7 @@ export default class Game {
             'small': '16px flappy',
             'medium': '24px flappy',
             'large': '48px flappy',
-        };
+        }
         this.graphics = new Graphics(this);
         this.audio = new Audio();
         this.stateMachine = new StateMachine({
@@ -35,26 +37,30 @@ export default class Game {
         this.accumulator = 0;
         this.lastTime = performance.now();
     }
+
     step(dt) {
         this.stateMachine.update(dt);
         this.graphics.update(dt);
         this.input.reset();
     }
+
+
     update() {
         let newTime = performance.now();
         let frameTime = newTime - this.lastTime;
         this.lastTime = newTime;
         this.accumulator += frameTime;
+
         while (this.dt < this.accumulator) {
             this.step(this.dt);
             this.t += this.dt;
             this.accumulator -= this.dt;
         }
     }
+
     draw() {
         this.graphics.drawBackground(this.ctx);
         this.stateMachine.draw(this.ctx);
         this.graphics.drawGround(this.ctx);
     }
 }
-//# sourceMappingURL=Game.js.map
