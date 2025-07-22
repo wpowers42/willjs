@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Teacher Growth Accounting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            margin: 10px;
+        }
+
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 5px auto 15px auto;
+            touch-action: pinch-zoom;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        .legend {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .legend h3 {
+            margin: 0 0 10px 0;
+            text-align: center;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            flex-shrink: 0;
+        }
+    </style>
+    <script src="jswasm/sqlite3.js"></script>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div class="legend">
+        <h3>Growth Accounting States</h3>
+        <div class="legend-grid">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #10b981;"></div>
+                <span><strong>New:</strong> L28 this month, never activated before</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #059669;"></div>
+                <span><strong>Returning:</strong> L28 this month AND same month last year</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #84cc16;"></div>
+                <span><strong>Resurrected:</strong> L28 this month, not same month last year, but had activated</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f59e0b;"></div>
+                <span><strong>Churned:</strong> NOT L28 this month, L28 same month last year</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #6b7280;"></div>
+                <span><strong>Dormant:</strong> Last communicated before cutoff date</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #d1d5db;"></div>
+                <span><strong>Never Activated:</strong> Has never communicated</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #9ca3af;"></div>
+                <span><strong>At Risk:</strong> Communicated between dates but not currently active</span>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+
+</html>
