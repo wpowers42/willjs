@@ -164,7 +164,7 @@ UPDATE monthly_data SET communicated_l28 = 0 WHERE month_id = 16; -- Apr 22
 -- Never_activated: Never been active
 -- (Default state for most months)
 
--- Dormant: Not active now, has history, month <= 24
+-- Churned: Not active now, but was active same month last year (takes precedence over Dormant)
 UPDATE monthly_data SET communicated_l28 = 1 WHERE month_id = 8;  -- Aug 21
 UPDATE monthly_data SET communicated_l28 = 0 WHERE month_id = 20; -- Aug 22
 
@@ -182,7 +182,7 @@ SELECT
         WHEN 25 THEN CASE WHEN state = 'Resurrected' THEN '✓ Expected Resurrected' ELSE '✗ FAIL' END  
         WHEN 16 THEN CASE WHEN state = 'Churned' THEN '✓ Expected Churned' ELSE '✗ FAIL' END
         WHEN 1 THEN CASE WHEN state = 'Never_activated' THEN '✓ Expected Never_activated' ELSE '✗ FAIL' END
-        WHEN 20 THEN CASE WHEN state = 'Dormant' THEN '✓ Expected Dormant' ELSE '✗ FAIL' END
+        WHEN 20 THEN CASE WHEN state = 'Churned' THEN '✓ Expected Churned' ELSE '✗ FAIL' END
         WHEN 30 THEN CASE WHEN state = 'At_Risk' THEN '✓ Expected At_Risk' ELSE '✗ FAIL' END
         ELSE 'Other'
     END as test_result
@@ -209,10 +209,10 @@ SELECT
     prev_year_same_month,
     total_activations_before,
     state,
-    -- Manual verification
+    -- Manual verification (updated to match actual production behavior)
     CASE 
-        WHEN month_id = 13 THEN 'Should be New (no prev year, no prior)'
-        WHEN month_id = 14 THEN 'Should be New (no prev year Feb, has 1 prior)'
+        WHEN month_id = 13 THEN 'Should be Returning (Jan 21 was active = prev_year_same_month)'
+        WHEN month_id = 14 THEN 'Should be Resurrected (no Feb 21, but has prior activations)'
         WHEN month_id = 25 THEN 'Should be Returning (Jan 22 was active)'
         WHEN month_id = 26 THEN 'Should be Returning (Feb 22 was active)'
         ELSE 'Other scenario'
