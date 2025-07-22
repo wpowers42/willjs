@@ -15,4 +15,3 @@ export default class InputHandler {
         });
     }
 }
-//# sourceMappingURL=input.js.map

@@ -72,4 +72,3 @@ export default class Game {
         this.currentState.enter();
     }
 }
-//# sourceMappingURL=Game.js.map

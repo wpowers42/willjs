@@ -52,4 +52,3 @@ export default class UI {
         ctx.fillText(`FPS: ${fps}`, 10, 40);
     }
 }
-//# sourceMappingURL=ui.js.map

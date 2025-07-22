@@ -109,4 +109,3 @@ export class Player2 extends Paddle {
         };
     }
 }
-//# sourceMappingURL=Paddle.js.map

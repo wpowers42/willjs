@@ -33,7 +33,7 @@ export default class Store {
                 baseCost: 150,
                 costMultiplier: 1.6,
                 purchaseCount: 0,
-                maxPurchases: 8,
+                maxPurchases: -1, // Unlimited
                 category: "defense"
             },
             multiShot: {

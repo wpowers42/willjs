@@ -113,4 +113,3 @@ export default class Ball {
         ctx.restore();
     }
 }
-//# sourceMappingURL=Ball.js.map

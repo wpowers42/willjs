@@ -33,4 +33,3 @@ export class MovingDownPaddleState extends PaddleState {
         this.paddle.dy = this.paddle.speed;
     }
 }
-//# sourceMappingURL=PaddleState.js.map

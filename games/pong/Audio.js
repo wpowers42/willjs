@@ -24,4 +24,3 @@ Audio.PaddleHit = 1;
 Audio.WallHit = 2;
 Audio.Score = 3;
 export default Audio;
-//# sourceMappingURL=Audio.js.map

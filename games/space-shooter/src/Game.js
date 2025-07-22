@@ -108,7 +108,7 @@ export default class Game {
         this.isRunning = true;
         this.isPaused = false;
         this.isGameOver = false;
-        this.score = 0;
+        this.score = 100000; // Debug: Start with high score for testing upgrades
         this.gameTime = 0;
         this.lastTime = performance.now();
 
@@ -806,7 +806,7 @@ export default class Game {
         const drawUpgradeLine = (name, currentValue, upgradeType, maxUpgrades = 10) => {
             const cost = this.store.getItemCost(upgradeType);
             const canAfford = this.score >= cost;
-            const isMaxed = this.store.items[upgradeType].purchaseCount >= maxUpgrades;
+            const isMaxed = maxUpgrades !== -1 && this.store.items[upgradeType].purchaseCount >= maxUpgrades;
             
             // Upgrade name and current value
             this.ctx.fillStyle = currentValue > 0 ? '#ffffff' : '#888888';
@@ -857,7 +857,7 @@ export default class Game {
         drawUpgradeLine(`Fire Rate +${fireRatePercent}%`, upgrades.fireRate, 'fireRate', 10);
 
         // Damage
-        drawUpgradeLine(`Damage +${upgrades.damage}`, upgrades.damage, 'damage', 8);
+        drawUpgradeLine(`Damage +${upgrades.damage}`, upgrades.damage, 'damage', -1);
 
         // Multi-Shot
         const shotCount = 1 + upgrades.multiShot;
