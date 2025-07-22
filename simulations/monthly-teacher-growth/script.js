@@ -104,33 +104,51 @@ const MONTH_LABELS = generateMonthLabels();
 console.log('First 12 months (2021):', MONTH_LABELS.slice(0, 12).map(m => m.label));
 
 function createTables(db) {
-    // Drop and recreate table to ensure clean state
-    const sqlDropTable = `DROP TABLE IF EXISTS monthly_data;`;
-    db.exec(sqlDropTable);
-    
-    // Create monthly data table
-    const sqlMonthlyData = `
-        CREATE TABLE monthly_data (
-            month_id INTEGER PRIMARY KEY,
-            month_label TEXT,
-            communicated_l28 INTEGER DEFAULT 0,
-            date_value TEXT
-        );
-    `;
-    db.exec(sqlMonthlyData);
-
-    // Insert month data (now guaranteed to be fresh)
-    MONTH_LABELS.forEach(month => {
-        const sql = `
-            INSERT INTO monthly_data 
-            (month_id, month_label, communicated_l28, date_value)
-            VALUES (?, ?, ?, ?)
-        `;
+    // Check if table exists and has data
+    let hasData = false;
+    try {
+        const checkSql = `SELECT COUNT(*) as count FROM monthly_data;`;
         db.exec({
-            sql: sql,
-            bind: [month.id, month.label, month.isCurrent ? 1 : 0, month.date.toISOString()]
+            sql: checkSql,
+            rowMode: 'object',
+            callback: function(row) {
+                hasData = row.count > 0;
+            }
         });
-    });
+    } catch (e) {
+        // Table doesn't exist, will create it
+        hasData = false;
+    }
+    
+    if (!hasData) {
+        // Only drop and recreate if no data exists
+        const sqlDropTable = `DROP TABLE IF EXISTS monthly_data;`;
+        db.exec(sqlDropTable);
+        
+        // Create monthly data table
+        const sqlMonthlyData = `
+            CREATE TABLE monthly_data (
+                month_id INTEGER PRIMARY KEY,
+                month_label TEXT,
+                communicated_l28 INTEGER DEFAULT 0,
+                date_value TEXT
+            );
+        `;
+        db.exec(sqlMonthlyData);
+
+        // Insert month data with default values
+        MONTH_LABELS.forEach(month => {
+            const sql = `
+                INSERT INTO monthly_data 
+                (month_id, month_label, communicated_l28, date_value)
+                VALUES (?, ?, ?, ?)
+            `;
+            db.exec({
+                sql: sql,
+                bind: [month.id, month.label, month.isCurrent ? 1 : 0, month.date.toISOString()]
+            });
+        });
+    }
 
     createGrowthView(db);
 }
@@ -361,9 +379,11 @@ function update(db) {
 
 function reset(db) {
     console.log('Resetting data and forcing view recreation...');
-    const sql = `UPDATE monthly_data SET communicated_l28 = 0`;
-    db.exec(sql);
-    // Force recreation of tables and views to ensure updated logic
+    // Force recreation of tables by dropping them first
+    const sqlDropTable = `DROP TABLE IF EXISTS monthly_data;`;
+    db.exec(sqlDropTable);
+    
+    // Now createTables will recreate with fresh data
     createTables(db);
     update(db);
 }
