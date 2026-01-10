@@ -1,8 +1,19 @@
 // setup canvas and context
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-canvas.width = Math.min(800, window.innerWidth);
-canvas.height = Math.min(600, window.innerHeight);
+
+// Responsive canvas sizing
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Helper to detect portrait mode (mobile-friendly vertical layout)
+function isPortrait() {
+    return canvas.height > canvas.width;
+}
 
 
 class ProjectivePlane {
@@ -121,6 +132,11 @@ class SpotIt {
         this.feedbackTime = 0;
         this.feedbackDuration = 800;  // ms to show feedback
 
+        // 2-player mode
+        this.player1Score = 0;  // Top card (portrait) or Left card (landscape)
+        this.player2Score = 0;  // Bottom card (portrait) or Right card (landscape)
+        this.lastScoringPlayer = null;  // Track who scored last for feedback
+
         // Timing
         this.roundStartTime = 0;
         this.totalTime = 0;
@@ -132,19 +148,19 @@ class SpotIt {
         this.selectedSymbol = null;
         this.hoveredSymbol = null;
 
-        // Buttons
+        // Buttons (positions updated dynamically in render)
         this.startButton = {
-            x: canvas.width / 2 - 60,
-            y: canvas.height / 2 + 50,
-            width: 120,
+            x: 0,
+            y: 0,
+            width: 140,
             height: 50,
             text: "Start Game",
             lastClicked: undefined
         };
 
         this.playAgainButton = {
-            x: canvas.width / 2 - 70,
-            y: canvas.height / 2 + 100,
+            x: 0,
+            y: 0,
             width: 140,
             height: 50,
             text: "Play Again",
@@ -245,27 +261,33 @@ class SpotIt {
     }
 
     checkSymbolClick(x, y) {
-        // Check card A
+        // Check card A (Player 1 - top/left)
         const hitA = this.cardA.getSymbolAtPoint(x, y);
         if (hitA !== null) {
-            this.handleSymbolSelection(this.cardA.symbols[hitA]);
+            this.handleSymbolSelection(this.cardA.symbols[hitA], 1);
             return;
         }
 
-        // Check card B
+        // Check card B (Player 2 - bottom/right)
         const hitB = this.cardB.getSymbolAtPoint(x, y);
         if (hitB !== null) {
-            this.handleSymbolSelection(this.cardB.symbols[hitB]);
+            this.handleSymbolSelection(this.cardB.symbols[hitB], 2);
             return;
         }
     }
 
-    handleSymbolSelection(symbolIndex) {
+    handleSymbolSelection(symbolIndex, player) {
         this.selectedSymbol = symbolIndex;
 
         if (symbolIndex === this.matchingSymbol) {
             // Correct!
             this.score++;
+            if (player === 1) {
+                this.player1Score++;
+            } else {
+                this.player2Score++;
+            }
+            this.lastScoringPlayer = player;
             this.feedbackResult = 'correct';
             this.lastRoundTime = performance.now() - this.roundStartTime;
             this.totalTime += this.lastRoundTime;
@@ -276,6 +298,7 @@ class SpotIt {
         } else {
             // Incorrect
             this.feedbackResult = 'incorrect';
+            this.lastScoringPlayer = null;
         }
 
         this.feedbackTime = performance.now();
@@ -285,6 +308,8 @@ class SpotIt {
     startGame() {
         this.state = GameState.PLAYING;
         this.score = 0;
+        this.player1Score = 0;
+        this.player2Score = 0;
         this.currentRound = 0;
         this.totalTime = 0;
         this.bestTime = Infinity;
@@ -418,18 +443,36 @@ class SpotIt {
     renderStartScreen() {
         ctx.save();
 
+        // Responsive font sizes
+        const titleSize = Math.min(48, canvas.width / 8);
+        const textSize = Math.min(20, canvas.width / 20);
+
         // Title
         ctx.fillStyle = 'white';
-        ctx.font = 'bold 48px Arial';
+        ctx.font = `bold ${titleSize}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('Spot It!', canvas.width / 2, canvas.height / 3);
 
-        // Instructions
-        ctx.font = '20px Arial';
+        // Instructions - word wrap for narrow screens
+        ctx.font = `${textSize}px Arial`;
         ctx.fillStyle = '#aaa';
-        ctx.fillText('Find the matching symbol between the two cards!', canvas.width / 2, canvas.height / 2 - 20);
-        ctx.fillText('Click on it as fast as you can.', canvas.width / 2, canvas.height / 2 + 10);
+
+        const instructions = [
+            'Find the matching symbol',
+            'between the two cards!',
+            'Tap it as fast as you can.'
+        ];
+
+        const lineHeight = textSize * 1.4;
+        const startY = canvas.height / 2 - lineHeight;
+        instructions.forEach((line, i) => {
+            ctx.fillText(line, canvas.width / 2, startY + i * lineHeight);
+        });
+
+        // Update button position dynamically
+        this.startButton.x = canvas.width / 2 - this.startButton.width / 2;
+        this.startButton.y = canvas.height / 2 + lineHeight * 2;
 
         // Start button
         this.renderButton(this.startButton);
@@ -442,8 +485,10 @@ class SpotIt {
         const highlightA = this.getCardHighlight('A');
         const highlightB = this.getCardHighlight('B');
 
-        this.cardA.render(0, highlightA);
-        this.cardB.render(1, highlightB);
+        // Pass portrait mode flag for vertical stacking
+        const portrait = isPortrait();
+        this.cardA.render(0, highlightA, portrait);
+        this.cardB.render(1, highlightB, portrait);
 
         // Render HUD
         this.renderHUD();
@@ -482,23 +527,59 @@ class SpotIt {
     renderHUD() {
         ctx.save();
 
-        // Score and round
+        const portrait = isPortrait();
+        const fontSize = Math.min(20, canvas.width / 18);
+        const smallFontSize = Math.min(16, canvas.width / 22);
+
         ctx.fillStyle = 'white';
-        ctx.font = 'bold 24px Arial';
-        ctx.textAlign = 'left';
+        ctx.font = `bold ${fontSize}px Arial`;
         ctx.textBaseline = 'top';
-        ctx.fillText(`Score: ${this.score}/${this.currentRound}`, 20, 20);
 
-        ctx.textAlign = 'right';
-        ctx.fillText(`Round: ${this.currentRound}/${this.totalRounds}`, canvas.width - 20, 20);
+        if (portrait) {
+            // Vertical layout for portrait mode - scores on sides, round/time stacked in center
+            // Player 1 score (top card)
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#4fc3f7';
+            ctx.fillText(`P1: ${this.player1Score}`, 10, 10);
 
-        // Current round timer
-        if (this.state === GameState.PLAYING) {
-            const elapsed = (performance.now() - this.roundStartTime) / 1000;
+            // Player 2 score (bottom card)
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#ffb74d';
+            ctx.fillText(`P2: ${this.player2Score}`, canvas.width - 10, 10);
+
+            // Round in center
             ctx.textAlign = 'center';
-            ctx.font = '20px Arial';
-            ctx.fillStyle = '#aaa';
-            ctx.fillText(`Time: ${elapsed.toFixed(1)}s`, canvas.width / 2, 20);
+            ctx.fillStyle = 'white';
+            ctx.font = `${smallFontSize}px Arial`;
+            ctx.fillText(`Round ${this.currentRound}/${this.totalRounds}`, canvas.width / 2, 10);
+
+            // Timer below round
+            if (this.state === GameState.PLAYING) {
+                const elapsed = (performance.now() - this.roundStartTime) / 1000;
+                ctx.fillStyle = '#aaa';
+                ctx.fillText(`${elapsed.toFixed(1)}s`, canvas.width / 2, 10 + smallFontSize + 4);
+            }
+        } else {
+            // Horizontal layout for landscape - player scores flanking, center info
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#4fc3f7';
+            ctx.fillText(`P1: ${this.player1Score}`, 20, 20);
+
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#ffb74d';
+            ctx.fillText(`P2: ${this.player2Score}`, canvas.width - 20, 20);
+
+            // Round and timer in center
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'white';
+            ctx.fillText(`Round ${this.currentRound}/${this.totalRounds}`, canvas.width / 2, 20);
+
+            if (this.state === GameState.PLAYING) {
+                const elapsed = (performance.now() - this.roundStartTime) / 1000;
+                ctx.font = `${smallFontSize}px Arial`;
+                ctx.fillStyle = '#aaa';
+                ctx.fillText(`${elapsed.toFixed(1)}s`, canvas.width / 2, 20 + fontSize + 4);
+            }
         }
 
         ctx.restore();
@@ -507,8 +588,19 @@ class SpotIt {
     renderFeedback() {
         ctx.save();
 
-        const message = this.feedbackResult === 'correct' ? 'Correct!' : 'Wrong!';
-        const color = this.feedbackResult === 'correct' ? '#4CAF50' : '#f44336';
+        let message;
+        let color;
+        if (this.feedbackResult === 'correct') {
+            const playerLabel = this.lastScoringPlayer === 1 ? 'P1' : 'P2';
+            const playerColor = this.lastScoringPlayer === 1 ? '#4fc3f7' : '#ffb74d';
+            message = `${playerLabel} scores!`;
+            color = playerColor;
+        } else {
+            message = 'Wrong!';
+            color = '#f44336';
+        }
+
+        const fontSize = Math.min(28, canvas.width / 14);
 
         // Semi-transparent overlay at bottom
         ctx.fillStyle = color;
@@ -517,7 +609,7 @@ class SpotIt {
 
         ctx.globalAlpha = 1;
         ctx.fillStyle = 'white';
-        ctx.font = 'bold 28px Arial';
+        ctx.font = `bold ${fontSize}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -533,32 +625,57 @@ class SpotIt {
     renderResults() {
         ctx.save();
 
+        const titleSize = Math.min(42, canvas.width / 9);
+        const scoreSize = Math.min(28, canvas.width / 14);
+        const textSize = Math.min(18, canvas.width / 20);
+
         // Title
         ctx.fillStyle = 'white';
-        ctx.font = 'bold 42px Arial';
+        ctx.font = `bold ${titleSize}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('Game Over!', canvas.width / 2, 80);
+        ctx.fillText('Game Over!', canvas.width / 2, canvas.height * 0.12);
+
+        // Winner announcement
+        let winner;
+        if (this.player1Score > this.player2Score) {
+            winner = 'P1 Wins!';
+            ctx.fillStyle = '#4fc3f7';
+        } else if (this.player2Score > this.player1Score) {
+            winner = 'P2 Wins!';
+            ctx.fillStyle = '#ffb74d';
+        } else {
+            winner = "It's a Tie!";
+            ctx.fillStyle = '#4CAF50';
+        }
+        ctx.font = `bold ${scoreSize}px Arial`;
+        ctx.fillText(winner, canvas.width / 2, canvas.height * 0.22);
+
+        // Player scores
+        ctx.font = `${textSize}px Arial`;
+        ctx.fillStyle = '#4fc3f7';
+        ctx.fillText(`Player 1: ${this.player1Score}`, canvas.width / 2, canvas.height * 0.32);
+        ctx.fillStyle = '#ffb74d';
+        ctx.fillText(`Player 2: ${this.player2Score}`, canvas.width / 2, canvas.height * 0.38);
 
         // Stats
-        ctx.font = '24px Arial';
-        ctx.fillStyle = '#4CAF50';
-        ctx.fillText(`Final Score: ${this.score}/${this.totalRounds}`, canvas.width / 2, canvas.height / 2 - 60);
-
         ctx.fillStyle = '#aaa';
-        ctx.font = '20px Arial';
+        ctx.font = `${textSize}px Arial`;
 
         if (this.times.length > 0) {
             const avgTime = this.totalTime / this.times.length / 1000;
-            ctx.fillText(`Average Time: ${avgTime.toFixed(2)}s`, canvas.width / 2, canvas.height / 2 - 20);
-            ctx.fillText(`Best Time: ${(this.bestTime / 1000).toFixed(2)}s`, canvas.width / 2, canvas.height / 2 + 10);
-            ctx.fillText(`Total Time: ${(this.totalTime / 1000).toFixed(2)}s`, canvas.width / 2, canvas.height / 2 + 40);
+            ctx.fillText(`Average Time: ${avgTime.toFixed(2)}s`, canvas.width / 2, canvas.height * 0.48);
+            ctx.fillText(`Best Time: ${(this.bestTime / 1000).toFixed(2)}s`, canvas.width / 2, canvas.height * 0.54);
         }
 
         // Accuracy
         const accuracy = this.totalRounds > 0 ? (this.score / this.totalRounds * 100).toFixed(0) : 0;
         ctx.fillStyle = this.score === this.totalRounds ? '#4CAF50' : '#ff9800';
-        ctx.fillText(`Accuracy: ${accuracy}%`, canvas.width / 2, canvas.height / 2 + 70);
+        ctx.fillText(`Accuracy: ${accuracy}%`, canvas.width / 2, canvas.height * 0.60);
+
+        // Update play again button position
+        this.playAgainButton.x = canvas.width / 2 - this.playAgainButton.width / 2;
+        this.playAgainButton.y = canvas.height * 0.70;
 
         // Play again button
         this.renderButton(this.playAgainButton);
@@ -610,11 +727,11 @@ class Card {
         this.symbols = symbols;
         this.icons = icons;
         this.padding = 5;
-        this.cardSize = Math.min(300 + this.padding * 4, (canvas.width - this.padding * 3) / 2);
-        this.symbolSize = (this.cardSize - this.padding * 4) / 3;
         this.symbolPositions = [];  // Store positions for hit detection
         this.cardX = 0;
         this.cardY = 0;
+        this.cardSize = 0;
+        this.symbolSize = 0;
     }
 
     getSymbolAtPoint(x, y) {
@@ -628,9 +745,8 @@ class Card {
         return null;
     }
 
-    renderIcon(iconIndex, x, y, highlight = null) {
+    renderIcon(iconIndex, x, y, size, highlight = null) {
         const icon = this.icons[iconIndex];
-        const size = this.symbolSize;
 
         // Draw highlight background if needed
         if (highlight) {
@@ -659,13 +775,38 @@ class Card {
         ctx.drawImage(icon, x, y, size, size);
     }
 
-    render(cardNumber, highlights = {}) {
-        const deltaX = (canvas.width - this.cardSize * 2) / 3;
-        const x = deltaX + cardNumber * (this.cardSize + deltaX);
-        const y = (canvas.height - this.cardSize) / 2;
+    render(cardNumber, highlights = {}, portrait = false) {
+        // Calculate card size based on orientation
+        const hudHeight = 60;  // Space for HUD at top
+        const feedbackHeight = 70;  // Space for feedback at bottom
+
+        let x, y, cardSize;
+
+        if (portrait) {
+            // Vertical stacking - cards fill width, stack top/bottom
+            const availableHeight = canvas.height - hudHeight - feedbackHeight;
+            const maxCardSize = Math.min(
+                canvas.width - this.padding * 2,
+                (availableHeight - this.padding * 3) / 2
+            );
+            cardSize = Math.min(maxCardSize, 400);
+
+            x = (canvas.width - cardSize) / 2;
+            const totalCardsHeight = cardSize * 2 + this.padding * 2;
+            const startY = hudHeight + (availableHeight - totalCardsHeight) / 2;
+            y = startY + cardNumber * (cardSize + this.padding * 2);
+        } else {
+            // Horizontal layout - side by side
+            cardSize = Math.min(300, (canvas.width - this.padding * 3) / 2);
+            const deltaX = (canvas.width - cardSize * 2) / 3;
+            x = deltaX + cardNumber * (cardSize + deltaX);
+            y = (canvas.height - cardSize) / 2;
+        }
 
         this.cardX = x;
         this.cardY = y;
+        this.cardSize = cardSize;
+        this.symbolSize = (cardSize - this.padding * 4) / 3;
 
         // create a 3x3 grid of positions
         this.symbolPositions = [];
@@ -685,7 +826,7 @@ class Card {
         ctx.fillStyle = 'white';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(x, y, this.cardSize, this.cardSize, 10);
+        ctx.roundRect(x, y, cardSize, cardSize, 10);
         ctx.fill();
         ctx.stroke();
         ctx.closePath();
@@ -695,7 +836,7 @@ class Card {
             if (idx < this.symbolPositions.length) {
                 const pos = this.symbolPositions[idx];
                 const highlight = highlights[idx] || null;
-                this.renderIcon(symbolIndex, pos.x, pos.y, highlight);
+                this.renderIcon(symbolIndex, pos.x, pos.y, this.symbolSize, highlight);
             }
         });
     }
