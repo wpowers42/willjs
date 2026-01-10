@@ -5,9 +5,15 @@
 
 body {
     background-color: #1a1a1a;
+    overflow: hidden;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 canvas {
     display: block;
     margin: 0 auto;
+    touch-action: none;
 }
