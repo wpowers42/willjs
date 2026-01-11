@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Points in a Circle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="info-panel">
+            <h1>Random Points in a Circle</h1>
+            <p class="description">
+                Compare different algorithms for generating uniformly distributed random points
+                within a unit circle. Notice how naive approaches can produce non-uniform distributions.
+            </p>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Speed Mode:</label>
+                    <div class="button-group">
+                        <button id="slowBtn" class="active">Slow</button>
+                        <button id="fastBtn">Fast</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Points per method: <span id="pointCount">10,000</span></label>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-box polar-stat">
+                    <h3>Polar (Naive)</h3>
+                    <p>Generated: <span id="polarCount">0</span></p>
+                    <p class="uniformity">Uniformity: <span id="polarUniformity">0%</span></p>
+                    <p class="formula">r = random(0,1)<br>θ = random(0,2π)</p>
+                </div>
+                <div class="stat-box rejection-stat">
+                    <h3>Rejection Sampling</h3>
+                    <p>Generated: <span id="rejectionCount">0</span></p>
+                    <p>Rejected: <span id="rejectedCount">0</span></p>
+                    <p class="uniformity">Uniformity: <span id="rejectionUniformity">0%</span></p>
+                    <p class="formula">x,y = random(-1,1)<br>accept if x²+y² ≤ 1</p>
+                </div>
+                <div class="stat-box sine-stat">
+                    <h3>Sine Sampling</h3>
+                    <p>Generated: <span id="sineCount">0</span></p>
+                    <p>Rejected: <span id="sineRejectedCount">0</span></p>
+                    <p class="uniformity">Uniformity: <span id="sineUniformity">0%</span></p>
+                    <p class="formula">θ₁,θ₂ = random(0,2π)<br>x=sin(θ₁), y=sin(θ₂)<br>accept if x²+y² ≤ 1</p>
+                </div>
+            </div>
+
+            <button id="startBtn">Generate Points</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="canvas-container">
+            <div class="canvas-wrapper">
+                <h3>Polar (Naive)</h3>
+                <canvas id="polarCanvas"></canvas>
+            </div>
+            <div class="canvas-wrapper">
+                <h3>Rejection Sampling</h3>
+                <canvas id="rejectionCanvas"></canvas>
+            </div>
+            <div class="canvas-wrapper">
+                <h3>Sine Sampling</h3>
+                <canvas id="sineCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
