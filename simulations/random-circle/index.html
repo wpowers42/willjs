@@ -31,6 +31,12 @@
             </div>
 
             <div class="stats">
+                <div class="stat-box ideal-stat">
+                    <h3>Ideal (sqrt)</h3>
+                    <p>Generated: <span id="idealCount">0</span></p>
+                    <p class="uniformity">Uniformity: <span id="idealUniformity">0%</span></p>
+                    <p class="formula">r = √random(0,1)<br>θ = random(0,2π)</p>
+                </div>
                 <div class="stat-box polar-stat">
                     <h3>Polar (Naive)</h3>
                     <p>Generated: <span id="polarCount">0</span></p>
@@ -51,6 +57,13 @@
                     <p class="uniformity">Uniformity: <span id="sineUniformity">0%</span></p>
                     <p class="formula">θ₁,θ₂ = random(0,2π)<br>x=sin(θ₁), y=sin(θ₂)<br>accept if x²+y² ≤ 1</p>
                 </div>
+                <div class="stat-box walk-stat">
+                    <h3>Random Walk</h3>
+                    <p>Generated: <span id="walkCount">0</span></p>
+                    <p>Rejected: <span id="walkRejectedCount">0</span></p>
+                    <p class="uniformity">Uniformity: <span id="walkUniformity">0%</span></p>
+                    <p class="formula">step = random dir, len∈[0,1]<br>accept if in circle</p>
+                </div>
             </div>
 
             <button id="startBtn">Generate Points</button>
@@ -58,6 +71,10 @@
         </div>
 
         <div class="canvas-container">
+            <div class="canvas-wrapper">
+                <h3>Ideal (sqrt)</h3>
+                <canvas id="idealCanvas"></canvas>
+            </div>
             <div class="canvas-wrapper">
                 <h3>Polar (Naive)</h3>
                 <canvas id="polarCanvas"></canvas>
@@ -69,6 +86,10 @@
             <div class="canvas-wrapper">
                 <h3>Sine Sampling</h3>
                 <canvas id="sineCanvas"></canvas>
+            </div>
+            <div class="canvas-wrapper">
+                <h3>Random Walk</h3>
+                <canvas id="walkCanvas"></canvas>
             </div>
         </div>
     </div>

@@ -29,7 +29,16 @@ body {
     background: #16213e;
     padding: 20px;
     border-radius: 10px;
-    min-width: 300px;
+    min-width: 280px;
+    max-width: 320px;
+    overflow-y: auto;
+    max-height: calc(100vh - 40px);
+}
+
+@media (min-width: 1000px) {
+    .info-panel {
+        flex-shrink: 0;
+    }
 }
 
 .info-panel h1 {
@@ -99,14 +108,18 @@ body {
 .stats {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     margin-bottom: 20px;
 }
 
 .stat-box {
-    padding: 15px;
+    padding: 10px 12px;
     border-radius: 8px;
     background: #0f3460;
+}
+
+.ideal-stat {
+    border-left: 4px solid #4ade80;
 }
 
 .polar-stat {
@@ -121,33 +134,37 @@ body {
     border-left: 4px solid #a855f7;
 }
 
+.walk-stat {
+    border-left: 4px solid #f97316;
+}
+
 .stat-box h3 {
-    font-size: 0.9rem;
-    margin-bottom: 10px;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
     color: #fff;
 }
 
 .stat-box p {
-    font-size: 0.85rem;
-    margin: 5px 0;
+    font-size: 0.8rem;
+    margin: 3px 0;
     font-family: 'Monaco', 'Consolas', monospace;
 }
 
 .uniformity {
     font-weight: bold;
-    font-size: 1rem !important;
+    font-size: 0.9rem !important;
 }
 
 .uniformity span {
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 .formula {
-    margin-top: 10px;
-    padding-top: 10px;
+    margin-top: 8px;
+    padding-top: 8px;
     border-top: 1px solid #1a1a2e;
     color: #ffd700;
-    font-size: 0.8rem !important;
+    font-size: 0.75rem !important;
 }
 
 button {
@@ -199,21 +216,15 @@ button:disabled {
 .canvas-container {
     flex: 1;
     display: flex;
-    flex-direction: column;
-    gap: 20px;
+    flex-direction: row;
+    gap: 15px;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
+    align-content: center;
 }
 
-@media (min-width: 800px) {
-    .canvas-container {
-        flex-direction: row;
-        align-content: center;
-    }
-}
-
-@media (min-width: 1200px) {
+@media (min-width: 1600px) {
     .canvas-container {
         flex-wrap: nowrap;
     }
@@ -233,15 +244,23 @@ button:disabled {
 }
 
 .canvas-wrapper:nth-child(1) h3 {
-    color: #e94560;
+    color: #4ade80;
 }
 
 .canvas-wrapper:nth-child(2) h3 {
-    color: #00d9ff;
+    color: #e94560;
 }
 
 .canvas-wrapper:nth-child(3) h3 {
+    color: #00d9ff;
+}
+
+.canvas-wrapper:nth-child(4) h3 {
     color: #a855f7;
+}
+
+.canvas-wrapper:nth-child(5) h3 {
+    color: #f97316;
 }
 
 canvas {

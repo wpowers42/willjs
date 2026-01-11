@@ -1,38 +1,51 @@
+const idealCanvas = document.getElementById('idealCanvas');
 const polarCanvas = document.getElementById('polarCanvas');
 const rejectionCanvas = document.getElementById('rejectionCanvas');
 const sineCanvas = document.getElementById('sineCanvas');
+const walkCanvas = document.getElementById('walkCanvas');
+const idealCtx = idealCanvas.getContext('2d');
 const polarCtx = polarCanvas.getContext('2d');
 const rejectionCtx = rejectionCanvas.getContext('2d');
 const sineCtx = sineCanvas.getContext('2d');
+const walkCtx = walkCanvas.getContext('2d');
 
 // UI elements
 const slowBtn = document.getElementById('slowBtn');
 const fastBtn = document.getElementById('fastBtn');
 const startBtn = document.getElementById('startBtn');
 const resetBtn = document.getElementById('resetBtn');
+const idealCountEl = document.getElementById('idealCount');
 const polarCountEl = document.getElementById('polarCount');
 const rejectionCountEl = document.getElementById('rejectionCount');
 const rejectedCountEl = document.getElementById('rejectedCount');
 const sineCountEl = document.getElementById('sineCount');
 const sineRejectedCountEl = document.getElementById('sineRejectedCount');
+const walkCountEl = document.getElementById('walkCount');
+const walkRejectedCountEl = document.getElementById('walkRejectedCount');
+const idealUniformityEl = document.getElementById('idealUniformity');
 const polarUniformityEl = document.getElementById('polarUniformity');
 const rejectionUniformityEl = document.getElementById('rejectionUniformity');
 const sineUniformityEl = document.getElementById('sineUniformity');
+const walkUniformityEl = document.getElementById('walkUniformity');
 
 // State
 const TARGET_POINTS = 10000;
+let idealPoints = [];
 let polarPoints = [];
 let rejectionPoints = [];
 let sinePoints = [];
+let walkPoints = [];
 let rejectedCount = 0;
 let sineRejectedCount = 0;
+let walkRejectedCount = 0;
+let walkCurrentPos = { x: 0, y: 0 };
 let isRunning = false;
 let isFastMode = false;
 let animationId = null;
 
 // Timing for slow mode - dynamic scaling
-const MIN_POINTS_PER_FRAME = 1;
-const MAX_POINTS_PER_FRAME = 15;
+const MIN_POINTS_PER_FRAME = 5;
+const MAX_POINTS_PER_FRAME = 20;
 const FRAME_DELAY = 16; // Consistent frame rate
 
 // Uniformity calculation settings
@@ -43,28 +56,29 @@ function resizeCanvases() {
     const containerRect = container.getBoundingClientRect();
 
     // Calculate available size for each canvas
-    // Account for gap and headers
-    const isWideScreen = window.innerWidth >= 1200;
-    const isMediumScreen = window.innerWidth >= 800;
+    const numCanvases = 5;
+    const gap = 15;
+    const isWideScreen = window.innerWidth >= 1600;
+    const isMediumScreen = window.innerWidth >= 1000;
     let availableWidth, availableHeight;
 
     if (isWideScreen) {
-        // Three side by side: split width by 3
-        availableWidth = (containerRect.width - 40) / 3; // 40px total gap
-        availableHeight = containerRect.height - 40; // header space
+        // Five side by side
+        availableWidth = (containerRect.width - gap * (numCanvases - 1)) / numCanvases;
+        availableHeight = containerRect.height - 40;
     } else if (isMediumScreen) {
-        // Two + one stacked
-        availableWidth = (containerRect.width - 20) / 2;
-        availableHeight = (containerRect.height - 60) / 2;
+        // 3 + 2 layout (wrapping)
+        availableWidth = (containerRect.width - gap * 2) / 3;
+        availableHeight = (containerRect.height - gap - 60) / 2;
     } else {
-        // All stacked: full width, split height by 3
-        availableWidth = containerRect.width;
-        availableHeight = (containerRect.height - 80) / 3;
+        // 2 + 2 + 1 or smaller
+        availableWidth = (containerRect.width - gap) / 2;
+        availableHeight = (containerRect.height - gap * 2 - 80) / 3;
     }
 
-    const size = Math.min(availableWidth, availableHeight, 350);
+    const size = Math.min(availableWidth, availableHeight, 200);
 
-    [polarCanvas, rejectionCanvas, sineCanvas].forEach((canvas) => {
+    [idealCanvas, polarCanvas, rejectionCanvas, sineCanvas, walkCanvas].forEach((canvas) => {
         const ctx = canvas.getContext('2d');
         canvas.style.width = size + 'px';
         canvas.style.height = size + 'px';
@@ -76,32 +90,78 @@ function resizeCanvases() {
     draw();
 }
 
-// Polar method (naive): generates clustered distribution toward center
-function generatePolarPoint() {
+// Ideal method: uniform distribution with sqrt correction (0% rejection)
+function generateIdealPoint() {
     const angle = Math.random() * 2 * Math.PI;
-    const r = Math.random(); // This is the naive approach - linear distribution
+    const r = Math.sqrt(Math.random()); // sqrt correction for uniform area distribution
     return {
         x: r * Math.cos(angle)
       , y: r * Math.sin(angle)
     };
 }
 
-// Rejection sampling: generates uniform distribution
+// Polar method (naive): generates clustered distribution toward center (0% rejection)
+function generatePolarPoint() {
+    const angle = Math.random() * 2 * Math.PI;
+    const r = Math.random(); // Linear distribution - clusters toward center
+    return {
+        x: r * Math.cos(angle)
+      , y: r * Math.sin(angle)
+    };
+}
+
+// Rejection sampling: try once, return point if in circle, null if rejected
+function tryRejectionPoint() {
+    const x = Math.random() * 2 - 1; // [-1, 1]
+    const y = Math.random() * 2 - 1; // [-1, 1]
+
+    if (x * x + y * y <= 1) {
+        return { x, y };
+    }
+    return null; // Rejected
+}
+
+// Sine sampling: try once, return point if in circle, null if rejected
+function trySinePoint() {
+    const angle1 = Math.random() * 2 * Math.PI;
+    const angle2 = Math.random() * 2 * Math.PI;
+    const x = Math.sin(angle1);
+    const y = Math.sin(angle2);
+
+    if (x * x + y * y <= 1) {
+        return { x, y };
+    }
+    return null; // Rejected
+}
+
+// Random walk: from current position, try stepping to a new point
+function tryWalkPoint() {
+    const angle = Math.random() * 2 * Math.PI;
+    const length = Math.random(); // Length between 0 and 1
+    const newX = walkCurrentPos.x + length * Math.cos(angle);
+    const newY = walkCurrentPos.y + length * Math.sin(angle);
+
+    if (newX * newX + newY * newY <= 1) {
+        walkCurrentPos = { x: newX, y: newY };
+        return { x: newX, y: newY };
+    }
+    return null; // Rejected, stay at current position
+}
+
+// Full generation for rejection sampling (used in fast mode)
 function generateRejectionPoint() {
     let attempts = 0;
     while (true) {
-        const x = Math.random() * 2 - 1; // [-1, 1]
-        const y = Math.random() * 2 - 1; // [-1, 1]
+        const x = Math.random() * 2 - 1;
+        const y = Math.random() * 2 - 1;
         attempts++;
-
         if (x * x + y * y <= 1) {
             return { point: { x, y }, rejected: attempts - 1 };
         }
     }
 }
 
-// Sine sampling: choose two random angles, take sin of each
-// Creates a distribution biased toward center (sin clusters around 0)
+// Full generation for sine sampling (used in fast mode)
 function generateSinePoint() {
     let attempts = 0;
     while (true) {
@@ -110,15 +170,28 @@ function generateSinePoint() {
         const x = Math.sin(angle1);
         const y = Math.sin(angle2);
         attempts++;
-
         if (x * x + y * y <= 1) {
             return { point: { x, y }, rejected: attempts - 1 };
         }
     }
 }
 
+// Full generation for walk sampling (used in fast mode)
+function generateWalkPoint(currentPos) {
+    let attempts = 0;
+    while (true) {
+        const angle = Math.random() * 2 * Math.PI;
+        const length = Math.random();
+        const newX = currentPos.x + length * Math.cos(angle);
+        const newY = currentPos.y + length * Math.sin(angle);
+        attempts++;
+        if (newX * newX + newY * newY <= 1) {
+            return { point: { x: newX, y: newY }, rejected: attempts - 1 };
+        }
+    }
+}
+
 // Ease-in smoothing function for dynamic speed scaling
-// Uses smoothstep variant that starts slow and accelerates
 function easeInCubic(t) {
     return t * t * t;
 }
@@ -130,11 +203,9 @@ function getPointsPerFrame(progress) {
 }
 
 // Calculate uniformity score using ring-based analysis
-// Returns a score from 0-100 where 100 is perfectly uniform
 function calculateUniformity(points) {
     if (points.length < NUM_RINGS) return 0;
 
-    // Count points in each ring
     const ringCounts = new Array(NUM_RINGS).fill(0);
 
     for (const point of points) {
@@ -143,16 +214,12 @@ function calculateUniformity(points) {
         ringCounts[ringIndex]++;
     }
 
-    // Calculate expected counts for uniform distribution
-    // Area of ring i: π * ((i+1)/N)² - π * (i/N)² = π/N² * (2i + 1)
-    // Expected proportion: (2i + 1) / N²
     const expectedCounts = [];
     for (let i = 0; i < NUM_RINGS; i++) {
         const proportion = (2 * i + 1) / (NUM_RINGS * NUM_RINGS);
         expectedCounts.push(proportion * points.length);
     }
 
-    // Calculate chi-squared statistic
     let chiSquared = 0;
     for (let i = 0; i < NUM_RINGS; i++) {
         if (expectedCounts[i] > 0) {
@@ -161,23 +228,25 @@ function calculateUniformity(points) {
         }
     }
 
-    // Convert to a 0-100 score
-    // Lower chi-squared = more uniform = higher score
-    // Use exponential decay: score = 100 * exp(-chiSquared / scale)
-    const scale = points.length / 10; // Scale based on sample size
+    const scale = points.length / 10;
     const score = 100 * Math.exp(-chiSquared / scale);
 
     return Math.round(score);
 }
 
 function generateAllPointsFast() {
+    idealPoints = [];
     polarPoints = [];
     rejectionPoints = [];
     sinePoints = [];
+    walkPoints = [];
     rejectedCount = 0;
     sineRejectedCount = 0;
+    walkRejectedCount = 0;
+    walkCurrentPos = { x: 0, y: 0 };
 
     for (let i = 0; i < TARGET_POINTS; i++) {
+        idealPoints.push(generateIdealPoint());
         polarPoints.push(generatePolarPoint());
 
         const rejectionResult = generateRejectionPoint();
@@ -187,6 +256,11 @@ function generateAllPointsFast() {
         const sineResult = generateSinePoint();
         sinePoints.push(sineResult.point);
         sineRejectedCount += sineResult.rejected;
+
+        const walkResult = generateWalkPoint(walkCurrentPos);
+        walkPoints.push(walkResult.point);
+        walkCurrentPos = walkResult.point;
+        walkRejectedCount += walkResult.rejected;
     }
 
     updateStats();
@@ -197,26 +271,72 @@ function generateAllPointsFast() {
 function generatePointsSlow() {
     if (!isRunning) return;
 
-    // Calculate dynamic points per frame based on progress
-    const progress = polarPoints.length / TARGET_POINTS;
-    const pointsThisFrame = getPointsPerFrame(progress);
+    // Calculate dynamic attempts per frame based on progress of fastest method
+    const maxPoints = Math.max(
+        idealPoints.length
+      , polarPoints.length
+      , rejectionPoints.length
+      , sinePoints.length
+      , walkPoints.length
+    );
+    const progress = maxPoints / TARGET_POINTS;
+    const attemptsThisFrame = getPointsPerFrame(progress);
 
-    for (let i = 0; i < pointsThisFrame && polarPoints.length < TARGET_POINTS; i++) {
-        polarPoints.push(generatePolarPoint());
+    // Each method gets the same number of attempts per frame
+    // Methods with 0% rejection (ideal, polar) will finish first
+    for (let i = 0; i < attemptsThisFrame; i++) {
+        // Ideal - always succeeds
+        if (idealPoints.length < TARGET_POINTS) {
+            idealPoints.push(generateIdealPoint());
+        }
 
-        const rejectionResult = generateRejectionPoint();
-        rejectionPoints.push(rejectionResult.point);
-        rejectedCount += rejectionResult.rejected;
+        // Polar - always succeeds
+        if (polarPoints.length < TARGET_POINTS) {
+            polarPoints.push(generatePolarPoint());
+        }
 
-        const sineResult = generateSinePoint();
-        sinePoints.push(sineResult.point);
-        sineRejectedCount += sineResult.rejected;
+        // Rejection - may reject
+        if (rejectionPoints.length < TARGET_POINTS) {
+            const point = tryRejectionPoint();
+            if (point) {
+                rejectionPoints.push(point);
+            } else {
+                rejectedCount++;
+            }
+        }
+
+        // Sine - may reject
+        if (sinePoints.length < TARGET_POINTS) {
+            const point = trySinePoint();
+            if (point) {
+                sinePoints.push(point);
+            } else {
+                sineRejectedCount++;
+            }
+        }
+
+        // Walk - may reject
+        if (walkPoints.length < TARGET_POINTS) {
+            const point = tryWalkPoint();
+            if (point) {
+                walkPoints.push(point);
+            } else {
+                walkRejectedCount++;
+            }
+        }
     }
 
     updateStats();
     draw();
 
-    if (polarPoints.length < TARGET_POINTS) {
+    // Continue if any method hasn't reached target
+    const allDone = idealPoints.length >= TARGET_POINTS &&
+                    polarPoints.length >= TARGET_POINTS &&
+                    rejectionPoints.length >= TARGET_POINTS &&
+                    sinePoints.length >= TARGET_POINTS &&
+                    walkPoints.length >= TARGET_POINTS;
+
+    if (!allDone) {
         animationId = setTimeout(generatePointsSlow, FRAME_DELAY);
     } else {
         finishGeneration();
@@ -224,31 +344,38 @@ function generatePointsSlow() {
 }
 
 function updateStats() {
+    idealCountEl.textContent = idealPoints.length.toLocaleString();
     polarCountEl.textContent = polarPoints.length.toLocaleString();
     rejectionCountEl.textContent = rejectionPoints.length.toLocaleString();
     rejectedCountEl.textContent = rejectedCount.toLocaleString();
     sineCountEl.textContent = sinePoints.length.toLocaleString();
     sineRejectedCountEl.textContent = sineRejectedCount.toLocaleString();
+    walkCountEl.textContent = walkPoints.length.toLocaleString();
+    walkRejectedCountEl.textContent = walkRejectedCount.toLocaleString();
 
-    // Calculate and display uniformity scores
+    const idealScore = calculateUniformity(idealPoints);
     const polarScore = calculateUniformity(polarPoints);
     const rejectionScore = calculateUniformity(rejectionPoints);
     const sineScore = calculateUniformity(sinePoints);
+    const walkScore = calculateUniformity(walkPoints);
 
+    idealUniformityEl.textContent = idealScore + '%';
     polarUniformityEl.textContent = polarScore + '%';
     rejectionUniformityEl.textContent = rejectionScore + '%';
     sineUniformityEl.textContent = sineScore + '%';
+    walkUniformityEl.textContent = walkScore + '%';
 
-    // Color code the scores
+    idealUniformityEl.style.color = getScoreColor(idealScore);
     polarUniformityEl.style.color = getScoreColor(polarScore);
     rejectionUniformityEl.style.color = getScoreColor(rejectionScore);
     sineUniformityEl.style.color = getScoreColor(sineScore);
+    walkUniformityEl.style.color = getScoreColor(walkScore);
 }
 
 function getScoreColor(score) {
-    if (score >= 80) return '#4ade80'; // Green
-    if (score >= 50) return '#fbbf24'; // Yellow
-    return '#f87171'; // Red
+    if (score >= 80) return '#4ade80';
+    if (score >= 50) return '#fbbf24';
+    return '#f87171';
 }
 
 function finishGeneration() {
@@ -260,15 +387,17 @@ function finishGeneration() {
 }
 
 function draw() {
+    drawCanvas(idealCtx, idealCanvas, idealPoints, '#4ade80');
     drawCanvas(polarCtx, polarCanvas, polarPoints, '#e94560');
     drawCanvas(rejectionCtx, rejectionCanvas, rejectionPoints, '#00d9ff');
     drawCanvas(sineCtx, sineCanvas, sinePoints, '#a855f7');
+    drawCanvas(walkCtx, walkCanvas, walkPoints, '#f97316');
 }
 
 function drawCanvas(ctx, canvas, points, color) {
     const size = canvas.width / window.devicePixelRatio;
     const center = size / 2;
-    const radius = size * 0.45; // Leave some padding
+    const radius = size * 0.45;
 
     ctx.clearRect(0, 0, size, size);
 
@@ -289,11 +418,11 @@ function drawCanvas(ctx, canvas, points, color) {
     ctx.lineTo(center, center + radius);
     ctx.stroke();
 
-    // Draw points (smaller for 10k points)
-    ctx.fillStyle = color + '60'; // More transparency for many points
+    // Draw points
+    ctx.fillStyle = color + '60';
     for (const point of points) {
         const x = center + point.x * radius;
-        const y = center - point.y * radius; // Flip y for screen coordinates
+        const y = center - point.y * radius;
         ctx.beginPath();
         ctx.arc(x, y, 1.5, 0, Math.PI * 2);
         ctx.fill();
@@ -311,7 +440,6 @@ function startGeneration() {
     fastBtn.disabled = true;
 
     if (isFastMode) {
-        // Use setTimeout to allow UI to update
         setTimeout(generateAllPointsFast, 10);
     } else {
         generatePointsSlow();
@@ -324,11 +452,15 @@ function reset() {
         animationId = null;
     }
     isRunning = false;
+    idealPoints = [];
     polarPoints = [];
     rejectionPoints = [];
     sinePoints = [];
+    walkPoints = [];
     rejectedCount = 0;
     sineRejectedCount = 0;
+    walkRejectedCount = 0;
+    walkCurrentPos = { x: 0, y: 0 };
     updateStats();
     draw();
     startBtn.disabled = false;
