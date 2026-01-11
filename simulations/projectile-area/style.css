@@ -1,0 +1,148 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 20px;
+    gap: 20px;
+}
+
+@media (min-width: 900px) {
+    .container {
+        flex-direction: row;
+    }
+}
+
+.info-panel {
+    background: #16213e;
+    padding: 20px;
+    border-radius: 10px;
+    min-width: 300px;
+}
+
+.info-panel h1 {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    color: #e94560;
+}
+
+.description {
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.vectors {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.vector-info {
+    flex: 1;
+    padding: 15px;
+    border-radius: 8px;
+    background: #0f3460;
+}
+
+.v1-info {
+    border-left: 4px solid #e94560;
+}
+
+.v2-info {
+    border-left: 4px solid #00d9ff;
+}
+
+.vector-info h3 {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.vector-info p {
+    font-size: 0.85rem;
+    margin: 5px 0;
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.results {
+    background: #0f3460;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.results h3 {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.results p {
+    font-size: 0.85rem;
+    margin: 5px 0;
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.formula {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #1a1a2e;
+    color: #ffd700;
+}
+
+button {
+    width: 100%;
+    padding: 12px 20px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+}
+
+button:hover {
+    transform: scale(1.02);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+#newBtn {
+    background: #e94560;
+    color: white;
+}
+
+#newBtn:hover {
+    background: #ff6b6b;
+}
+
+#fireBtn {
+    background: #00d9ff;
+    color: #1a1a2e;
+}
+
+#fireBtn:hover {
+    background: #4de8ff;
+}
+
+canvas {
+    flex: 1;
+    background: #0f0f23;
+    border-radius: 10px;
+    min-height: 400px;
+}

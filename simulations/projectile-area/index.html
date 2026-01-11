@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projectile Area Invariant</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="info-panel">
+            <h1>Projectile Area Invariant</h1>
+            <p class="description">
+                Two projectiles with different initial velocities land at the same distance
+                if the product of their velocity components (Vx * Vy) is equal.
+            </p>
+
+            <div class="vectors">
+                <div class="vector-info v1-info">
+                    <h3>V1 (Random)</h3>
+                    <p>Vx: <span id="v1x">-</span></p>
+                    <p>Vy: <span id="v1y">-</span></p>
+                    <p>Area: <span id="v1area">-</span></p>
+                </div>
+                <div class="vector-info v2-info">
+                    <h3>V2 (Equal Components)</h3>
+                    <p>Vx: <span id="v2x">-</span></p>
+                    <p>Vy: <span id="v2y">-</span></p>
+                    <p>Area: <span id="v2area">-</span></p>
+                </div>
+            </div>
+
+            <div class="results">
+                <h3>Results</h3>
+                <p>Distance V1: <span id="dist1">-</span></p>
+                <p>Distance V2: <span id="dist2">-</span></p>
+                <p class="formula">D = (2 * Vx * Vy) / g</p>
+            </div>
+
+            <button id="newBtn">New Random V1</button>
+            <button id="fireBtn">Fire Projectiles</button>
+        </div>
+        <canvas id="canvas"></canvas>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
