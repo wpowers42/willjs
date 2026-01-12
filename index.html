@@ -5,19 +5,106 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sandbox</title>
+    <title>will.js</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        h1 {
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        .projects {
+            list-style: none;
+            padding: 0;
+        }
+        .projects li {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        .projects li:last-child {
+            border-bottom: none;
+        }
+        .projects a {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #0066cc;
+            text-decoration: none;
+        }
+        .projects a:hover {
+            text-decoration: underline;
+        }
+        .projects p {
+            margin: 0.5rem 0 0;
+            color: #444;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Sandbox</h1>
-    <ul class="links">
-        <li><a href="box-breathing">Box Breathing</a></li>
-        <li><a href="growth-model">Growth Model Simulation</a></li>
-        <li><a href="nature-of-code">Nature of Code</a></li>
-        <li><a href="simulations">Simulations</a></li>
-        <li><a href="games">Games</a></li>
-        <li><a href="tools">Tools</a></li>
-        <li><a href="spot-it">Spot It</a></li>
+    <h1>will.js</h1>
+    <p class="subtitle">Interactive demos and experiments</p>
+
+    <ul class="projects">
+        <li>
+            <a href="spot-it">Spot It</a>
+            <p>Card matching game using projective plane geometry (Galois field GF(7)) to generate valid symbol combinations.</p>
+        </li>
+        <li>
+            <a href="simulations/random-circle">Random Circle Points</a>
+            <p>Compares 5 algorithms for uniform random point distribution in a circle, showing why the naive approach fails.</p>
+        </li>
+        <li>
+            <a href="simulations/projectile-area">Projectile Area Invariant</a>
+            <p>Demonstrates that projectiles with equal Vx × Vy products land at the same distance.</p>
+        </li>
+        <li>
+            <a href="games/space-shooter">Space Shooter</a>
+            <p>Asteroid defense game with intelligent projectile swarm AI featuring 10 distinct behavioral personalities.</p>
+        </li>
+        <li>
+            <a href="games/color-mixing">Color Mixing</a>
+            <p>Educational game using Mixbox for accurate subtractive color mixing.</p>
+        </li>
+        <li>
+            <a href="tools/weather">Weather Forecast</a>
+            <p>Netherlands rainfall predictions from KNMI radar data, updated every 15 minutes.</p>
+        </li>
+        <li>
+            <a href="simulations/temperature">Temperature Simulation</a>
+            <p>Particle system visualizing kinetic energy and temperature through movement and collisions.</p>
+        </li>
+        <li>
+            <a href="simulations/fourier-transform">Fourier Transform</a>
+            <p>Visualization of Fourier series decomposition and harmonic synthesis.</p>
+        </li>
+        <li>
+            <a href="box-breathing">Box Breathing</a>
+            <p>Guided breathing exercise with animated visualization for relaxation and focus.</p>
+        </li>
+        <li>
+            <a href="growth-model">Growth Model</a>
+            <p>Activity grid visualization powered by in-browser SQLite.</p>
+        </li>
+        <li>
+            <a href="games/lighting">Lighting</a>
+            <p>Interactive 2D shadow casting with draggable light source and obstacles.</p>
+        </li>
+        <li>
+            <a href="games/making-rays">Making Rays</a>
+            <p>Ray casting visualization with configurable rays and wall intersections.</p>
+        </li>
     </ul>
 </body>
 
