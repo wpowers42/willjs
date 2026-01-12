@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Python Weather Tool
 ```bash
-cd tools/weather
+cd weather
 export KNMI_API_KEY="your_api_key_here"
 python main.py
 ```
@@ -23,39 +23,60 @@ Games follow a consistent architecture pattern:
 - **Game Loop**: Fixed timestep game loop with accumulator pattern for consistent physics
 - **Entity-Component**: Game objects (Ball, Paddle, Player) are separate classes with update/draw methods
 - **Input Handling**: Centralized input handling through `InputHandler` classes
-- **Math Utilities**: Shared math utilities in `games/math/` including Vector2 and Mathf classes
+- **Math Utilities**: Vector2 and collision utilities (e.g., in `space-shooter/src/utils/`)
 
 ### Key Game Components
 - **StateMachine**: Manages game state transitions with enter/exit/update/draw lifecycle
 - **Vector2.js**: Unity-style 2D vector math library with static utility methods
-- **Game Classes**: Main game controllers that orchestrate all game systems  
+- **Game Classes**: Main game controllers that orchestrate all game systems
 - **Entity Classes**: Individual game objects (Ball, Paddle, Player, etc.)
 
 ### Weather Tool Integration
 The weather tool demonstrates a complete data pipeline:
-- Python script (`tools/weather/main.py`) fetches KNMI radar data
+- Python script (`weather/main.py`) fetches KNMI radar data
 - Processes HDF5 radar files for Utrecht coordinates
 - Generates JSON output for web display
-- GitHub Actions automates data updates every 15 minutes
+- GitHub Actions automates data updates every 5 minutes
 - Deployed to GitHub Pages at `/weather/` path
-
-### Interactive Web Projects
-- **Nature of Code**: Educational coding examples organized by chapter
-- **Games**: Complete game implementations (Pong, Breakout, Flappy Bird)
-- **Simulations**: Physics and mathematical simulations
-- **Tools**: Utility web applications including weather forecast
 
 ## File Organization
 
-### Games Structure
+All projects are organized as peer directories at the root level:
 ```
-games/
-├── [game-name]/
-│   ├── main.js          # Main game entry point
-│   ├── Game.js          # Core game class
-│   ├── src/             # Game-specific components
-│   ├── assets/          # Images, sounds, fonts
-│   └── states/          # Game state implementations
+/
+├── space-shooter/       # Games
+├── lighting/
+├── making-rays/
+├── color-mixing-game/
+├── fourier-transform/   # Simulations
+├── projectile-area/
+├── random-circle/
+├── temperature/
+├── box-breathing/       # Standalone apps
+├── growth-model/
+├── spot-it/
+└── weather/             # Tools (Python + web)
+```
+
+### Project Structure Pattern
+Simple projects use a minimal 3-file structure:
+```
+[project]/
+├── index.html
+├── script.js
+└── style.css
+```
+
+Complex projects (like space-shooter) use a src/ subdirectory:
+```
+[project]/
+├── index.html
+├── script.js
+├── style.css
+└── src/
+    ├── Game.js
+    ├── entities/
+    └── utils/
 ```
 
 ### JavaScript Development

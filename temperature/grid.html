@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* center canvas absolutely */
+        #canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: black 1px solid;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // scale canvas to fit window
+        canvas.style.width = '50%';
+
+        canvas.width = canvas.height = 256;
+
+        class Grid {
+            constructor(numCells) {
+                this.cells = [];
+                for (let i = 0; i < numCells; i++) {
+                    this.cells.push([]);
+                    for (let j = 0; j < numCells; j++) {
+                        this.cells[i].push([]);
+                    }
+                }
+            }
+
+            addParticle(particle) {
+                const [cellX, cellY] = particle.cell;
+                this.cells[cellX][cellY].push(particle);
+            }
+
+            removeParticle(particle) {
+                const [cellX, cellY] = particle.cell;
+                const index = this.cells[cellX][cellY].indexOf(particle);
+                this.cells[cellX][cellY].splice(index, 1);
+            }
+
+            draw() {
+                const radius = canvas.width / this.cells.length;
+                for (let i = 0; i < this.cells.length; i++) {
+                    for (let j = 0; j < this.cells[i].length; j++) {
+                        const x = i * radius;
+                        const y = j * radius;
+                        ctx.strokeStyle = 'grey';
+                        ctx.strokeRect(x, y, radius, radius);
+
+                        // show count of particles in each cell
+                        ctx.fillStyle = 'black';
+                        ctx.font = '10px Arial';
+                        ctx.fillText(this.cells[i][j].length, x + 2, y + 10);
+                    }
+                }
+            }
+        }
+
+        const radius = 32;
+        const numCells = canvas.width / radius;
+        const grid = new Grid(numCells);
+
+        class Particle {
+            constructor(grid, attraction, color) {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.grid = grid;
+                this.cell = this.getCell();
+                this.grid.addParticle(this);
+                this.vx = Math.random() * 0.1 - 0.05;
+                this.vy = Math.random() * 0.1 - 0.05;
+                this.color = color;
+                this.attraction = attraction;
+            }
+
+            getCell = () => {
+                let cellX = Math.floor(this.x / radius);
+                let cellY = Math.floor(this.y / radius);
+
+                // clamp to grid
+                cellX = Math.max(0, Math.min(cellX, numCells - 1));
+                cellY = Math.max(0, Math.min(cellY, numCells - 1));
+
+                return [cellX, cellY];
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, 1, 1);
+            }
+
+            updateForces(dt, lookup) {
+
+                // get neighboring cells
+                const [cellX, cellY] = this.cell;
+                const neighbors = [];
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        const x = cellX + i;
+                        const y = cellY + j;
+                        if (x >= 0 && x < numCells && y >= 0 && y < numCells) {
+                            neighbors.push(...this.grid.cells[x][y]);
+                        }
+                    }
+                }
+
+                neighbors.map(neighbor => {
+                    const [fx, fy] = calculateForces(this, neighbor, this.attraction);
+                    this.vx += fx * dt;
+                    this.vy += fy * dt;
+                });
+
+                this.vx = Math.max(-0.1, Math.min(this.vx, 0.1));
+                this.vy = Math.max(-0.1, Math.min(this.vy, 0.1));
+            }
+
+
+            update(dt) {
+
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                if (this.x < 0 || this.x > canvas.width) {
+                    this.vx *= -1;
+                    this.x = Math.max(1, Math.min(this.x, canvas.width - 1));
+                }
+                if (this.y < 0 || this.y > canvas.height) {
+                    this.vy *= -1;
+                    this.y = Math.max(1, Math.min(this.y, canvas.height - 1));
+                }
+
+                let newCell = this.getCell();
+
+                if (newCell[0] !== this.cell[0] || newCell[1] !== this.cell[1]) {
+                    this.grid.removeParticle(this);
+                    this.cell = newCell;
+                    this.grid.addParticle(this);
+                }
+
+            }
+        }
+
+        const numParticles = 100;
+        const particles = [];
+
+        for (let i = 0; i < numParticles; i++) {
+            particles.push(new Particle(grid, -0.0001, 'black'));
+            particles.push(new Particle(grid, 0.001, 'red'));
+        }
+
+        const calculateForces = (point1, point2, g) => {
+            let dx = point1.x - point2.x;
+            let dy = point1.y - point2.y;
+            let d = Math.sqrt(dx * dx + dy * dy);
+            if (d > 0) {
+                let F = g * (1 / d);
+                dx *= F;
+                dy *= F;
+            }
+            return [dx, dy];
+        }
+
+        let t = 0.0;
+        const fps = 0.1;
+        const dt = 1.0 / fps;
+        let currentTime = Date.now();
+        let accumulator = 0;
+
+        const animate = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(50, 50, 50, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const newTime = Date.now();
+            const frameTime = newTime - currentTime;
+            currentTime = newTime;
+            accumulator += frameTime;
+
+            // negative means attract, positive means repel
+            while (accumulator >= dt) {
+
+                // const lookup = updateSpacialLookup(particles);
+
+                particles.map(particle => {
+                    particle.updateForces(dt);
+                });
+
+                particles.map(particle => {
+                    particle.update(dt);
+                });
+
+                accumulator -= dt;
+                t += dt;
+            }
+
+
+            particles.map(particle => {
+                particle.draw();
+            });
+
+            grid.draw();
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+    </script>
+
+</body>
+
+</html>
