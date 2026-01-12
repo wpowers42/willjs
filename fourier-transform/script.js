@@ -14,12 +14,10 @@ class FourierAnimation {
         this.waves = 12;
         this.paused = false;
 
-        // Bind methods to the class instance
         this.animate = this.animate.bind(this);
         this.togglePause = this.togglePause.bind(this);
 
-        // Add pause button
-        this.setupPauseButton();
+        this.setupControls();
     }
 
     drawCircle(x, y, radius) {
@@ -81,55 +79,23 @@ class FourierAnimation {
 
     togglePause() {
         this.paused = !this.paused;
+        this.button.textContent = this.paused ? 'Play' : 'Pause';
         if (!this.paused) {
-            this.lastTime = null;  // Reset lastTime when resuming
+            this.lastTime = null;
             requestAnimationFrame(this.animate);
         }
     }
 
-    setupPauseButton() {
-        const button = document.createElement('button');
-        button.textContent = 'Pause';
+    setupControls() {
+        this.button = document.getElementById('pause-btn');
+        this.button.addEventListener('click', this.togglePause);
 
-        const canvasRect = this.canvas.getBoundingClientRect();
-        const buttonWidth = canvasRect.width / 8;
-        const buttonHeight = buttonWidth;
-
-        // Updated styling for better appearance and mobile-friendliness
-        button.style.position = 'absolute';
-        button.style.fontSize = `${buttonWidth * 0.30}px`;
-        button.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-        button.style.border = '2px solid #333';
-        button.style.borderRadius = '12px';
-        button.style.cursor = 'pointer';
-        button.style.width = `${buttonWidth}px`;
-        button.style.height = `${buttonHeight}px`;
-
-        // Center the button at the bottom of the canvas
-        const updateButtonPosition = () => {
-            const canvasRect = this.canvas.getBoundingClientRect();
-            const offset = canvasRect.width * 0.05;
-            const buttonLeft = canvasRect.left + offset;
-            const buttonBottom = canvasRect.bottom - offset;
-            button.style.left = `${buttonLeft}px`;
-            button.style.top = `${buttonBottom - buttonHeight}px`;
-        };
-
-        // Initial position
-        updateButtonPosition();
-
-        // Update position when window resizes
-        window.addEventListener('resize', updateButtonPosition);
-
-        // Update the toggle function to change the symbol
-        const originalToggle = this.togglePause;
-        this.togglePause = () => {
-            originalToggle.call(this);
-            button.textContent = this.paused ? 'Play' : 'Pause';
-        };
-
-        this.canvas.parentNode.appendChild(button);
-        button.addEventListener('click', this.togglePause);
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                this.togglePause();
+            }
+        });
     }
 
     animate(timestamp) {
@@ -138,28 +104,22 @@ class FourierAnimation {
             this.lastTime = timestamp;
             this.currentTime += deltaTime * this.timeScale;
 
-            // Clear canvas
             this.ctx.fillStyle = "white";
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-            // Initial translation
             this.ctx.translate(150, 150);
 
-            // Calculate and draw wave circles
             const { x, y, waveComponentHeights } = this.calculateWavePoints();
 
-            // Update history arrays
             this.ys.unshift(waveComponentHeights);
             this.points.unshift(y);
             if (this.ys.length > 500) this.ys.pop();
             if (this.points.length > 500) this.points.pop();
 
-            // Draw waveforms
             this.ctx.translate(150, 0);
             const translateY = this.drawWaveforms(x, waveComponentHeights);
             this.ctx.translate(0, -translateY);
 
-            // Draw final wave
             this.ctx.beginPath();
             this.ctx.moveTo(0, this.points[0]);
             for (let i = 0; i < this.points.length; i++) {
@@ -167,17 +127,10 @@ class FourierAnimation {
             }
             this.ctx.stroke();
 
-            // Draw connecting line
             this.ctx.translate(-150, 0);
             this.drawLine(x, this.points[0], 150, this.points[0]);
 
-            // Reset translation
             this.ctx.translate(-150, -150);
-
-            // draw the title in the top left corner
-            this.ctx.fillStyle = "black";
-            this.ctx.font = "24px Arial";
-            this.ctx.fillText("Fourier Transform", 10, 30);
 
             requestAnimationFrame(this.animate);
         }
@@ -188,6 +141,5 @@ class FourierAnimation {
     }
 }
 
-// Initialize and start the animation
 const fourierAnimation = new FourierAnimation('canvas');
 fourierAnimation.start();

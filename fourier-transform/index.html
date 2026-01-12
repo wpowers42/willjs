@@ -7,7 +7,24 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <canvas id="canvas"></canvas>
+    <div class="demo-container">
+        <canvas id="canvas"></canvas>
+        <div class="controls">
+            <button class="btn" id="pause-btn">Pause</button>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>Fourier Transform Visualization</h3>
+        <p>Watch how a complex square wave is built from simple sine waves.</p>
+        <ul>
+            <li><strong>Left:</strong> Rotating circles (epicycles) representing frequency components</li>
+            <li><strong>Top right:</strong> The combined square wave being traced</li>
+            <li><strong>Bottom right:</strong> Individual sine wave harmonics (1st, 3rd, 5th...)</li>
+        </ul>
+        <p class="controls-hint">Press <strong>Space</strong> or click the button to pause/resume.</p>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
