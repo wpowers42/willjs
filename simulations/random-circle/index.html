@@ -57,6 +57,11 @@
                     <p class="uniformity">Uniformity: <span id="sineUniformity">0%</span></p>
                     <p class="formula">θ₁,θ₂ = random(0,2π)<br>x=sin(θ₁), y=sin(θ₂)<br>accept if x²+y² ≤ 1</p>
                 </div>
+                <div class="stat-box sine-square-stat">
+                    <h3>Sine Square</h3>
+                    <p>Generated: <span id="sineSquareCount">0</span></p>
+                    <p class="formula">θ₁,θ₂ = random(0,2π)<br>x=sin(θ₁), y=sin(θ₂)<br>accept all</p>
+                </div>
                 <div class="stat-box walk-stat">
                     <h3>Random Walk</h3>
                     <p>Generated: <span id="walkCount">0</span></p>
@@ -88,11 +93,17 @@
                 <canvas id="sineCanvas"></canvas>
             </div>
             <div class="canvas-wrapper">
+                <h3>Sine Square</h3>
+                <canvas id="sineSquareCanvas"></canvas>
+            </div>
+            <div class="canvas-wrapper">
                 <h3>Random Walk</h3>
                 <canvas id="walkCanvas"></canvas>
             </div>
         </div>
     </div>
+    <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <script src="script.js"></script>
 </body>
 

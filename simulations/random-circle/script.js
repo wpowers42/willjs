@@ -2,11 +2,13 @@ const idealCanvas = document.getElementById('idealCanvas');
 const polarCanvas = document.getElementById('polarCanvas');
 const rejectionCanvas = document.getElementById('rejectionCanvas');
 const sineCanvas = document.getElementById('sineCanvas');
+const sineSquareCanvas = document.getElementById('sineSquareCanvas');
 const walkCanvas = document.getElementById('walkCanvas');
 const idealCtx = idealCanvas.getContext('2d');
 const polarCtx = polarCanvas.getContext('2d');
 const rejectionCtx = rejectionCanvas.getContext('2d');
 const sineCtx = sineCanvas.getContext('2d');
+const sineSquareCtx = sineSquareCanvas.getContext('2d');
 const walkCtx = walkCanvas.getContext('2d');
 
 // UI elements
@@ -20,6 +22,7 @@ const rejectionCountEl = document.getElementById('rejectionCount');
 const rejectedCountEl = document.getElementById('rejectedCount');
 const sineCountEl = document.getElementById('sineCount');
 const sineRejectedCountEl = document.getElementById('sineRejectedCount');
+const sineSquareCountEl = document.getElementById('sineSquareCount');
 const walkCountEl = document.getElementById('walkCount');
 const walkRejectedCountEl = document.getElementById('walkRejectedCount');
 const idealUniformityEl = document.getElementById('idealUniformity');
@@ -34,6 +37,7 @@ let idealPoints = [];
 let polarPoints = [];
 let rejectionPoints = [];
 let sinePoints = [];
+let sineSquarePoints = [];
 let walkPoints = [];
 let rejectedCount = 0;
 let sineRejectedCount = 0;
@@ -56,29 +60,29 @@ function resizeCanvases() {
     const containerRect = container.getBoundingClientRect();
 
     // Calculate available size for each canvas
-    const numCanvases = 5;
+    const numCanvases = 6;
     const gap = 15;
-    const isWideScreen = window.innerWidth >= 1600;
+    const isWideScreen = window.innerWidth >= 1800;
     const isMediumScreen = window.innerWidth >= 1000;
     let availableWidth, availableHeight;
 
     if (isWideScreen) {
-        // Five side by side
+        // Six side by side
         availableWidth = (containerRect.width - gap * (numCanvases - 1)) / numCanvases;
         availableHeight = containerRect.height - 40;
     } else if (isMediumScreen) {
-        // 3 + 2 layout (wrapping)
+        // 3 + 3 layout (wrapping)
         availableWidth = (containerRect.width - gap * 2) / 3;
         availableHeight = (containerRect.height - gap - 60) / 2;
     } else {
-        // 2 + 2 + 1 or smaller
+        // 2 + 2 + 2 or smaller
         availableWidth = (containerRect.width - gap) / 2;
         availableHeight = (containerRect.height - gap * 2 - 80) / 3;
     }
 
     const size = Math.min(availableWidth, availableHeight, 200);
 
-    [idealCanvas, polarCanvas, rejectionCanvas, sineCanvas, walkCanvas].forEach((canvas) => {
+    [idealCanvas, polarCanvas, rejectionCanvas, sineCanvas, sineSquareCanvas, walkCanvas].forEach((canvas) => {
         const ctx = canvas.getContext('2d');
         canvas.style.width = size + 'px';
         canvas.style.height = size + 'px';
@@ -132,6 +136,16 @@ function trySinePoint() {
         return { x, y };
     }
     return null; // Rejected
+}
+
+// Sine square sampling: always accepts, shows the full square distribution
+function generateSineSquarePoint() {
+    const angle1 = Math.random() * 2 * Math.PI;
+    const angle2 = Math.random() * 2 * Math.PI;
+    return {
+        x: Math.sin(angle1),
+        y: Math.sin(angle2)
+    };
 }
 
 // Random walk: from current position, try stepping to a new point
@@ -239,6 +253,7 @@ function generateAllPointsFast() {
     polarPoints = [];
     rejectionPoints = [];
     sinePoints = [];
+    sineSquarePoints = [];
     walkPoints = [];
     rejectedCount = 0;
     sineRejectedCount = 0;
@@ -256,6 +271,8 @@ function generateAllPointsFast() {
         const sineResult = generateSinePoint();
         sinePoints.push(sineResult.point);
         sineRejectedCount += sineResult.rejected;
+
+        sineSquarePoints.push(generateSineSquarePoint());
 
         const walkResult = generateWalkPoint(walkCurrentPos);
         walkPoints.push(walkResult.point);
@@ -277,13 +294,14 @@ function generatePointsSlow() {
       , polarPoints.length
       , rejectionPoints.length
       , sinePoints.length
+      , sineSquarePoints.length
       , walkPoints.length
     );
     const progress = maxPoints / TARGET_POINTS;
     const attemptsThisFrame = getPointsPerFrame(progress);
 
     // Each method gets the same number of attempts per frame
-    // Methods with 0% rejection (ideal, polar) will finish first
+    // Methods with 0% rejection (ideal, polar, sineSquare) will finish first
     for (let i = 0; i < attemptsThisFrame; i++) {
         // Ideal - always succeeds
         if (idealPoints.length < TARGET_POINTS) {
@@ -315,6 +333,11 @@ function generatePointsSlow() {
             }
         }
 
+        // Sine Square - always succeeds
+        if (sineSquarePoints.length < TARGET_POINTS) {
+            sineSquarePoints.push(generateSineSquarePoint());
+        }
+
         // Walk - may reject
         if (walkPoints.length < TARGET_POINTS) {
             const point = tryWalkPoint();
@@ -334,6 +357,7 @@ function generatePointsSlow() {
                     polarPoints.length >= TARGET_POINTS &&
                     rejectionPoints.length >= TARGET_POINTS &&
                     sinePoints.length >= TARGET_POINTS &&
+                    sineSquarePoints.length >= TARGET_POINTS &&
                     walkPoints.length >= TARGET_POINTS;
 
     if (!allDone) {
@@ -350,6 +374,7 @@ function updateStats() {
     rejectedCountEl.textContent = rejectedCount.toLocaleString();
     sineCountEl.textContent = sinePoints.length.toLocaleString();
     sineRejectedCountEl.textContent = sineRejectedCount.toLocaleString();
+    sineSquareCountEl.textContent = sineSquarePoints.length.toLocaleString();
     walkCountEl.textContent = walkPoints.length.toLocaleString();
     walkRejectedCountEl.textContent = walkRejectedCount.toLocaleString();
 
@@ -391,6 +416,7 @@ function draw() {
     drawCanvas(polarCtx, polarCanvas, polarPoints, '#e94560');
     drawCanvas(rejectionCtx, rejectionCanvas, rejectionPoints, '#00d9ff');
     drawCanvas(sineCtx, sineCanvas, sinePoints, '#a855f7');
+    drawSquareCanvas(sineSquareCtx, sineSquareCanvas, sineSquarePoints, '#ff69b4');
     drawCanvas(walkCtx, walkCanvas, walkPoints, '#f97316');
 }
 
@@ -406,6 +432,41 @@ function drawCanvas(ctx, canvas, points, color) {
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(center, center, radius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Draw crosshairs
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(center - radius, center);
+    ctx.lineTo(center + radius, center);
+    ctx.moveTo(center, center - radius);
+    ctx.lineTo(center, center + radius);
+    ctx.stroke();
+
+    // Draw points
+    ctx.fillStyle = color + '60';
+    for (const point of points) {
+        const x = center + point.x * radius;
+        const y = center - point.y * radius;
+        ctx.beginPath();
+        ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function drawSquareCanvas(ctx, canvas, points, color) {
+    const size = canvas.width / window.devicePixelRatio;
+    const center = size / 2;
+    const radius = size * 0.45;
+
+    ctx.clearRect(0, 0, size, size);
+
+    // Draw square outline
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.rect(center - radius, center - radius, radius * 2, radius * 2);
     ctx.stroke();
 
     // Draw crosshairs
@@ -456,6 +517,7 @@ function reset() {
     polarPoints = [];
     rejectionPoints = [];
     sinePoints = [];
+    sineSquarePoints = [];
     walkPoints = [];
     rejectedCount = 0;
     sineRejectedCount = 0;
@@ -481,6 +543,24 @@ fastBtn.addEventListener('click', () => setSpeedMode(true));
 startBtn.addEventListener('click', startGeneration);
 resetBtn.addEventListener('click', reset);
 window.addEventListener('resize', resizeCanvases);
+
+// Mobile sidebar toggle
+const sidebarToggle = document.getElementById('sidebarToggle');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+const infoPanel = document.querySelector('.info-panel');
+
+function toggleSidebar() {
+    infoPanel.classList.toggle('open');
+    sidebarOverlay.classList.toggle('open');
+}
+
+function closeSidebar() {
+    infoPanel.classList.remove('open');
+    sidebarOverlay.classList.remove('open');
+}
+
+sidebarToggle.addEventListener('click', toggleSidebar);
+sidebarOverlay.addEventListener('click', closeSidebar);
 
 // Initialize
 resizeCanvases();
