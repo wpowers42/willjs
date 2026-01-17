@@ -34,16 +34,143 @@ class Loop {
         this.isPlaying = false;
         this.noteActive = false;
         this.nextNoteTime = 0;
+
+        // Track position for pause/resume
+        this.hasStarted = false;
+        this.pausedElapsed = 0;
+
+        // Session ID to invalidate old setTimeout callbacks
+        this.sessionId = 0;
+
+        // Track active oscillators so we can stop them on pause
+        this.activeOscillators = [];
     }
 
     start(startOffset = 0) {
-        this.startTime = this.audioEngine.ctx.currentTime + startOffset;
-        this.isPlaying = true;
-        this.scheduleNote(this.startTime);
+        const ctx = this.audioEngine.ctx;
+
+        // Increment session ID to invalidate any pending setTimeout callbacks
+        this.sessionId++;
+
+        if (this.hasStarted) {
+            // Resume from paused position
+            this.startTime = ctx.currentTime - this.pausedElapsed;
+            this.isPlaying = true;
+
+            const positionInLoop = this.pausedElapsed % this.length;
+            const noteDuration = ENVELOPE.attack + ENVELOPE.sustain + ENVELOPE.release;
+
+            if (positionInLoop < noteDuration) {
+                // We're in the middle of a note - resume it from current envelope position
+                this.scheduleNoteFromPosition(ctx.currentTime, positionInLoop);
+            }
+
+            // Schedule the next note at the appropriate time
+            const timeUntilNextCycle = this.length - positionInLoop;
+            this.scheduleNote(ctx.currentTime + timeUntilNextCycle);
+        } else {
+            // First time start with staggered offset
+            this.hasStarted = true;
+            this.startTime = ctx.currentTime + startOffset;
+            this.isPlaying = true;
+            this.scheduleNote(this.startTime);
+        }
     }
 
     stop() {
+        if (this.isPlaying) {
+            // Save current position before stopping
+            const ctx = this.audioEngine.ctx;
+            this.pausedElapsed = ctx.currentTime - this.startTime;
+        }
         this.isPlaying = false;
+
+        // Stop all active oscillators immediately to prevent overlap on resume
+        this.activeOscillators.forEach(osc => {
+            try {
+                osc.stop();
+            } catch (e) {
+                // Oscillator may have already stopped
+            }
+        });
+        this.activeOscillators = [];
+    }
+
+    // Resume a note from the middle of its envelope
+    scheduleNoteFromPosition(time, positionInNote) {
+        if (!this.isPlaying) return;
+
+        const ctx = this.audioEngine.ctx;
+        const noteDuration = ENVELOPE.attack + ENVELOPE.sustain + ENVELOPE.release;
+        const remainingDuration = noteDuration - positionInNote;
+
+        // Create oscillators
+        const sineOsc = ctx.createOscillator();
+        const triangleOsc = ctx.createOscillator();
+        sineOsc.type = 'sine';
+        triangleOsc.type = 'triangle';
+        sineOsc.frequency.value = this.frequency;
+        triangleOsc.frequency.value = this.frequency;
+
+        // Gain nodes for mixing
+        const sineGain = ctx.createGain();
+        const triangleGain = ctx.createGain();
+        sineGain.gain.value = 0.7;
+        triangleGain.gain.value = 0.3;
+
+        // Calculate current envelope value and remaining envelope
+        const envelopeGain = ctx.createGain();
+
+        if (positionInNote < ENVELOPE.attack) {
+            // In attack phase - continue ramping up
+            const currentGain = (positionInNote / ENVELOPE.attack) * 0.15;
+            const remainingAttack = ENVELOPE.attack - positionInNote;
+            envelopeGain.gain.setValueAtTime(currentGain, time);
+            envelopeGain.gain.linearRampToValueAtTime(0.15, time + remainingAttack);
+            envelopeGain.gain.setValueAtTime(0.15, time + remainingAttack + ENVELOPE.sustain);
+            envelopeGain.gain.linearRampToValueAtTime(0, time + remainingDuration);
+        } else if (positionInNote < ENVELOPE.attack + ENVELOPE.sustain) {
+            // In sustain phase
+            const remainingSustain = (ENVELOPE.attack + ENVELOPE.sustain) - positionInNote;
+            envelopeGain.gain.setValueAtTime(0.15, time);
+            envelopeGain.gain.setValueAtTime(0.15, time + remainingSustain);
+            envelopeGain.gain.linearRampToValueAtTime(0, time + remainingDuration);
+        } else {
+            // In release phase - continue ramping down
+            const releaseProgress = (positionInNote - ENVELOPE.attack - ENVELOPE.sustain) / ENVELOPE.release;
+            const currentGain = 0.15 * (1 - releaseProgress);
+            envelopeGain.gain.setValueAtTime(currentGain, time);
+            envelopeGain.gain.linearRampToValueAtTime(0, time + remainingDuration);
+        }
+
+        // Lowpass filter
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 2000;
+        filter.Q.value = 0.5;
+
+        // Connect
+        sineOsc.connect(sineGain);
+        triangleOsc.connect(triangleGain);
+        sineGain.connect(envelopeGain);
+        triangleGain.connect(envelopeGain);
+        envelopeGain.connect(filter);
+        filter.connect(this.audioEngine.reverbInput);
+
+        // Track oscillators
+        this.activeOscillators.push(sineOsc, triangleOsc);
+        const removeOsc = (osc) => {
+            const idx = this.activeOscillators.indexOf(osc);
+            if (idx > -1) this.activeOscillators.splice(idx, 1);
+        };
+        sineOsc.onended = () => removeOsc(sineOsc);
+        triangleOsc.onended = () => removeOsc(triangleOsc);
+
+        // Start and stop
+        sineOsc.start(time);
+        triangleOsc.start(time);
+        sineOsc.stop(time + remainingDuration + 0.1);
+        triangleOsc.stop(time + remainingDuration + 0.1);
     }
 
     scheduleNote(time) {
@@ -87,6 +214,17 @@ class Loop {
         envelopeGain.connect(filter);
         filter.connect(this.audioEngine.reverbInput);
 
+        // Track oscillators for cleanup on stop
+        this.activeOscillators.push(sineOsc, triangleOsc);
+
+        // Remove from tracking when oscillator ends
+        const removeOsc = (osc) => {
+            const idx = this.activeOscillators.indexOf(osc);
+            if (idx > -1) this.activeOscillators.splice(idx, 1);
+        };
+        sineOsc.onended = () => removeOsc(sineOsc);
+        triangleOsc.onended = () => removeOsc(triangleOsc);
+
         // Start and stop oscillators
         sineOsc.start(time);
         triangleOsc.start(time);
@@ -96,9 +234,13 @@ class Loop {
         // Store next note time for visualization
         this.nextNoteTime = time + this.length;
 
+        // Capture current session ID to check in callback
+        const currentSessionId = this.sessionId;
+
         // Schedule next note
         const scheduleNext = () => {
-            if (this.isPlaying) {
+            // Only schedule if still playing AND session hasn't changed
+            if (this.isPlaying && this.sessionId === currentSessionId) {
                 this.scheduleNote(time + this.length);
             }
         };
@@ -110,9 +252,12 @@ class Loop {
 
     // Get current progress through loop (0-1)
     getProgress() {
-        if (!this.isPlaying) return 0;
+        if (!this.hasStarted) return 0;
         const ctx = this.audioEngine.ctx;
-        const elapsed = ctx.currentTime - this.startTime;
+        // Use paused position if not playing, otherwise calculate from startTime
+        const elapsed = this.isPlaying
+            ? ctx.currentTime - this.startTime
+            : this.pausedElapsed;
         return (elapsed % this.length) / this.length;
     }
 
@@ -128,9 +273,12 @@ class Loop {
 
     // Get note intensity (0-1) based on envelope position
     getNoteIntensity() {
-        if (!this.isPlaying) return 0;
+        if (!this.hasStarted) return 0;
         const ctx = this.audioEngine.ctx;
-        const elapsed = ctx.currentTime - this.startTime;
+        // Use paused position if not playing, otherwise calculate from startTime
+        const elapsed = this.isPlaying
+            ? ctx.currentTime - this.startTime
+            : this.pausedElapsed;
         const positionInLoop = elapsed % this.length;
         const noteDuration = ENVELOPE.attack + ENVELOPE.sustain + ENVELOPE.release;
 
@@ -228,7 +376,8 @@ export class AudioEngine {
 
         if (this.isPlaying) return;
 
-        // Stop any existing loops (in case we're restarting during fade-out)
+        // Stop any loops still playing (in case we're restarting during fade-out)
+        // This also saves their current position
         this.loops.forEach(loop => loop.stop());
 
         this.isPlaying = true;
@@ -237,10 +386,11 @@ export class AudioEngine {
         const startGain = this.fadeLevel * this.targetVolume;
         this.masterGain.gain.setValueAtTime(startGain, this.ctx.currentTime);
 
-        // Stagger loop starts to avoid initial chord burst
+        // Start or resume loops
+        // First-time starts get staggered offsets; resumes use saved position
         this.loops.forEach((loop, index) => {
             const offset = index * 0.3 + Math.random() * 0.2;
-            loop.start(offset);
+            loop.start(offset); // Offset is ignored if loop has already started
         });
 
         // Fade in
