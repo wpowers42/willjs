@@ -156,6 +156,13 @@ export class AudioEngine {
         this.loops = [];
         this.isPlaying = false;
         this.initialized = false;
+
+        // Fade state
+        this.targetVolume = 0.7;
+        this.fadeLevel = 0; // 0 = silent/paused, 1 = full volume/playing
+        this.isFading = false;
+        this.fadeDuration = 1.5; // seconds
+        this.fadeTarget = 0; // Track fade direction: 0 = fading out, 1 = fading in
     }
 
     async init() {
@@ -221,35 +228,117 @@ export class AudioEngine {
 
         if (this.isPlaying) return;
 
+        // Stop any existing loops (in case we're restarting during fade-out)
+        this.loops.forEach(loop => loop.stop());
+
         this.isPlaying = true;
+
+        // Start with current fade level (allows smooth restart during fade-out)
+        const startGain = this.fadeLevel * this.targetVolume;
+        this.masterGain.gain.setValueAtTime(startGain, this.ctx.currentTime);
 
         // Stagger loop starts to avoid initial chord burst
         this.loops.forEach((loop, index) => {
             const offset = index * 0.3 + Math.random() * 0.2;
             loop.start(offset);
         });
+
+        // Fade in
+        this.fadeIn();
     }
 
     stop() {
         if (!this.isPlaying) return;
 
+        // Fade out, then stop loops
+        this.fadeOut(() => {
+            this.loops.forEach(loop => loop.stop());
+        });
+    }
+
+    fadeIn() {
+        if (!this.ctx || !this.masterGain) return;
+
+        this.isFading = true;
+        this.fadeTarget = 1;
+        const startTime = this.ctx.currentTime;
+
+        // Cancel any pending ramps
+        this.masterGain.gain.cancelScheduledValues(startTime);
+        this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, startTime);
+        this.masterGain.gain.linearRampToValueAtTime(this.targetVolume, startTime + this.fadeDuration);
+
+        // Animate fade level for visualization
+        this.animateFadeLevel(1, startTime);
+    }
+
+    fadeOut(onComplete) {
+        if (!this.ctx || !this.masterGain) {
+            if (onComplete) onComplete();
+            return;
+        }
+
+        this.isFading = true;
+        this.fadeTarget = 0;
         this.isPlaying = false;
-        this.loops.forEach(loop => loop.stop());
+        const startTime = this.ctx.currentTime;
+
+        // Cancel any pending ramps
+        this.masterGain.gain.cancelScheduledValues(startTime);
+        this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, startTime);
+        this.masterGain.gain.linearRampToValueAtTime(0, startTime + this.fadeDuration);
+
+        // Animate fade level for visualization
+        this.animateFadeLevel(0, startTime, onComplete);
+    }
+
+    animateFadeLevel(target, startTime, onComplete) {
+        const startLevel = this.fadeLevel;
+        const currentTarget = target; // Capture target at start
+
+        const animate = () => {
+            if (!this.ctx) return;
+
+            // Stop if fade direction changed
+            if (this.fadeTarget !== currentTarget) return;
+
+            const elapsed = this.ctx.currentTime - startTime;
+            const progress = Math.min(elapsed / this.fadeDuration, 1);
+
+            this.fadeLevel = startLevel + (target - startLevel) * progress;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                this.fadeLevel = target;
+                this.isFading = false;
+                if (onComplete) onComplete();
+            }
+        };
+        requestAnimationFrame(animate);
     }
 
     toggle() {
-        if (this.isPlaying) {
+        // If actively playing or fading in, stop
+        if (this.isPlaying || (this.isFading && this.fadeTarget === 1)) {
             this.stop();
+            return false;
         } else {
+            // If stopped or fading out, start
             this.start();
+            return true;
         }
-        return this.isPlaying;
     }
 
     setVolume(value) {
-        if (this.masterGain) {
+        this.targetVolume = value;
+        if (this.masterGain && this.isPlaying && !this.isFading) {
             this.masterGain.gain.setTargetAtTime(value, this.ctx.currentTime, 0.1);
         }
+    }
+
+    getFadeLevel() {
+        return this.fadeLevel;
     }
 
     getLoopStates() {
