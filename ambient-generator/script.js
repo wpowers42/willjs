@@ -146,7 +146,11 @@ function handleVisibility() {
     if (document.visibilityState === 'visible') {
         // Resume audio context if it was suspended while hidden
         if (audioEngine.isPlaying) {
+            // Use small delays to work around iOS Safari bugs with immediate resume
             audioEngine.resumeContext();
+            setTimeout(() => audioEngine.resumeContext(), 100);
+            setTimeout(() => audioEngine.resumeContext(), 500);
+
             // Ensure silent audio is playing for mobile background support
             if (silentAudio && silentAudio.paused) {
                 silentAudio.play().catch(() => {});
@@ -175,11 +179,21 @@ function setupBackgroundAudioSupport() {
         }
     });
 
-    window.addEventListener('pageshow', () => {
+    window.addEventListener('pageshow', (event) => {
         if (audioEngine.isPlaying) {
+            // On iOS Safari, pageshow fires when returning from background
+            // Use delayed resume attempts to work around timing issues
             audioEngine.resumeContext();
+            setTimeout(() => audioEngine.resumeContext(), 100);
+            setTimeout(() => audioEngine.resumeContext(), 300);
+
             if (silentAudio && silentAudio.paused) {
                 silentAudio.play().catch(() => {});
+            }
+
+            // If page was restored from cache, force audio restart
+            if (event.persisted) {
+                audioEngine.resumeContext();
             }
         }
     });
@@ -193,9 +207,20 @@ function setupBackgroundAudioSupport() {
 
     window.addEventListener('focus', () => {
         if (audioEngine.isPlaying) {
+            // Multiple resume attempts with delays for iOS Safari
             audioEngine.resumeContext();
+            setTimeout(() => audioEngine.resumeContext(), 100);
+            setTimeout(() => audioEngine.resumeContext(), 500);
         }
     });
+
+    // iOS Safari specific: handle touch events to keep audio alive
+    // A touch interaction can sometimes "unlock" suspended audio
+    document.addEventListener('touchstart', () => {
+        if (audioEngine.isPlaying) {
+            audioEngine.resumeContext();
+        }
+    }, { passive: true });
 }
 
 function animate() {
