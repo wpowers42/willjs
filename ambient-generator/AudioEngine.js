@@ -309,6 +309,13 @@ export class AudioEngine {
         this.keepaliveOscillator = null;
         this.keepaliveGain = null;
         this.keepaliveInterval = null;
+        this.keepaliveWorker = null;
+
+        // iOS background audio: route Web Audio through HTML audio element
+        this.mediaStreamDestination = null;
+        this.backgroundAudioElement = null;
+        this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     }
 
     createSynth(type) {
@@ -361,6 +368,10 @@ export class AudioEngine {
         this.reverb.connect(this.masterGain);
         this.masterGain.toDestination();
 
+        // iOS: Also route audio through MediaStreamDestination to HTML audio element
+        // HTML audio elements can continue playing in background, Web Audio cannot
+        this.setupMediaStreamDestination();
+
         // Create all synths and connect them to the effects chain
         for (const type of SYNTH_TYPES) {
             this.synths[type] = this.createSynth(type);
@@ -373,14 +384,44 @@ export class AudioEngine {
         // Create silent keepalive oscillator for background playback
         this.setupKeepalive();
 
-        // Listen for audio context state changes
-        Tone.context.rawContext.addEventListener('statechange', () => {
-            if (this.isPlaying && Tone.context.state === 'suspended') {
+        // Listen for audio context state changes (including iOS 'interrupted' state)
+        const rawContext = Tone.context.rawContext;
+        rawContext.addEventListener('statechange', () => {
+            const state = rawContext.state;
+            if (this.isPlaying && (state === 'suspended' || state === 'interrupted')) {
                 this.resumeContext();
             }
         });
 
         this.initialized = true;
+    }
+
+    setupMediaStreamDestination() {
+        // Create MediaStreamDestination to route Web Audio to an HTML audio element
+        // This allows audio to continue playing when iOS Safari is backgrounded
+        try {
+            const ctx = Tone.context.rawContext;
+            if (ctx.createMediaStreamDestination) {
+                this.mediaStreamDestination = ctx.createMediaStreamDestination();
+
+                // Connect master gain to the MediaStream destination
+                // Audio will now be routed through BOTH normal destination AND the MediaStream
+                this.masterGain.connect(this.mediaStreamDestination);
+
+                // Create audio element that plays the MediaStream
+                this.backgroundAudioElement = document.createElement('audio');
+                this.backgroundAudioElement.setAttribute('playsinline', '');
+                this.backgroundAudioElement.setAttribute('x-webkit-airplay', 'deny');
+                this.backgroundAudioElement.srcObject = this.mediaStreamDestination.stream;
+
+                // Append to body (required for some browsers)
+                this.backgroundAudioElement.style.display = 'none';
+                document.body.appendChild(this.backgroundAudioElement);
+            }
+        } catch (e) {
+            // MediaStreamDestination not supported, fall back to normal playback
+            console.log('MediaStreamDestination not available, using standard audio routing');
+        }
     }
 
     setupKeepalive() {
@@ -409,11 +450,53 @@ export class AudioEngine {
             clearInterval(this.keepaliveInterval);
         }
 
+        // Use a shorter interval for more aggressive keepalive
         this.keepaliveInterval = setInterval(() => {
             if (this.isPlaying) {
                 this.resumeContext();
+                // Also ensure background audio element is playing
+                if (this.backgroundAudioElement && this.backgroundAudioElement.paused) {
+                    this.backgroundAudioElement.play().catch(() => {});
+                }
             }
-        }, 1000); // Check every second
+        }, 500); // Check every 500ms for faster response
+
+        // Also use a Web Worker-based timer for background tabs where setInterval is throttled
+        this.startWorkerKeepalive();
+    }
+
+    startWorkerKeepalive() {
+        // Create an inline Web Worker for background timers
+        // Web Workers are not throttled in background tabs like setInterval is
+        if (this.keepaliveWorker) {
+            this.keepaliveWorker.terminate();
+        }
+
+        try {
+            const workerCode = `
+                let interval = null;
+                self.onmessage = function(e) {
+                    if (e.data === 'start') {
+                        interval = setInterval(() => self.postMessage('tick'), 1000);
+                    } else if (e.data === 'stop') {
+                        clearInterval(interval);
+                        interval = null;
+                    }
+                };
+            `;
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            this.keepaliveWorker = new Worker(URL.createObjectURL(blob));
+
+            this.keepaliveWorker.onmessage = () => {
+                if (this.isPlaying) {
+                    this.resumeContext();
+                }
+            };
+
+            this.keepaliveWorker.postMessage('start');
+        } catch (e) {
+            // Web Workers not supported, fall back to setInterval only
+        }
     }
 
     stopKeepaliveInterval() {
@@ -421,15 +504,41 @@ export class AudioEngine {
             clearInterval(this.keepaliveInterval);
             this.keepaliveInterval = null;
         }
+
+        if (this.keepaliveWorker) {
+            this.keepaliveWorker.postMessage('stop');
+            this.keepaliveWorker.terminate();
+            this.keepaliveWorker = null;
+        }
     }
 
     async resumeContext() {
-        if (Tone.context.state === 'suspended') {
+        const state = Tone.context.state;
+        // Handle both 'suspended' and iOS-specific 'interrupted' states
+        if (state === 'suspended' || state === 'interrupted') {
             try {
                 await Tone.context.resume();
+                // Also ensure background audio element is playing
+                if (this.backgroundAudioElement && this.backgroundAudioElement.paused) {
+                    this.backgroundAudioElement.play().catch(() => {});
+                }
             } catch (e) {
                 // Silently ignore resume errors
             }
+        }
+    }
+
+    startBackgroundAudio() {
+        // Start the background audio element that routes Web Audio through HTML audio
+        if (this.backgroundAudioElement) {
+            this.backgroundAudioElement.play().catch(() => {});
+        }
+    }
+
+    stopBackgroundAudio() {
+        // Stop the background audio element
+        if (this.backgroundAudioElement) {
+            this.backgroundAudioElement.pause();
         }
     }
 
@@ -449,6 +558,9 @@ export class AudioEngine {
         // Start keepalive interval for background playback
         this.startKeepaliveInterval();
 
+        // Start background audio element for iOS background playback
+        this.startBackgroundAudio();
+
         const startGain = this.fadeLevel * this.targetVolume;
         this.masterGain.gain.value = startGain;
 
@@ -465,6 +577,9 @@ export class AudioEngine {
 
         // Stop keepalive interval
         this.stopKeepaliveInterval();
+
+        // Stop background audio element
+        this.stopBackgroundAudio();
 
         this.fadeOut(() => {
             this.loops.forEach(loop => loop.stop());

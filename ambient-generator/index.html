@@ -25,7 +25,11 @@
     </div>
 
     <!-- Silent audio for background playback on mobile -->
-    <audio id="silentAudio" loop playsinline>
+    <!-- Using a longer silent MP3 for better iOS compatibility -->
+    <audio id="silentAudio" loop playsinline preload="auto" x-webkit-airplay="deny">
+        <!-- 1 second of silence encoded as MP3 - more reliable than short WAV on iOS -->
+        <source src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYNdTuLAAAAAAD/+1DEAAAGQAN/AAAAIjQq7+AAAAAD/BBB//wQQ//4IIf///BA//hAh/+CD//wgQ//8EEAAAIIf//hAh////+CEP//gg///9AhAAAAAh///4IP///wQf//+CD//wQf//BA///Ag//4EH//4IP/+CD/wQf/8EEH/8EH//Ah///hA//8EAP/BA//gg//8EH//gg//wQf/8EEP//gg//4IP//BB//+CD/4IP/+CD//Ag///4QP//+CD//wQf/8EH/+CD//+ED//gg//8EH//4QP/+CD///hA//4IP//+CD///Ah///gg//8EEP//gg//8IH///gh//wQf/8EH//BA//+CD//+CD//gg/8EH//hA//8EH//gg//+CD//wgf//BA//4IP//wQf/+CD//wgf/8EEP//BA//4IP//wQf//gg//8EH//Bh//wQQf/8GH//Bg///gg//4IP//+CD//gg//4IH//Ag//4IP//BB//wQf//BA//4IP//+CD//wQf/8EH//Ah//8EH//gg//8EH//hA//4IP//+CD//wQf/8EH//Ag//8EH//gg//8EH//hA//4IP//+CD//wQf//BA//Ag//4IP//+CD//gg//4IP//BA//4IH//Ag/wAAADEwMDAAAAAAAAAAAAAAAAAAAA==" type="audio/mp3">
+        <!-- Fallback WAV for browsers that don't support MP3 -->
         <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA" type="audio/wav">
     </audio>
 
