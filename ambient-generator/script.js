@@ -21,9 +21,9 @@ const COLORS = {
 
 // Visualization settings
 const VIZ = {
-    ringSpacing: 35,
+    ringSpacing: 30,
     ringWidth: 4,
-    centerRadius: 50,
+    centerRadius: 45,
 };
 
 function init() {

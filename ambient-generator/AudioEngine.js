@@ -3,15 +3,17 @@
  * Inspired by Brian Eno's "Music for Airports"
  */
 
-// Loop configuration: 7 independent loops with incommensurable lengths
+// Loop configuration: 8 planets with cycles proportional to orbital periods
+// Orbital periods compressed via cube root, normalized to 13-114 second range
 const LOOP_CONFIG = [
-    { length: 17.3, note: 'D4' },
-    { length: 21.7, note: 'E4' },
-    { length: 19.1, note: 'F#4' },
-    { length: 23.9, note: 'A4' },
-    { length: 29.3, note: 'C4' },
-    { length: 31.1, note: 'D5' },
-    { length: 37.7, note: 'A3' },
+    { length: 13.1,  note: 'D5',  planet: 'Mercury' },  // 88 days
+    { length: 17.9,  note: 'B4',  planet: 'Venus' },    // 225 days
+    { length: 21.3,  note: 'A4',  planet: 'Earth' },    // 365 days
+    { length: 25.7,  note: 'F#4', planet: 'Mars' },     // 687 days
+    { length: 47.3,  note: 'E4',  planet: 'Jupiter' },  // 4,333 days
+    { length: 64.9,  note: 'D4',  planet: 'Saturn' },   // 10,759 days
+    { length: 91.1,  note: 'C4',  planet: 'Uranus' },   // 30,687 days
+    { length: 113.9, note: 'A3',  planet: 'Neptune' },  // 60,190 days
 ];
 
 // Envelope timing (in seconds)
