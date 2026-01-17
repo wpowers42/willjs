@@ -176,22 +176,27 @@ body {
 /* Mobile adjustments */
 @media (max-width: 600px) {
     .controls {
-        bottom: 20px;
-        padding: 12px 20px;
-        gap: 15px;
-        flex-wrap: wrap;
-        justify-content: center;
-        max-width: 90vw;
+        bottom: 30px;
+        padding: 16px 24px;
+        gap: 20px;
+        flex-direction: column;
+        align-items: center;
+        max-width: 85vw;
     }
 
     .play-btn {
-        padding: 10px 24px;
-        font-size: 14px;
-        min-width: 80px;
+        padding: 14px 48px;
+        font-size: 16px;
+        min-width: 120px;
+    }
+
+    .volume-container {
+        width: 100%;
+        justify-content: center;
     }
 
     .volume-slider {
-        width: 80px;
+        width: 120px;
     }
 
     .volume-label,
@@ -205,31 +210,60 @@ body {
     }
 
     .info {
-        top: 20px;
+        top: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        padding: 0 10px;
     }
 
     .info p {
-        font-size: 12px;
+        font-size: 13px;
+        line-height: 1.4;
     }
 
     .info .subtitle {
         font-size: 11px;
+        line-height: 1.4;
     }
 }
 
 /* Touch-friendly targets */
 @media (pointer: coarse) {
     .play-btn {
-        padding: 14px 40px;
+        padding: 16px 48px;
+        min-height: 48px;
+    }
+
+    .volume-slider {
+        height: 6px;
     }
 
     .volume-slider::-webkit-slider-thumb {
-        width: 24px;
-        height: 24px;
+        width: 28px;
+        height: 28px;
     }
 
     .volume-slider::-moz-range-thumb {
-        width: 24px;
-        height: 24px;
+        width: 28px;
+        height: 28px;
+    }
+}
+
+/* Safe area for notched devices */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .controls {
+        padding-bottom: calc(15px + env(safe-area-inset-bottom));
+    }
+
+    @media (max-width: 600px) {
+        .controls {
+            padding-bottom: calc(16px + env(safe-area-inset-bottom));
+            bottom: 10px;
+        }
+
+        .info {
+            top: calc(40px + env(safe-area-inset-top));
+        }
     }
 }

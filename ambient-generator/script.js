@@ -9,6 +9,7 @@ import { AudioEngine } from './AudioEngine.js';
 let canvas, ctx;
 let audioEngine;
 let animationId;
+let silentAudio;
 
 // Colors
 const COLORS = {
@@ -19,12 +20,24 @@ const COLORS = {
     text: '#f4a460',
 };
 
-// Visualization settings
-const VIZ = {
+// Visualization settings (will be updated based on screen size)
+let VIZ = {
     ringSpacing: 30,
     ringWidth: 4,
     centerRadius: 45,
 };
+
+function updateVisualizationSettings() {
+    const minDimension = Math.min(window.innerWidth, window.innerHeight);
+    // Scale visualization based on screen size
+    // Target: fit 8 rings comfortably with some padding
+    const availableRadius = (minDimension * 0.42); // 42% of min dimension for rings
+    const numRings = 8;
+
+    VIZ.ringSpacing = Math.max(18, Math.min(35, availableRadius / numRings));
+    VIZ.centerRadius = Math.max(25, Math.min(50, minDimension * 0.05));
+    VIZ.ringWidth = Math.max(2, Math.min(5, minDimension * 0.005));
+}
 
 function init() {
     // Setup canvas
@@ -35,6 +48,9 @@ function init() {
     // Create audio engine
     audioEngine = new AudioEngine();
 
+    // Get silent audio element for background playback
+    silentAudio = document.getElementById('silentAudio');
+
     // Setup event listeners
     window.addEventListener('resize', resizeCanvas);
     document.getElementById('playBtn').addEventListener('click', togglePlay);
@@ -43,6 +59,9 @@ function init() {
     // Handle visibility change (resync on return)
     document.addEventListener('visibilitychange', handleVisibility);
 
+    // Setup Media Session API for lock screen controls
+    setupMediaSession();
+
     // Start animation loop
     animate();
 }
@@ -50,6 +69,41 @@ function init() {
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    updateVisualizationSettings();
+}
+
+function setupMediaSession() {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: 'Ambient Generator',
+            artist: 'Planetary Orbits',
+            album: 'D Mixolydian',
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => {
+            if (!audioEngine.isPlaying) {
+                togglePlay();
+            }
+        });
+
+        navigator.mediaSession.setActionHandler('pause', () => {
+            if (audioEngine.isPlaying) {
+                togglePlay();
+            }
+        });
+
+        navigator.mediaSession.setActionHandler('stop', () => {
+            if (audioEngine.isPlaying) {
+                togglePlay();
+            }
+        });
+    }
+}
+
+function updateMediaSessionState(isPlaying) {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    }
 }
 
 async function togglePlay() {
@@ -64,10 +118,20 @@ async function togglePlay() {
     if (isPlaying) {
         btn.textContent = 'Pause';
         btn.classList.add('playing');
+        // Start silent audio to keep audio session alive on mobile
+        if (silentAudio) {
+            silentAudio.play().catch(() => {});
+        }
     } else {
         btn.textContent = 'Play';
         btn.classList.remove('playing');
+        // Pause silent audio when not playing
+        if (silentAudio) {
+            silentAudio.pause();
+        }
     }
+
+    updateMediaSessionState(isPlaying);
 }
 
 function handleVolume(e) {
@@ -76,10 +140,22 @@ function handleVolume(e) {
 }
 
 function handleVisibility() {
-    // Audio context may suspend when tab is hidden
-    if (document.visibilityState === 'visible' && audioEngine.isPlaying) {
-        if (audioEngine.ctx && audioEngine.ctx.state === 'suspended') {
-            audioEngine.ctx.resume();
+    if (document.visibilityState === 'visible') {
+        // Resume audio context if it was suspended while hidden
+        if (audioEngine.isPlaying) {
+            if (Tone.context.state === 'suspended') {
+                Tone.context.resume();
+            }
+            // Ensure silent audio is playing for mobile background support
+            if (silentAudio && silentAudio.paused) {
+                silentAudio.play().catch(() => {});
+            }
+        }
+    } else {
+        // When hidden, try to keep audio playing
+        // The silent audio element helps maintain the audio session
+        if (audioEngine.isPlaying && silentAudio && silentAudio.paused) {
+            silentAudio.play().catch(() => {});
         }
     }
 }
