@@ -374,7 +374,7 @@ export class AudioEngine {
         this.setupKeepalive();
 
         // Listen for audio context state changes
-        Tone.context.addEventListener('statechange', () => {
+        Tone.context.rawContext.addEventListener('statechange', () => {
             if (this.isPlaying && Tone.context.state === 'suspended') {
                 this.resumeContext();
             }
