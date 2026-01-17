@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Ambient Generator</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -21,6 +23,11 @@
         <p>Generative ambient music inspired by Brian Eno</p>
         <p class="subtitle">8 planetary orbits in D Mixolydian - cycles proportional to real orbital periods</p>
     </div>
+
+    <!-- Silent audio for background playback on mobile -->
+    <audio id="silentAudio" loop playsinline>
+        <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA" type="audio/wav">
+    </audio>
 
     <script src="https://unpkg.com/tone@14"></script>
     <script type="module" src="script.js"></script>
