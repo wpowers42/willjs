@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambient Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div class="controls">
+        <button id="playBtn" class="play-btn">Play</button>
+        <div class="volume-container">
+            <label for="volumeSlider" class="volume-label">Volume</label>
+            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.7">
+        </div>
+    </div>
+
+    <div class="info">
+        <p>Generative ambient music inspired by Brian Eno</p>
+        <p class="subtitle">7 loops in D Mixolydian - patterns never exactly repeat</p>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
