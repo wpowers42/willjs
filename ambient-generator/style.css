@@ -104,6 +104,50 @@ body {
     border: none;
 }
 
+.synth-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.synth-label {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.synth-select {
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(244, 164, 96, 0.1);
+    border: 1px solid rgba(244, 164, 96, 0.4);
+    color: #f4a460;
+    padding: 8px 32px 8px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f4a460' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+.synth-select:hover {
+    background-color: rgba(244, 164, 96, 0.2);
+    border-color: rgba(244, 164, 96, 0.6);
+}
+
+.synth-select:focus {
+    outline: none;
+    border-color: #f4a460;
+}
+
+.synth-select option {
+    background: #1a1a24;
+    color: #f4a460;
+    padding: 8px;
+}
+
 .info {
     position: fixed;
     top: 30px;
@@ -134,7 +178,10 @@ body {
     .controls {
         bottom: 20px;
         padding: 12px 20px;
-        gap: 20px;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 90vw;
     }
 
     .play-btn {
@@ -147,8 +194,14 @@ body {
         width: 80px;
     }
 
-    .volume-label {
+    .volume-label,
+    .synth-label {
         display: none;
+    }
+
+    .synth-select {
+        padding: 8px 28px 8px 10px;
+        font-size: 13px;
     }
 
     .info {
