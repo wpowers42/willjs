@@ -59,6 +59,9 @@ function init() {
     // Handle visibility change (resync on return)
     document.addEventListener('visibilitychange', handleVisibility);
 
+    // Setup additional background audio support for mobile
+    setupBackgroundAudioSupport();
+
     // Setup Media Session API for lock screen controls
     setupMediaSession();
 
@@ -143,9 +146,7 @@ function handleVisibility() {
     if (document.visibilityState === 'visible') {
         // Resume audio context if it was suspended while hidden
         if (audioEngine.isPlaying) {
-            if (Tone.context.state === 'suspended') {
-                Tone.context.resume();
-            }
+            audioEngine.resumeContext();
             // Ensure silent audio is playing for mobile background support
             if (silentAudio && silentAudio.paused) {
                 silentAudio.play().catch(() => {});
@@ -154,10 +155,47 @@ function handleVisibility() {
     } else {
         // When hidden, try to keep audio playing
         // The silent audio element helps maintain the audio session
+        if (audioEngine.isPlaying) {
+            if (silentAudio && silentAudio.paused) {
+                silentAudio.play().catch(() => {});
+            }
+            // Proactively try to resume context when going to background
+            audioEngine.resumeContext();
+        }
+    }
+}
+
+// Additional event listeners for iOS background audio support
+// These events fire when the page loses/gains focus on mobile
+function setupBackgroundAudioSupport() {
+    // Handle page hide/show (works better on some mobile browsers)
+    window.addEventListener('pagehide', () => {
+        if (audioEngine.isPlaying && silentAudio) {
+            silentAudio.play().catch(() => {});
+        }
+    });
+
+    window.addEventListener('pageshow', () => {
+        if (audioEngine.isPlaying) {
+            audioEngine.resumeContext();
+            if (silentAudio && silentAudio.paused) {
+                silentAudio.play().catch(() => {});
+            }
+        }
+    });
+
+    // Handle blur/focus events
+    window.addEventListener('blur', () => {
         if (audioEngine.isPlaying && silentAudio && silentAudio.paused) {
             silentAudio.play().catch(() => {});
         }
-    }
+    });
+
+    window.addEventListener('focus', () => {
+        if (audioEngine.isPlaying) {
+            audioEngine.resumeContext();
+        }
+    });
 }
 
 function animate() {

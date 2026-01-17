@@ -304,6 +304,11 @@ export class AudioEngine {
         this.isFading = false;
         this.fadeDuration = 1.5;
         this.fadeTarget = 0;
+
+        // Background audio keepalive
+        this.keepaliveOscillator = null;
+        this.keepaliveGain = null;
+        this.keepaliveInterval = null;
     }
 
     createSynth(type) {
@@ -365,7 +370,67 @@ export class AudioEngine {
         // Create loops
         this.loops = LOOP_CONFIG.map((config, index) => new Loop(this, config, index));
 
+        // Create silent keepalive oscillator for background playback
+        this.setupKeepalive();
+
+        // Listen for audio context state changes
+        Tone.context.addEventListener('statechange', () => {
+            if (this.isPlaying && Tone.context.state === 'suspended') {
+                this.resumeContext();
+            }
+        });
+
         this.initialized = true;
+    }
+
+    setupKeepalive() {
+        // Create a silent oscillator that keeps the audio context alive on mobile
+        // This runs at an inaudible frequency with zero gain
+        this.keepaliveGain = new Tone.Gain(0).toDestination();
+
+        // Use Tone's raw context for the oscillator
+        const ctx = Tone.context.rawContext;
+        this.keepaliveOscillator = ctx.createOscillator();
+        this.keepaliveOscillator.frequency.value = 0; // DC offset, completely silent
+
+        // Connect through a gain node at zero volume
+        const silentGain = ctx.createGain();
+        silentGain.gain.value = 0;
+        this.keepaliveOscillator.connect(silentGain);
+        silentGain.connect(ctx.destination);
+
+        this.keepaliveOscillator.start();
+    }
+
+    startKeepaliveInterval() {
+        // Periodically check and resume audio context if it gets suspended
+        // This is crucial for mobile background playback
+        if (this.keepaliveInterval) {
+            clearInterval(this.keepaliveInterval);
+        }
+
+        this.keepaliveInterval = setInterval(() => {
+            if (this.isPlaying) {
+                this.resumeContext();
+            }
+        }, 1000); // Check every second
+    }
+
+    stopKeepaliveInterval() {
+        if (this.keepaliveInterval) {
+            clearInterval(this.keepaliveInterval);
+            this.keepaliveInterval = null;
+        }
+    }
+
+    async resumeContext() {
+        if (Tone.context.state === 'suspended') {
+            try {
+                await Tone.context.resume();
+            } catch (e) {
+                // Silently ignore resume errors
+            }
+        }
     }
 
     async start() {
@@ -381,6 +446,9 @@ export class AudioEngine {
 
         this.isPlaying = true;
 
+        // Start keepalive interval for background playback
+        this.startKeepaliveInterval();
+
         const startGain = this.fadeLevel * this.targetVolume;
         this.masterGain.gain.value = startGain;
 
@@ -394,6 +462,9 @@ export class AudioEngine {
 
     stop() {
         if (!this.isPlaying) return;
+
+        // Stop keepalive interval
+        this.stopKeepaliveInterval();
 
         this.fadeOut(() => {
             this.loops.forEach(loop => loop.stop());
