@@ -19,6 +19,7 @@ if not JSONBIN_API_KEY:
 JSONBIN_BIN_ID = "687255286063391d31ac20d2"
 
 BASE_URL = "https://api.dataplatform.knmi.nl/open-data/v1/datasets/radar_forecast/versions/2.0/files"
+REQUEST_TIMEOUT = (10, 60)
 
 # City coordinates for major Dutch cities
 CITIES = {
@@ -48,19 +49,23 @@ n_steps = 25
 def list_latest_file():
     headers = {"Authorization": f"Bearer {API_KEY}"}
     params = {"maxKeys": 1, "order_by": "filename", "sorting": "desc"}
-    r = requests.get(BASE_URL, headers=headers, params=params)
+    r = requests.get(BASE_URL, headers=headers, params=params, timeout=REQUEST_TIMEOUT)
     r.raise_for_status()
     return r.json()["files"][0]["filename"]
 
 def get_download_url(fname):
     headers = {"Authorization": f"Bearer {API_KEY}"}
-    resp = requests.get(f"{BASE_URL}/{fname}/url", headers=headers)
+    resp = requests.get(
+        f"{BASE_URL}/{fname}/url",
+        headers=headers,
+        timeout=REQUEST_TIMEOUT,
+    )
     resp.raise_for_status()
     return resp.json()["temporaryDownloadUrl"]
 
 def download_file(url, path):
     Path(path).parent.mkdir(exist_ok=True, parents=True)
-    with requests.get(url, stream=True) as r:
+    with requests.get(url, stream=True, timeout=REQUEST_TIMEOUT) as r:
         r.raise_for_status()
         with open(path, "wb") as f:
             for chunk in r.iter_content(8192):
@@ -118,11 +123,21 @@ def upload_to_jsonbin(data):
             if JSONBIN_BIN_ID:
                 # Update existing bin
                 url = f"https://api.jsonbin.io/v3/b/{JSONBIN_BIN_ID}"
-                response = requests.put(url, json=data, headers=headers)
+                response = requests.put(
+                    url,
+                    json=data,
+                    headers=headers,
+                    timeout=REQUEST_TIMEOUT,
+                )
             else:
                 # Create new bin
                 url = "https://api.jsonbin.io/v3/b"
-                response = requests.post(url, json=data, headers=headers)
+                response = requests.post(
+                    url,
+                    json=data,
+                    headers=headers,
+                    timeout=REQUEST_TIMEOUT,
+                )
 
             response.raise_for_status()
             result = response.json()
