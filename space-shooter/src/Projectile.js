@@ -325,6 +325,16 @@ export default class Projectile {
         let bestScore = -1;
 
         const weights = this.getTargetingWeights();
+        const targetingCounts = new Map();
+
+        // Count assignments once instead of rescanning every projectile per asteroid.
+        for (const projectile of allProjectiles) {
+            if (projectile === this || !projectile.target) continue;
+            targetingCounts.set(
+                projectile.target,
+                (targetingCounts.get(projectile.target) || 0) + 1
+            );
+        }
 
         for (const asteroid of asteroids) {
             if (asteroid.shouldRemove) continue;
@@ -336,17 +346,12 @@ export default class Projectile {
             let threatScore = this.calculateDangerBasedScore(asteroid, distance);
 
             // Count how many other projectiles are targeting this asteroid
-            const targetingCount = this.countTargetingProjectiles(asteroid, allProjectiles);
+            const targetingCount = targetingCounts.get(asteroid) || 0;
 
             // Apply spread penalty based on popularity and bucket behavior
             if (targetingCount > 0) {
                 const spreadPenalty = 1 / (1 + targetingCount * weights.spreadFactor);
                 threatScore *= spreadPenalty;
-
-                // Debug logging for spread calculations
-                if (window.game && window.game.showDebug && targetingCount > 1) {
-                    console.log(`${weights.name} spread penalty: ${targetingCount} others targeting, penalty: ${spreadPenalty.toFixed(2)}`);
-                }
             }
 
             // Add small randomization for high-spread buckets to break ties
@@ -363,33 +368,8 @@ export default class Projectile {
 
         // Only change target if we found a better one or don't have one
         if (bestTarget) {
-            // Debug logging to understand target selection
-            if (window.game && window.game.showDebug && this.target !== bestTarget) {
-                const weights = this.getTargetingWeights();
-                console.log(`${weights.name} Projectile #${this.projectileId} acquired new target: Score ${bestScore.toFixed(0)} at (${bestTarget.position.x.toFixed(1)}, ${bestTarget.position.y.toFixed(1)})`);
-            }
             this.target = bestTarget;
         }
-    }
-
-    /**
-     * Count how many other projectiles are targeting the same asteroid
-     * @param {Object} asteroid - Asteroid to check
-     * @param {Array} allProjectiles - All projectiles to check against
-     * @returns {number} Number of other projectiles targeting this asteroid
-     */
-    countTargetingProjectiles(asteroid, allProjectiles) {
-        let count = 0;
-        for (const projectile of allProjectiles) {
-            // Skip self and projectiles without targets
-            if (projectile === this || !projectile.target) continue;
-
-            // Check if this projectile is targeting the same asteroid
-            if (projectile.target === asteroid) {
-                count++;
-            }
-        }
-        return count;
     }
 
     /**
@@ -430,11 +410,6 @@ export default class Projectile {
 
             score += collisionScore;
 
-            // Debug logging for collision threats
-            if (window.game && window.game.showDebug) {
-                console.log(`${weights.name} COLLISION THREAT: Asteroid at (${asteroid.position.x.toFixed(1)}, ${asteroid.position.y.toFixed(1)}) - Score: ${score.toFixed(0)}`);
-            }
-
             // For high collision threat weights, return early (Guardian behavior)
             if (weights.collisionThreat >= 2.5) {
                 return score;
@@ -463,11 +438,6 @@ export default class Projectile {
         const generalThreatScore = asteroid.getThreatLevel ?
             asteroid.getThreatLevel(this.position) / 100 : 0.5;
         score += generalThreatScore * 100 * weights.generalThreat;
-
-        // Debug logging for target selection (only when debug enabled and score is significant)
-        if (window.game && window.game.showDebug && score > 1000) {
-            console.log(`${weights.name} targeting: Asteroid at (${asteroid.position.x.toFixed(1)}, ${asteroid.position.y.toFixed(1)}) - Score: ${score.toFixed(0)}`);
-        }
 
         return score;
     }

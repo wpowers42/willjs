@@ -45,6 +45,15 @@ export default class Game {
         this.accumulator = 0;
         this.deltaTime = 1000 / 60; // 60 FPS target
         this.maxDeltaTime = 1000 / 30; // Prevent spiral of death
+        this.performanceMetrics = {
+            frameCount: 0,
+            elapsedTime: 0,
+            workTime: 0,
+            fps: 0,
+            frameTime: 0,
+            averageWorkTime: 0,
+            reducedEffects: false
+        };
 
         // Game settings
         this.baseAsteroidSpawnRate = 2000; // Base milliseconds between spawns (reduced for easier start)
@@ -171,7 +180,9 @@ export default class Game {
     gameLoop(currentTime) {
         if (!this.isRunning) return;
 
-        const frameTime = Math.min(currentTime - this.lastTime, this.maxDeltaTime);
+        const workStart = performance.now();
+        const rawFrameTime = currentTime - this.lastTime;
+        const frameTime = Math.min(rawFrameTime, this.maxDeltaTime);
         this.lastTime = currentTime;
 
         if (!this.isPaused && !this.isGameOver) {
@@ -186,9 +197,31 @@ export default class Game {
 
         // Always render
         this.render();
+        this.updatePerformanceMetrics(rawFrameTime, performance.now() - workStart);
 
         // Continue loop
         requestAnimationFrame(this.gameLoop);
+    }
+
+    /**
+     * Update rolling performance metrics twice per second
+     * @param {number} frameTime - Time since the previous frame in milliseconds
+     * @param {number} workTime - Time spent updating and rendering this frame
+     */
+    updatePerformanceMetrics(frameTime, workTime) {
+        const metrics = this.performanceMetrics;
+        metrics.frameCount++;
+        metrics.elapsedTime += frameTime;
+        metrics.workTime += workTime;
+
+        if (metrics.elapsedTime >= 500) {
+            metrics.fps = metrics.frameCount * 1000 / metrics.elapsedTime;
+            metrics.frameTime = metrics.elapsedTime / metrics.frameCount;
+            metrics.averageWorkTime = metrics.workTime / metrics.frameCount;
+            metrics.frameCount = 0;
+            metrics.elapsedTime = 0;
+            metrics.workTime = 0;
+        }
     }
 
     /**
@@ -540,12 +573,18 @@ export default class Game {
             }
         }
 
-        // Draw projectiles
-        for (const projectile of this.projectiles) {
-            if (projectile.draw) {
-                projectile.draw(this.ctx);
-            } else {
-                this.drawProjectile(projectile);
+        // Draw projectiles. Drop expensive trails, shadows, and lock lines at high counts.
+        const useReducedProjectileEffects = this.projectiles.length > 30;
+        this.performanceMetrics.reducedEffects = useReducedProjectileEffects;
+        if (useReducedProjectileEffects) {
+            this.drawReducedProjectiles();
+        } else {
+            for (const projectile of this.projectiles) {
+                if (projectile.draw) {
+                    projectile.draw(this.ctx);
+                } else {
+                    this.drawProjectile(projectile);
+                }
             }
         }
 
@@ -690,6 +729,28 @@ export default class Game {
     }
 
     /**
+     * Draw all projectiles in one path when entity counts are high
+     */
+    drawReducedProjectiles() {
+        this.ctx.fillStyle = '#ffff44';
+        this.ctx.beginPath();
+
+        for (const projectile of this.projectiles) {
+            const radius = projectile.size || 3;
+            this.ctx.moveTo(projectile.position.x + radius, projectile.position.y);
+            this.ctx.arc(
+                projectile.position.x,
+                projectile.position.y,
+                radius,
+                0,
+                Math.PI * 2
+            );
+        }
+
+        this.ctx.fill();
+    }
+
+    /**
      * Draw a projectile
      */
     drawProjectile(projectile) {
@@ -742,9 +803,13 @@ export default class Game {
         this.ctx.save();
         this.ctx.fillStyle = '#fff';
         this.ctx.font = '12px monospace';
-        this.ctx.textAlign = 'left';
+        this.ctx.textAlign = 'right';
 
         const debugInfo = [
+            `FPS: ${this.performanceMetrics.fps.toFixed(1)}`,
+            `Frame: ${this.performanceMetrics.frameTime.toFixed(1)}ms`,
+            `Work: ${this.performanceMetrics.averageWorkTime.toFixed(1)}ms`,
+            `Effects: ${this.performanceMetrics.reducedEffects ? 'reduced' : 'full'}`,
             `Entities: ${this.entities.length}`,
             `Asteroids: ${this.asteroids.length}`,
             `Projectiles: ${this.projectiles.length}`,
@@ -754,7 +819,7 @@ export default class Game {
         ];
 
         for (let i = 0; i < debugInfo.length; i++) {
-            this.ctx.fillText(debugInfo[i], 10, 20 + i * 15);
+            this.ctx.fillText(debugInfo[i], this.width - 10, 20 + i * 15);
         }
 
         this.ctx.restore();
