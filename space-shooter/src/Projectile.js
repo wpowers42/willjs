@@ -30,7 +30,6 @@ export default class Projectile {
         // Enhanced seeking behavior
         this.seekingPower = config.seekingPower || 0.005; // Increased from 0.003
         this.maxTurnRate = config.maxTurnRate || 0.08; // Increased from 0.05
-        this.predictionTime = config.predictionTime || 0.8; // Increased from 0.5
         this.lockOnDistance = config.lockOnDistance || 500; // Increased from 400
         this.proximityDetonation = config.proximityDetonation || 20; // Increased from 15
 
@@ -597,7 +596,7 @@ export default class Projectile {
     }
 
     /**
-     * Predict where target will be
+     * Predict where target will be when a constant-speed projectile intercepts it
      * @returns {Vector2} Predicted target position
      */
     predictTargetPosition() {
@@ -605,12 +604,37 @@ export default class Projectile {
             return this.target.position.clone();
         }
 
-        const distance = this.position.distanceTo(this.target.position);
-        const timeToTarget = distance / this.speed;
-        const effectivePredictionTime = Math.min(timeToTarget * this.predictionTime, 1.0);
+        const relativePosition = Vector2.subtract(this.target.position, this.position);
+        const targetVelocity = this.target.velocity;
 
-        const futureVelocity = Vector2.multiply(this.target.velocity, effectivePredictionTime);
-        return Vector2.add(this.target.position, futureVelocity);
+        // Solve |relativePosition + targetVelocity * t| = projectileSpeed * t.
+        const a = targetVelocity.magnitudeSquared() - this.speed * this.speed;
+        const b = 2 * relativePosition.dot(targetVelocity);
+        const c = relativePosition.magnitudeSquared();
+        const epsilon = 0.000001;
+        let interceptTime = 0;
+
+        if (Math.abs(a) < epsilon) {
+            const linearTime = Math.abs(b) < epsilon ? 0 : -c / b;
+            interceptTime = linearTime > 0 ? linearTime : 0;
+        } else {
+            const discriminant = b * b - 4 * a * c;
+            if (discriminant >= 0) {
+                const squareRoot = Math.sqrt(discriminant);
+                const firstTime = (-b - squareRoot) / (2 * a);
+                const secondTime = (-b + squareRoot) / (2 * a);
+                const positiveTimes = [firstTime, secondTime].filter(time => time > 0);
+
+                if (positiveTimes.length > 0) {
+                    interceptTime = Math.min(...positiveTimes);
+                }
+            }
+        }
+
+        return Vector2.add(
+            this.target.position,
+            Vector2.multiply(targetVelocity, interceptTime)
+        );
     }
 
     /**

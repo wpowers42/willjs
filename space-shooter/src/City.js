@@ -436,7 +436,6 @@ export default class City {
             maxLifeTime: 4000,
             seekingPower: 0.015,    // Optimal intelligent seeking strength
             maxTurnRate: 0.11,      // Fast turning for effective tracking
-            predictionTime: 1.1,    // Strong target prediction
             lockOnDistance: 500,
             proximityDetonation: 20
         };
