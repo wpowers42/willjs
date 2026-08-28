@@ -253,6 +253,7 @@ export default class Projectile {
         for (const asteroid of asteroids) {
             if (asteroid.shouldRemove) continue;
             if (asteroid.position.y > window.innerHeight + 25) continue;
+            if (!this.isTargetWithinFiringArc(asteroid)) continue;
 
             const threatScore = this.calculateDangerBasedScore(asteroid);
             if (threatScore > highestThreatScore) {
@@ -387,16 +388,17 @@ export default class Projectile {
     }
 
     /**
-     * Predict where target will be when a constant-speed projectile intercepts it
+     * Predict where a target will be when a constant-speed projectile intercepts it
+     * @param {Object} target - Target to predict; defaults to the assigned target
      * @returns {Vector2} Predicted target position
      */
-    predictTargetPosition() {
-        if (!this.target.velocity) {
-            return this.target.position.clone();
+    predictTargetPosition(target = this.target) {
+        if (!target.velocity) {
+            return target.position.clone();
         }
 
-        const relativePosition = Vector2.subtract(this.target.position, this.position);
-        const targetVelocity = this.target.velocity;
+        const relativePosition = Vector2.subtract(target.position, this.position);
+        const targetVelocity = target.velocity;
 
         // Solve |relativePosition + targetVelocity * t| = projectileSpeed * t.
         const a = targetVelocity.magnitudeSquared() - this.speed * this.speed;
@@ -423,9 +425,22 @@ export default class Projectile {
         }
 
         return Vector2.add(
-            this.target.position,
+            target.position,
             Vector2.multiply(targetVelocity, interceptTime)
         );
+    }
+
+    /**
+     * Check whether a target's predicted intercept is within 45 degrees of vertical
+     * @param {Object} target - Target to evaluate
+     * @returns {boolean} True when the turret can fire at the predicted intercept
+     */
+    isTargetWithinFiringArc(target) {
+        const predictedPosition = this.predictTargetPosition(target);
+        const horizontalDistance = Math.abs(predictedPosition.x - this.position.x);
+        const verticalDistance = this.position.y - predictedPosition.y;
+
+        return verticalDistance > 0 && horizontalDistance <= verticalDistance + 0.000001;
     }
 
     /**

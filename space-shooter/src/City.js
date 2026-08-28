@@ -454,8 +454,10 @@ export default class City {
             projectileConfig
         );
 
-        // Assign threats in priority order, then lock the predicted launch trajectory.
+        // Assign the highest-priority target inside this turret's firing arc.
         projectile.acquireNewTarget(asteroids, projectiles);
+        if (!projectile.target) return;
+
         projectile.initializeVelocity();
         projectiles.push(projectile);
     }

@@ -59,13 +59,28 @@ test('keeps its launch direction when the target moves', () => {
     assert.ok(projectile.velocity.equals(launchVelocity));
 });
 
+test('limits predicted launch trajectories to 45 degrees from vertical', () => {
+    const projectile = new Projectile(0, 0, null, { speed: 200 });
+    const boundaryTarget = {
+        position: new Vector2(100, -100),
+        velocity: new Vector2(0, 0)
+    };
+    const outsideTarget = {
+        position: new Vector2(101, -100),
+        velocity: new Vector2(0, 0)
+    };
+
+    assert.equal(projectile.isTargetWithinFiringArc(boundaryTarget), true);
+    assert.equal(projectile.isTargetWithinFiringArc(outsideTarget), false);
+});
+
 test('chooses the highest-threat target without an existing assignment', () => {
     const asteroids = [
         { position: new Vector2(100, 100), shouldRemove: false, threat: 10000 },
         { position: new Vector2(200, 100), shouldRemove: false, threat: 100 },
         { position: new Vector2(300, 100), shouldRemove: false, threat: 10 }
     ];
-    const projectile = new Projectile(0, 0, null);
+    const projectile = new Projectile(200, 500, null);
     projectile.calculateDangerBasedScore = asteroid => asteroid.threat;
 
     let iterationCount = 0;

@@ -25,7 +25,7 @@ A planetary defense space shooter game featuring an integrated city-turret defen
   - **Repair City**: Restore 3 health points (unlimited purchases)
   - **Fire Rate**: Increase turret fire rate by 15% per level (max 10)
   - **Damage**: Increase projectile damage by 1 per level (max 8)
-  - **Additional Turret**: Add an evenly spaced, immune firing location (max 5 upgrades)
+  - **Additional Turret**: Add an evenly spaced, immune firing location with a ±45° firing arc (max 5 upgrades)
   - **Shield Upgrade**: Increase city shield capacity (max 3)
 - **Purchase Method**: Click '+' buttons in upgrade panel, no pause required
 

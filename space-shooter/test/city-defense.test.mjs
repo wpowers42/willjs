@@ -30,7 +30,7 @@ test('fires one projectile from each turret location', () => {
     city.defense.target = {};
     city.defense.upgrades.multiShot = 2;
     const asteroids = [300, 200, 100].map((threat, index) => ({
-        position: new Vector2(100 + index * 300, 100),
+        position: new Vector2(250 + index * 150, 100),
         velocity: new Vector2(0, 0),
         size: 15,
         damage: 1,
@@ -49,4 +49,23 @@ test('fires one projectile from each turret location', () => {
     assert.deepEqual(projectiles.map(projectile => projectile.position.y), [540, 540, 540]);
     assert.deepEqual(projectiles.map(projectile => projectile.target), asteroids);
     assert.ok(projectiles[0].velocity.x < 0);
+});
+
+test('does not fire when no target is inside the turret firing arc', () => {
+    const city = new City(400, 540);
+    window.game.city = city;
+    const target = {
+        position: new Vector2(800, 530),
+        velocity: new Vector2(0, 0),
+        size: 15,
+        damage: 1,
+        shouldRemove: false,
+        getThreatLevel: () => 100
+    };
+    city.defense.target = target;
+    const projectiles = [];
+
+    city.fireDefenseProjectiles([target], projectiles);
+
+    assert.equal(projectiles.length, 0);
 });
