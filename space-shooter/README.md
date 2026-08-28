@@ -9,7 +9,7 @@ A planetary defense space shooter game featuring an integrated city-turret defen
 - **Defensive Unit**: Turret integrated into city center at screen center
 - **Objective**: Protect the space city from destruction by incoming asteroids
 - **Enemies**: Asteroids with dynamic scaling based on cumulative score
-- **Auto-Combat**: Integrated turret system with advanced auto-seeking projectiles
+- **Auto-Combat**: Distributed turrets fire predictively aimed projectiles
 
 ### Health System
 - **Unified Defense**: Single health pool for the integrated city-turret system
@@ -31,9 +31,9 @@ A planetary defense space shooter game featuring an integrated city-turret defen
 
 ### Game Mechanics
 - **Integrated Defense**: City and turret function as single defensive unit
-- **Advanced Projectiles**: Auto-seeking missiles with predictive targeting and 10 distinct AI behaviors
-- **Intelligent Targeting**: Each projectile has unique targeting personality (Guardian, Hunter, Sniper, etc.)
-- **Target Distribution**: Projectiles coordinate to spread across multiple threats instead of clustering
+- **Predictive Projectiles**: Missiles lead moving targets at launch and then follow fixed trajectories
+- **Threat-First Targeting**: Turrets prioritize the most dangerous uncovered asteroids
+- **Target Distribution**: Each live threat receives coverage before turrets focus fire
 - **Score-Based Progression**: Difficulty scales with cumulative points earned
 - **Dynamic Asteroid Scaling**: Early asteroids are weaker, become stronger with score
 - **Continuous Play**: Endless survival challenge with progressive difficulty
@@ -66,7 +66,7 @@ space-shooter/
 │   ├── Game.js           # Main game class and loop
 │   ├── Turret.js         # Legacy turret (visual compatibility)
 │   ├── Asteroid.js       # Asteroid entities with score scaling
-│   ├── Projectile.js     # Advanced seeking projectiles
+│   ├── Projectile.js     # Predictively aimed projectiles
 │   ├── City.js           # Integrated city-turret defense system
 │   ├── Store.js          # Complete upgrade and repair system
 │   └── utils/
@@ -96,7 +96,7 @@ space-shooter/
 - [x] Advanced rendering system
 
 ### Phase 3: Combat System ✅
-- [x] Seeking projectiles with multi-phase behavior
+- [x] Fixed-trajectory projectiles with predictive intercept aiming
 - [x] Smart auto-targeting logic with threat assessment
 - [x] Damage system with health management
 - [x] Basic particle effects
@@ -131,8 +131,8 @@ space-shooter/
 - [x] **Projectile Target Locking**: Projectiles should 'lock' on to original target and only change if target is destroyed
 - [x] **Danger-Based Turret Targeting**: Turret now prioritizes asteroid targets by danger - asteroids on collision course with city get highest priority, then closest ones
 - [x] **Projectile Lock Release**: Projectiles should release lock on any asteroids below the screen
-- [x] **Projectile AI Diversification**: Each projectile now has unique targeting behavior (10 distinct AI personalities)
-- [x] **Target Distribution System**: Projectiles coordinate to prevent clustering on same asteroid
+- [x] **Threat-First Targeting**: Projectiles prioritize the highest-threat asteroid
+- [x] **Target Distribution System**: Projectiles cover unassigned threats before focus firing
 
 ### Medium Priority (User Experience) ⚡
 - [ ] **Fix Play Again Functionality**: Auto-start next game and correctly reset all systems
@@ -198,20 +198,20 @@ space-shooter/
 
 ## Current Game Status
 
-🎮 **FULLY PLAYABLE** - Version 2.2 features intelligent projectile swarm with diverse AI behaviors!
+🎮 **FULLY PLAYABLE** - Distributed defense turrets use predictive threat-first targeting.
 
 ### What's Working:
-- ✅ **Intelligent Projectile Swarm** - 10 distinct AI personalities per projectile (Guardian, Hunter, Sniper, etc.)
-- ✅ **Coordinated Targeting** - Projectiles distribute across threats to prevent clustering
+- ✅ **Predictive Ballistics** - Projectiles lead moving targets without heat-seeking after launch
+- ✅ **Coordinated Targeting** - Turrets cover the highest-threat unassigned asteroids first
 - ✅ **Integrated City-Turret Defense** - Single unified defensive structure
 - ✅ **Real-Time Upgrade System** - Click '+' buttons to purchase upgrades instantly
 - ✅ **Points-Based Economy** - Clear currency system integrated into gameplay
 - ✅ **Score-Based Difficulty Scaling** - Dynamic progression based on performance
-- ✅ **Advanced Auto-Seeking Projectiles** - Predictive targeting with threat assessment
+- ✅ **Predictively Aimed Projectiles** - Accurate intercept targeting with fixed trajectories
 - ✅ **Mouse-Driven Interface** - Direct interaction with upgrade buttons
 - ✅ **Unified Health System** - 10 health + 5 shields with regeneration
 - ✅ **6 Dynamic Asteroid Types** - Properties scale with cumulative points
-- ✅ **Enhanced Projectile Targeting** - Multi-phase seeking with terminal guidance
+- ✅ **Highest-Threat Targeting** - City danger determines launch priority
 - ✅ **Always-Visible Upgrade Panel** - No menu navigation required
 - ✅ **Real-time Targeting** with animated crosshair indicators
 - ✅ **Beautiful Starfield** with realistic twinkling effects over planet surface
@@ -221,8 +221,8 @@ space-shooter/
 There are no victory conditions - the game is an endless survival challenge. The goal is to achieve the highest possible score before the city is destroyed.
 
 ### New in Version 2.2:
-- **🤖 Intelligent Swarm AI**: 10 distinct projectile personalities with unique targeting behaviors
-- **🎯 Target Distribution**: Projectiles coordinate to spread across multiple threats instead of clustering
+- **🤖 Threat-Priority AI**: Every turret uses the same city-focused danger assessment
+- **🎯 Target Distribution**: Turrets cover unassigned threats before focus firing
 - **🔍 Behavioral Specialization**: Guardians protect city, Hunters seek close targets, Snipers prefer distant ones
 - **🎨 Clean Interface**: Removed duplicate UI elements for streamlined experience
 - **🔢 Integer Display**: Health/Shield values now show as clean integers
@@ -238,7 +238,7 @@ There are no victory conditions - the game is an endless survival challenge. The
 - **🏗️ Architectural Redesign**: Complete integration of turret into city
 - **⚖️ Smart Difficulty**: Score-based scaling replaces time-based progression
 - **🛒 Full Store System**: Complete upgrade and repair functionality
-- **🎯 Enhanced Targeting**: Advanced projectile seeking with interception prediction
+- **🎯 Enhanced Targeting**: Launch-time interception prediction without heat-seeking
 - **🛡️ Shield System**: Regenerating shields provide additional protection
 
 ### Planned Improvements:

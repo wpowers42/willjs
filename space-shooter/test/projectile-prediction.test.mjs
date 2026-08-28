@@ -30,6 +30,35 @@ test('uses the current position when the target has no velocity', () => {
     assert.deepEqual(projectile.predictTargetPosition(), target.position);
 });
 
+test('launches directly toward the predicted intercept point', () => {
+    const target = {
+        position: new Vector2(300, 0),
+        velocity: new Vector2(0, 100)
+    };
+    const projectile = new Projectile(0, 0, target, { speed: 200 });
+    const expectedVelocity = Vector2.subtract(
+        projectile.predictTargetPosition(),
+        projectile.position
+    ).normalized().multiply(projectile.speed);
+
+    assert.ok(projectile.velocity.equals(expectedVelocity));
+});
+
+test('keeps its launch direction when the target moves', () => {
+    const target = {
+        position: new Vector2(300, 0),
+        velocity: new Vector2(0, 0),
+        shouldRemove: false
+    };
+    const projectile = new Projectile(0, 0, target, { speed: 200 });
+    const launchVelocity = projectile.velocity.clone();
+    target.position.set(0, 300);
+
+    projectile.update(16);
+
+    assert.ok(projectile.velocity.equals(launchVelocity));
+});
+
 test('chooses the highest-threat target without an existing assignment', () => {
     const asteroids = [
         { position: new Vector2(100, 100), shouldRemove: false, threat: 10000 },

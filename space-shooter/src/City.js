@@ -439,15 +439,11 @@ export default class City {
      */
     createDefenseProjectile(asteroids, projectiles, firePosition) {
 
-        // Create projectile configuration with intelligent static seeking defaults
         const projectileConfig = {
             speed: this.defense.projectileSpeed,
             damage: this.getDefenseEffectiveDamage(),
             size: 3,
             maxLifeTime: 4000,
-            seekingPower: 0.015,    // Optimal intelligent seeking strength
-            maxTurnRate: 0.11,      // Fast turning for effective tracking
-            lockOnDistance: 500,
             proximityDetonation: 20
         };
 
@@ -458,8 +454,9 @@ export default class City {
             projectileConfig
         );
 
-        // Assign threats in priority order as each turret fires.
+        // Assign threats in priority order, then lock the predicted launch trajectory.
         projectile.acquireNewTarget(asteroids, projectiles);
+        projectile.initializeVelocity();
         projectiles.push(projectile);
     }
 

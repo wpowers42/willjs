@@ -48,4 +48,5 @@ test('fires one projectile from each turret location', () => {
     );
     assert.deepEqual(projectiles.map(projectile => projectile.position.y), [540, 540, 540]);
     assert.deepEqual(projectiles.map(projectile => projectile.target), asteroids);
+    assert.ok(projectiles[0].velocity.x < 0);
 });

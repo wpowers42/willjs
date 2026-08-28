@@ -1,6 +1,6 @@
 /**
- * Projectile class - Seeking missiles fired by the turret
- * Features intelligent targeting and smooth seeking behavior
+ * Projectile class - Predictively aimed missiles fired by defense turrets
+ * Launches toward a calculated intercept point and follows a fixed trajectory
  */
 
 import Vector2 from './utils/Vector2.js';
@@ -27,28 +27,18 @@ export default class Projectile {
         this.explosionRadius = config.explosionRadius || 0;
         this.maxLifeTime = config.maxLifeTime || 4000; // 4 seconds
 
-        // Enhanced seeking behavior
-        this.seekingPower = config.seekingPower || 0.005; // Increased from 0.003
-        this.maxTurnRate = config.maxTurnRate || 0.08; // Increased from 0.05
-        this.lockOnDistance = config.lockOnDistance || 500; // Increased from 400
-        this.proximityDetonation = config.proximityDetonation || 20; // Increased from 15
+        this.proximityDetonation = config.proximityDetonation || 20;
 
         // State
         this.life = this.maxLifeTime;
         this.shouldRemove = false;
         this.hasExploded = false;
-        this.isLocked = false;
 
         // Visual properties
         this.trail = [];
         this.trailLength = 8;
         this.glowIntensity = 1.0;
         this.rotation = 0;
-
-        // Behavior phases
-        this.phase = 'launch'; // launch, seeking, terminal
-        this.launchTime = 150; // Reduced time before seeking begins
-        this.terminalDistance = 40; // Increased distance when terminal phase begins
 
         // Set initial velocity toward target (or default if no target)
         this.initializeVelocity();
@@ -200,7 +190,8 @@ export default class Projectile {
      */
     initializeVelocity() {
         if (this.target && this.target.position) {
-            const direction = Vector2.subtract(this.target.position, this.position).normalized();
+            const aimPosition = this.predictTargetPosition();
+            const direction = Vector2.subtract(aimPosition, this.position).normalized();
             this.velocity = Vector2.multiply(direction, this.speed);
             this.rotation = Math.atan2(direction.y, direction.x);
         } else {
@@ -213,10 +204,8 @@ export default class Projectile {
     /**
      * Update projectile logic
      * @param {number} dt - Delta time in milliseconds
-     * @param {Array} asteroids - Array of potential targets
-     * @param {Array} allProjectiles - Array of all projectiles for target coordination
      */
-    update(dt, asteroids = [], allProjectiles = []) {
+    update(dt) {
         // Update lifetime
         this.life -= dt;
         if (this.life <= 0) {
@@ -224,9 +213,7 @@ export default class Projectile {
             return;
         }
 
-        // Update phase and behavior
-        this.updatePhase(dt);
-        this.updateSeeking(dt, asteroids, allProjectiles);
+        // Projectiles keep their predicted launch trajectory without steering.
         this.updateMovement(dt);
         this.updateVisuals(dt);
 
@@ -238,80 +225,6 @@ export default class Projectile {
             this.playLaunchSound();
             this.hasPlayedLaunchSound = true;
         }
-    }
-
-    /**
-     * Update behavior phase
-     * @param {number} dt - Delta time
-     */
-    updatePhase(dt) {
-        switch (this.phase) {
-            case 'launch':
-                this.launchTime -= dt;
-                if (this.launchTime <= 0) {
-                    this.phase = 'seeking';
-                }
-                break;
-
-            case 'seeking':
-                if (this.target && this.target.position) {
-                    const distance = this.position.distanceTo(this.target.position);
-                    if (distance <= this.terminalDistance) {
-                        this.phase = 'terminal';
-                    }
-                }
-                break;
-
-            case 'terminal':
-                // Maximum seeking power and turn rate in terminal phase
-                this.seekingPower = Math.min(this.seekingPower * 2.0, 0.015);
-                this.maxTurnRate = Math.min(this.maxTurnRate * 1.5, 0.12);
-                break;
-        }
-    }
-
-    /**
-     * Update seeking behavior
-     * @param {number} dt - Delta time
-     * @param {Array} asteroids - Available targets
-     * @param {Array} allProjectiles - Array of all projectiles for target coordination
-     */
-    updateSeeking(dt, asteroids, allProjectiles = []) {
-        // Always try to acquire target if we don't have one, even during launch
-        if (!this.target || !this.isTargetValid()) {
-            this.acquireNewTarget(asteroids, allProjectiles);
-        }
-
-        // Only apply seeking forces after launch phase
-        if (this.phase === 'launch') return;
-
-        if (!this.target || !this.target.position) return;
-
-        // Calculate seeking force
-        const seekingForce = this.calculateSeekingForce();
-
-        // Apply seeking force with turn rate limitation
-        if (seekingForce.magnitude() > 0) {
-            this.applySeeking(seekingForce, dt);
-        }
-
-        // Update lock status
-        this.updateLockStatus();
-    }
-
-    /**
-     * Check if current target is still valid
-     * @returns {boolean} True if target is valid
-     */
-    isTargetValid() {
-        if (!this.target || this.target.shouldRemove) return false;
-        if (!this.target.position) return false;
-
-        // Release lock if asteroid has moved below screen (earlier threshold to prevent chasing)
-        if (this.target.position.y > window.innerHeight + 25) return false;
-
-        // Keep target locked regardless of distance (removed distance check)
-        return true;
     }
 
     /**
@@ -474,47 +387,6 @@ export default class Projectile {
     }
 
     /**
-     * Calculate probability of successful intercept
-     * @param {Object} asteroid - Target asteroid
-     * @returns {number} Intercept probability (0-1)
-     */
-    calculateInterceptProbability(asteroid) {
-        if (!asteroid.velocity) return 0.5;
-
-        const distance = this.position.distanceTo(asteroid.position);
-        const relativeSpeed = this.speed - asteroid.velocity.magnitude();
-
-        // Better intercept probability for slower targets or closer range
-        if (relativeSpeed <= 0) return 0.1; // Can't catch up
-
-        const timeToIntercept = distance / relativeSpeed;
-        return Math.max(0, Math.min(1, (3.0 - timeToIntercept) / 3.0));
-    }
-
-    /**
-     * Calculate seeking force toward target
-     * @returns {Vector2} Seeking force vector
-     */
-    calculateSeekingForce() {
-        if (!this.target || !this.target.position) {
-            return Vector2.ZERO;
-        }
-
-        // Predict target position
-        const predictedPosition = this.predictTargetPosition();
-
-        // Calculate desired velocity
-        const desired = Vector2.subtract(predictedPosition, this.position).normalized();
-        desired.multiply(this.speed);
-
-        // Calculate steering force
-        const steering = Vector2.subtract(desired, this.velocity);
-        steering.multiply(this.seekingPower);
-
-        return steering;
-    }
-
-    /**
      * Predict where target will be when a constant-speed projectile intercepts it
      * @returns {Vector2} Predicted target position
      */
@@ -557,58 +429,6 @@ export default class Projectile {
     }
 
     /**
-     * Apply seeking force with turn rate limitation
-     * @param {Vector2} seekingForce - Force to apply
-     * @param {number} dt - Delta time
-     */
-    applySeeking(seekingForce, dt) {
-        // Current direction
-        const currentDirection = this.velocity.normalized();
-
-        // Desired direction
-        const newVelocity = Vector2.add(this.velocity, Vector2.multiply(seekingForce, dt));
-        const desiredDirection = newVelocity.normalized();
-
-        // Calculate angle difference
-        const angleDiff = Math.acos(Math.max(-1, Math.min(1, currentDirection.dot(desiredDirection))));
-
-        // Limit turn rate
-        const maxTurn = this.maxTurnRate * (dt / 16.67); // Normalize to 60fps
-        const actualTurn = Math.min(angleDiff, maxTurn);
-
-        if (actualTurn > 0.001) {
-            // Calculate which direction to turn
-            const cross = currentDirection.x * desiredDirection.y - currentDirection.y * desiredDirection.x;
-            const turnDirection = Math.sign(cross);
-
-            // Apply limited turn
-            const finalDirection = currentDirection.clone();
-            finalDirection.rotate(actualTurn * turnDirection);
-
-            this.velocity = Vector2.multiply(finalDirection, this.speed);
-            this.rotation = Math.atan2(finalDirection.y, finalDirection.x);
-        }
-    }
-
-    /**
-     * Update lock-on status
-     */
-    updateLockStatus() {
-        if (!this.target) {
-            this.isLocked = false;
-            return;
-        }
-
-        const distance = this.position.distanceTo(this.target.position);
-        const directionToTarget = Vector2.subtract(this.target.position, this.position).normalized();
-        const projectileDirection = this.velocity.normalized();
-
-        const alignment = directionToTarget.dot(projectileDirection);
-
-        this.isLocked = distance <= this.lockOnDistance * 0.7 && alignment > 0.8;
-    }
-
-    /**
      * Update movement
      * @param {number} dt - Delta time
      */
@@ -630,12 +450,7 @@ export default class Projectile {
         // Update trail
         this.updateTrail();
 
-        // Update glow based on phase and lock status
-        if (this.isLocked) {
-            this.glowIntensity = 1.0 + 0.3 * Math.sin(Date.now() * 0.01);
-        } else {
-            this.glowIntensity = lerp(this.glowIntensity, 0.7, 0.05);
-        }
+        this.glowIntensity = lerp(this.glowIntensity, 0.7, 0.05);
 
         // Update rotation to match velocity direction
         if (this.velocity.magnitude() > 0) {
@@ -731,20 +546,14 @@ export default class Projectile {
      * @returns {Object} Projectile information
      */
     getInfo() {
-        const weights = this.getTargetingWeights();
         return {
             id: this.projectileId,
-            bucket: this.targetingBucket,
-            behavior: weights.name,
-            phase: this.phase,
-            isLocked: this.isLocked,
+            behavior: 'fixed trajectory',
             hasTarget: !!this.target,
             position: { x: this.position.x, y: this.position.y },
             velocity: { x: this.velocity.x, y: this.velocity.y },
             life: this.life,
-            damage: this.damage,
-            seekingPower: this.seekingPower,
-            weights: weights
+            damage: this.damage
         };
     }
 
@@ -778,17 +587,12 @@ export default class Projectile {
 
         // Glow effect
         if (this.glowIntensity > 0.5) {
-            ctx.shadowColor = this.isLocked ? '#ff0000' : '#ffff00';
+            ctx.shadowColor = '#ffff00';
             ctx.shadowBlur = this.glowIntensity * 8;
         }
 
         // Draw projectile body
         this.drawBody(ctx);
-
-        // Draw seeking indicator
-        if (this.isLocked && this.target) {
-            this.drawLockIndicator(ctx);
-        }
 
         ctx.restore();
     }
@@ -799,8 +603,8 @@ export default class Projectile {
      */
     drawBody(ctx) {
         // Main projectile
-        ctx.fillStyle = this.isLocked ? '#ff4444' : '#ffff44';
-        ctx.strokeStyle = this.isLocked ? '#ff0000' : '#ffaa00';
+        ctx.fillStyle = '#ffff44';
+        ctx.strokeStyle = '#ffaa00';
         ctx.lineWidth = 1;
 
         // Draw missile shape
@@ -815,7 +619,7 @@ export default class Projectile {
         ctx.stroke();
 
         // Draw nose cone
-        ctx.fillStyle = this.isLocked ? '#ffffff' : '#ffffaa';
+        ctx.fillStyle = '#ffffaa';
         ctx.beginPath();
         ctx.arc(this.size * 1.5, 0, this.size * 0.5, 0, Math.PI * 2);
         ctx.fill();
@@ -847,32 +651,4 @@ export default class Projectile {
         ctx.restore();
     }
 
-    /**
-     * Draw lock-on indicator
-     * @param {CanvasRenderingContext2D} ctx - Canvas context
-     */
-    drawLockIndicator(ctx) {
-        if (!this.target) return;
-
-        ctx.save();
-        ctx.rotate(-this.rotation); // Counter-rotate
-
-        const targetPos = Vector2.subtract(this.target.position, this.position);
-        const distance = targetPos.magnitude();
-
-        if (distance > 20) {
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.6)';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([5, 5]);
-
-            ctx.beginPath();
-            ctx.moveTo(this.size * 2, 0);
-            ctx.lineTo(targetPos.x, targetPos.y);
-            ctx.stroke();
-
-            ctx.setLineDash([]);
-        }
-
-        ctx.restore();
-    }
 }
