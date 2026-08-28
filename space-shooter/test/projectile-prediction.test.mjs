@@ -30,14 +30,14 @@ test('uses the current position when the target has no velocity', () => {
     assert.deepEqual(projectile.predictTargetPosition(), target.position);
 });
 
-test('counts existing target assignments once per acquisition', () => {
+test('chooses the highest-threat target without an existing assignment', () => {
     const asteroids = [
-        { position: new Vector2(100, 100), shouldRemove: false },
-        { position: new Vector2(200, 100), shouldRemove: false },
-        { position: new Vector2(300, 100), shouldRemove: false }
+        { position: new Vector2(100, 100), shouldRemove: false, threat: 10000 },
+        { position: new Vector2(200, 100), shouldRemove: false, threat: 100 },
+        { position: new Vector2(300, 100), shouldRemove: false, threat: 10 }
     ];
     const projectile = new Projectile(0, 0, null);
-    projectile.calculateDangerBasedScore = () => 1000;
+    projectile.calculateDangerBasedScore = asteroid => asteroid.threat;
 
     let iterationCount = 0;
     const allProjectiles = {
@@ -51,5 +51,30 @@ test('counts existing target assignments once per acquisition', () => {
     projectile.acquireNewTarget(asteroids, allProjectiles);
 
     assert.equal(iterationCount, 1);
-    assert.notEqual(projectile.target, asteroids[0]);
+    assert.equal(projectile.target, asteroids[1]);
+});
+
+test('scores asteroid threat independently of projectile location', () => {
+    const city = { position: new Vector2(400, 800), size: 40 };
+    window.game = { city, width: 800, height: 900 };
+    const asteroid = {
+        position: new Vector2(200, 100),
+        velocity: new Vector2(10, 50),
+        damage: 2,
+        size: 20,
+        getThreatLevel: targetPosition => 1000 - asteroid.position.distanceTo(targetPosition)
+    };
+    const leftProjectile = new Projectile(0, 800, asteroid);
+    const rightProjectile = new Projectile(800, 800, asteroid);
+
+    assert.equal(
+        leftProjectile.calculateDangerBasedScore(
+            asteroid,
+            leftProjectile.position.distanceTo(asteroid.position)
+        ),
+        rightProjectile.calculateDangerBasedScore(
+            asteroid,
+            rightProjectile.position.distanceTo(asteroid.position)
+        )
+    );
 });

@@ -296,7 +296,7 @@ export default class City {
         this.updateDefenseTargeting(dt, asteroids);
 
         // Update firing
-        this.updateDefenseFiring(dt, projectiles);
+        this.updateDefenseFiring(dt, asteroids, projectiles);
     }
 
 
@@ -388,15 +388,16 @@ export default class City {
     /**
      * Update defense firing system
      * @param {number} dt - Delta time
+     * @param {Array} asteroids - Available targets
      * @param {Array} projectiles - Array to add projectiles to
      */
-    updateDefenseFiring(dt, projectiles) {
+    updateDefenseFiring(dt, asteroids, projectiles) {
         this.defense.lastFireTime += dt;
 
         const effectiveFireRate = this.getDefenseEffectiveFireRate();
 
         if (this.defense.canFire && this.defense.target && this.defense.lastFireTime >= effectiveFireRate) {
-            this.fireDefenseProjectiles(projectiles);
+            this.fireDefenseProjectiles(asteroids, projectiles);
             this.defense.lastFireTime = 0;
         }
     }
@@ -419,22 +420,24 @@ export default class City {
 
     /**
      * Fire one defense projectile from each turret
+     * @param {Array} asteroids - Available targets
      * @param {Array} projectiles - Array to add projectiles to
      */
-    fireDefenseProjectiles(projectiles) {
+    fireDefenseProjectiles(asteroids, projectiles) {
         if (!this.defense.target) return;
 
         for (const turretPosition of this.getDefenseTurretPositions()) {
-            this.createDefenseProjectile(projectiles, turretPosition);
+            this.createDefenseProjectile(asteroids, projectiles, turretPosition);
         }
     }
 
     /**
      * Create a defense projectile at a turret position
+     * @param {Array} asteroids - Available targets
      * @param {Array} projectiles - Array to add projectile to
      * @param {Vector2} firePosition - Turret firing position
      */
-    createDefenseProjectile(projectiles, firePosition) {
+    createDefenseProjectile(asteroids, projectiles, firePosition) {
 
         // Create projectile configuration with intelligent static seeking defaults
         const projectileConfig = {
@@ -448,14 +451,15 @@ export default class City {
             proximityDetonation: 20
         };
 
-        // Create projectile with no initial target - let projectile choose
         const projectile = new Projectile(
             firePosition.x,
             firePosition.y,
-            null, // No initial target - projectile will find best target
+            null,
             projectileConfig
         );
 
+        // Assign threats in priority order as each turret fires.
+        projectile.acquireNewTarget(asteroids, projectiles);
         projectiles.push(projectile);
     }
 

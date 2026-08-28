@@ -321,15 +321,16 @@ export default class Projectile {
      * @param {Array} allProjectiles - All projectiles for coordination
      */
     acquireNewTarget(asteroids, allProjectiles = []) {
-        let bestTarget = null;
-        let bestScore = -1;
-
-        const weights = this.getTargetingWeights();
+        let highestThreatTarget = null;
+        let highestThreatScore = -1;
+        let highestUnassignedTarget = null;
+        let highestUnassignedScore = -1;
         const targetingCounts = new Map();
 
         // Count assignments once instead of rescanning every projectile per asteroid.
         for (const projectile of allProjectiles) {
-            if (projectile === this || !projectile.target) continue;
+            if (projectile === this || projectile.shouldRemove || !projectile.target) continue;
+            if (projectile.target.shouldRemove) continue;
             targetingCounts.set(
                 projectile.target,
                 (targetingCounts.get(projectile.target) || 0) + 1
@@ -338,38 +339,22 @@ export default class Projectile {
 
         for (const asteroid of asteroids) {
             if (asteroid.shouldRemove) continue;
-            if (asteroid.position.y > window.innerHeight + 25) continue; // Skip below-screen asteroids
+            if (asteroid.position.y > window.innerHeight + 25) continue;
 
-            const distance = this.position.distanceTo(asteroid.position);
-
-            // Calculate base threat score
-            let threatScore = this.calculateDangerBasedScore(asteroid, distance);
-
-            // Count how many other projectiles are targeting this asteroid
-            const targetingCount = targetingCounts.get(asteroid) || 0;
-
-            // Apply spread penalty based on popularity and bucket behavior
-            if (targetingCount > 0) {
-                const spreadPenalty = 1 / (1 + targetingCount * weights.spreadFactor);
-                threatScore *= spreadPenalty;
+            const threatScore = this.calculateDangerBasedScore(asteroid);
+            if (threatScore > highestThreatScore) {
+                highestThreatScore = threatScore;
+                highestThreatTarget = asteroid;
             }
 
-            // Add small randomization for high-spread buckets to break ties
-            if (weights.spreadFactor >= 1.5) {
-                const randomSeed = (this.projectileId * 17 + asteroid.position.x * 13) % 100;
-                threatScore += randomSeed * 10; // Small random bonus
-            }
-
-            if (threatScore > bestScore) {
-                bestScore = threatScore;
-                bestTarget = asteroid;
+            if (!targetingCounts.has(asteroid) && threatScore > highestUnassignedScore) {
+                highestUnassignedScore = threatScore;
+                highestUnassignedTarget = asteroid;
             }
         }
 
-        // Only change target if we found a better one or don't have one
-        if (bestTarget) {
-            this.target = bestTarget;
-        }
+        // Cover threats in priority order, then focus fire when every threat is covered.
+        this.target = highestUnassignedTarget || highestThreatTarget;
     }
 
     /**
@@ -379,65 +364,29 @@ export default class Projectile {
      * @param {number} distance - Distance to asteroid
      * @returns {number} Danger score (higher = more dangerous/priority)
      */
-    calculateDangerBasedScore(asteroid, distance) {
+    calculateDangerBasedScore(asteroid) {
         let score = 0;
 
         const game = window.game;
         if (!game || !game.city) return score;
 
-        // Get targeting weights for this projectile's bucket
-        const weights = this.getTargetingWeights();
-
-        // PRIORITY 1: Asteroids on direct collision course with city (CRITICAL)
+        // Asteroids on a collision course with the city are always the top priority.
         const collisionInfo = this.calculateCollisionTrajectory(asteroid, game.city);
         if (collisionInfo.willHitCity) {
-            // Base collision threat score (reduced to allow other factors more influence), weighted by bucket behavior
-            let collisionScore = 50000 * weights.collisionThreat;
+            score += 50000;
 
-            // Higher priority for asteroids that will hit sooner
             if (collisionInfo.timeToImpact > 0 && collisionInfo.timeToImpact < 10000) {
-                // Shorter time = higher priority (inverse relationship)
-                collisionScore += Math.max(0, 10000 - collisionInfo.timeToImpact) * weights.collisionThreat;
+                score += Math.max(0, 10000 - collisionInfo.timeToImpact);
             }
 
-            // Factor in damage potential for collision threats
-            const damageScore = (asteroid.damage || 1) * 1000 * weights.collisionThreat;
-            collisionScore += damageScore;
-
-            // Size matters more for collision threats
-            const sizeScore = (asteroid.size || 15) / 35 * 2000 * weights.collisionThreat;
-            collisionScore += sizeScore;
-
-            score += collisionScore;
-
-            // For high collision threat weights, return early (Guardian behavior)
-            if (weights.collisionThreat >= 2.5) {
-                return score;
-            }
+            score += (asteroid.damage || 1) * 1000;
+            score += (asteroid.size || 15) / 35 * 2000;
         }
 
-        // PRIORITY 2: Asteroids moving toward city area (HIGH THREAT)
-        const cityThreatScore = this.calculateCityProximityThreat(asteroid, game.city);
-        score += cityThreatScore * 1000 * weights.cityProximity;
-
-        // PRIORITY 3: Projectile intercept factors (MEDIUM THREAT)
-        const interceptScore = this.calculateInterceptProbability(asteroid);
-        score += interceptScore * 500 * weights.intercept;
-
-        // PRIORITY 4: Distance-based scoring (MEDIUM THREAT)
-        const distanceScore = Math.max(0, (this.lockOnDistance - distance) / this.lockOnDistance);
-        score += distanceScore * 300 * weights.distance;
-
-        // PRIORITY 5: Alignment with current projectile direction (LOW-MEDIUM THREAT)
-        const directionToAsteroid = Vector2.subtract(asteroid.position, this.position).normalized();
-        const currentDirection = this.velocity.normalized();
-        const alignmentScore = Math.max(0, directionToAsteroid.dot(currentDirection));
-        score += alignmentScore * 200 * weights.alignment;
-
-        // PRIORITY 6: General asteroid threat level (LOW THREAT)
-        const generalThreatScore = asteroid.getThreatLevel ?
-            asteroid.getThreatLevel(this.position) / 100 : 0.5;
-        score += generalThreatScore * 100 * weights.generalThreat;
+        // Remaining factors are measured relative to the city, not the projectile.
+        score += this.calculateCityProximityThreat(asteroid, game.city) * 1000;
+        score += asteroid.getThreatLevel ?
+            asteroid.getThreatLevel(game.city.position) : 50;
 
         return score;
     }
