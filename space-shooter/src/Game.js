@@ -924,9 +924,9 @@ export default class Game {
         // Damage
         drawUpgradeLine(`Damage +${upgrades.damage}`, upgrades.damage, 'damage', -1);
 
-        // Multi-Shot
-        const shotCount = 1 + upgrades.multiShot;
-        drawUpgradeLine(`Multi-Shot ${shotCount}x`, upgrades.multiShot, 'multiShot', 5);
+        // Turrets (stored as the legacy multiShot upgrade level)
+        const turretCount = 1 + upgrades.multiShot;
+        drawUpgradeLine('Turrets', turretCount, 'multiShot', 5);
 
         // City Repair
         if (this.city.health < this.city.maxHealth) {

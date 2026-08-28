@@ -402,31 +402,39 @@ export default class City {
     }
 
     /**
-     * Fire defense projectiles
+     * Get evenly spaced turret positions across the playable width
+     * @param {number} playfieldWidth - Width available for turret placement
+     * @returns {Array<Vector2>} Turret firing positions
+     */
+    getDefenseTurretPositions(playfieldWidth = null) {
+        const width = playfieldWidth || (window.game ? window.game.width : this.position.x * 2);
+        const turretCount = 1 + this.defense.upgrades.multiShot;
+        const placementOrder = [3, 4, 2, 5, 1, 6];
+
+        return placementOrder.slice(0, turretCount).map(slot => new Vector2(
+            width * slot / 7,
+            this.position.y
+        ));
+    }
+
+    /**
+     * Fire one defense projectile from each turret
      * @param {Array} projectiles - Array to add projectiles to
      */
     fireDefenseProjectiles(projectiles) {
         if (!this.defense.target) return;
 
-        const multiShotCount = 1 + this.defense.upgrades.multiShot;
-        const spreadAngle = multiShotCount > 1 ? Math.PI / 12 : 0;
-
-        for (let i = 0; i < multiShotCount; i++) {
-            const angleOffset = multiShotCount > 1 ?
-                (i - (multiShotCount - 1) / 2) * (spreadAngle / (multiShotCount - 1)) : 0;
-
-            this.createDefenseProjectile(projectiles, angleOffset);
+        for (const turretPosition of this.getDefenseTurretPositions()) {
+            this.createDefenseProjectile(projectiles, turretPosition);
         }
     }
 
     /**
-     * Create defense projectile fired from city center
+     * Create a defense projectile at a turret position
      * @param {Array} projectiles - Array to add projectile to
-     * @param {number} angleOffset - Angle offset for spread shot
+     * @param {Vector2} firePosition - Turret firing position
      */
-    createDefenseProjectile(projectiles, angleOffset = 0) {
-        // Fire from fixed point at city center
-        const firePosition = this.position.clone();
+    createDefenseProjectile(projectiles, firePosition) {
 
         // Create projectile configuration with intelligent static seeking defaults
         const projectileConfig = {
@@ -447,12 +455,6 @@ export default class City {
             null, // No initial target - projectile will find best target
             projectileConfig
         );
-
-        // Apply angle offset for spread shots
-        if (angleOffset !== 0) {
-            projectile.velocity.rotate(angleOffset);
-            projectile.rotation += angleOffset;
-        }
 
         projectiles.push(projectile);
     }
@@ -827,8 +829,39 @@ export default class City {
 
         ctx.restore();
 
+        // Turrets are independent firing locations and are not damageable entities.
+        this.drawDefenseTurrets(ctx);
+
         // Draw health bar
         this.drawHealthBar(ctx);
+    }
+
+    /**
+     * Draw all defense turrets at their firing positions
+     * @param {CanvasRenderingContext2D} ctx - Canvas context
+     */
+    drawDefenseTurrets(ctx) {
+        for (const position of this.getDefenseTurretPositions()) {
+            ctx.save();
+            ctx.translate(position.x, position.y);
+
+            ctx.fillStyle = '#555';
+            ctx.strokeStyle = '#00ff88';
+            ctx.lineWidth = 2;
+            ctx.fillRect(-8, 3, 16, 7);
+            ctx.strokeRect(-8, 3, 16, 7);
+
+            ctx.fillStyle = '#888';
+            ctx.fillRect(-2, -10, 4, 13);
+            ctx.strokeRect(-2, -10, 4, 13);
+
+            ctx.beginPath();
+            ctx.arc(0, 3, 6, Math.PI, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.restore();
+        }
     }
 
     /**

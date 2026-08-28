@@ -37,8 +37,8 @@ export default class Store {
                 category: "defense"
             },
             multiShot: {
-                name: "Multi-Shot",
-                description: "Fire additional projectiles",
+                name: "Additional Turret",
+                description: "Add an evenly spaced, immune defense turret",
                 baseCost: 200,
                 costMultiplier: 2.0,
                 purchaseCount: 0,
