@@ -1,0 +1,35 @@
+#game-container {
+    max-width: 400px;
+    margin: 20px auto;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 5px;
+    margin: 20px auto;
+    width: 90%;
+}
+
+#board .cell {
+    background: #f0f0f0;
+    border: 2px solid #333;
+    font-size: 4rem;
+    line-height: 1;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+#board .cell:hover {
+    background: #e0e0e0;
+}
+
+#status {
+    margin-top: 10px;
+    font-size: 1.2rem;
+}
