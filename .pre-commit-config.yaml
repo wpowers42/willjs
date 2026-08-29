@@ -8,6 +8,7 @@ repos:
           (?x)^(
             .*\.sqlite|
             .*\.wasm|
+            marble-run/vendor/rapier/rapier\.es\.js|
             games/.*\.js|
             nature-of-code/.*\.js
           )$
@@ -17,6 +18,7 @@ repos:
     hooks:
       - id: check-added-large-files
         args: ['--maxkb=1000']
+        exclude: ^marble-run/vendor/rapier/rapier\.es\.js$
       - id: check-merge-conflict
       - id: trailing-whitespace
       - id: end-of-file-fixer
