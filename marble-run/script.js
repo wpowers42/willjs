@@ -14,11 +14,9 @@ import {
 
 const canvas = document.querySelector("#game");
 const context = canvas.getContext("2d");
-const status = document.querySelector("#status");
 const playButton = document.querySelector("#play-button");
 const resetButton = document.querySelector("#reset-button");
 const timelineInput = document.querySelector("#timeline");
-const timeOutput = document.querySelector("#time-output");
 
 let world;
 let marbleHandle;
@@ -40,12 +38,36 @@ function getMarbleBody() {
   return body;
 }
 
-function recordSnapshot() {
+function recordActualSnapshot() {
+  const position = marbleBody.translation();
   timeline[currentTick] = {
     physics: world.takeSnapshot(),
     gameState: { ...gameState },
+    position: { x: position.x, y: position.y },
   };
+}
+
+function buildFutureTimeline() {
   timeline.length = currentTick + 1;
+
+  const futureWorld = RAPIER.World.restoreSnapshot(world.takeSnapshot());
+  const futureMarble = futureWorld.getRigidBody(marbleHandle);
+  if (!futureMarble) throw new Error("The future marble is missing.");
+
+  let futureTick = currentTick;
+  let futureState = { ...gameState };
+  while (!futureState.goalReached && !futureState.failed && futureTick < MAX_TICKS) {
+    futureWorld.timestep = FIXED_STEP;
+    futureWorld.step();
+    futureTick += 1;
+    futureState = evaluateMarble(futureMarble, futureTick);
+    const position = futureMarble.translation();
+    timeline[futureTick] = {
+      physics: futureWorld.takeSnapshot(),
+      gameState: { ...futureState },
+      position: { x: position.x, y: position.y },
+    };
+  }
 }
 
 function restoreTick(tick, resetClock = true) {
@@ -60,37 +82,36 @@ function restoreTick(tick, resetClock = true) {
   updateInterface();
 }
 
-function pause() {
+function pause(rebuildFuture = true) {
   isPlaying = false;
   accumulator = 0;
+  if (rebuildFuture && !gameState.goalReached && !gameState.failed) {
+    buildFutureTimeline();
+  }
   updateInterface();
 }
 
 function advanceOneTick() {
-  if (currentTick < timeline.length - 1) {
-    restoreTick(currentTick + 1, false);
-  } else {
-    world.timestep = FIXED_STEP;
-    world.step();
-    currentTick += 1;
-    gameState = evaluateMarble(marbleBody, currentTick);
-    recordSnapshot();
-  }
+  world.timestep = FIXED_STEP;
+  world.step();
+  currentTick += 1;
+  gameState = evaluateMarble(marbleBody, currentTick);
+  recordActualSnapshot();
 
   if (gameState.goalReached || gameState.failed || currentTick >= MAX_TICKS) {
-    pause();
+    pause(false);
   }
 }
 
 function togglePlayback() {
   if (isPlaying) {
-    pause();
+    pause(true);
     return;
   }
 
-  const atRecordedEnd = currentTick === timeline.length - 1;
-  if (atRecordedEnd && (gameState.goalReached || gameState.failed)) return;
+  if (gameState.goalReached || gameState.failed) return;
 
+  recordActualSnapshot();
   isPlaying = true;
   accumulator = 0;
   updateInterface();
@@ -106,35 +127,24 @@ function resetTimeline() {
   gameState = { goalReached: false, failed: false };
   isPlaying = false;
   accumulator = 0;
-  recordSnapshot();
+  recordActualSnapshot();
+  buildFutureTimeline();
   updateInterface();
-}
-
-function statusMessage() {
-  const currentSeconds = (currentTick * FIXED_STEP).toFixed(2);
-
-  if (isPlaying) {
-    return currentTick < timeline.length - 1 ? "Replaying the recorded future…" : "Recording the future…";
-  }
-  if (gameState.goalReached) return "Goal reached! Scrub backward to watch it again.";
-  if (gameState.failed) return "Time ran out. Scrub backward to inspect the run.";
-  if (currentTick === 0) return "Press Play to create the future.";
-  if (currentTick < timeline.length - 1) return `Viewing the future at ${currentSeconds}s.`;
-  return `Paused at ${currentSeconds}s. Drag the timeline to inspect the run.`;
 }
 
 function updateInterface() {
   const lastTick = Math.max(0, timeline.length - 1);
+  const currentPosition = (currentTick / Math.max(1, lastTick)) * 100;
+
   timelineInput.max = String(lastTick);
   timelineInput.value = String(currentTick);
   timelineInput.disabled = isPlaying || lastTick === 0;
-  timeOutput.value = `${(currentTick * FIXED_STEP).toFixed(2)}s / ${(lastTick * FIXED_STEP).toFixed(2)}s`;
+  timelineInput.style.setProperty("--current-position", `${currentPosition}%`);
 
-  playButton.textContent = isPlaying ? "Ⅱ Pause" : "▶ Play";
-  playButton.disabled =
-    currentTick === lastTick && (gameState.goalReached || gameState.failed);
+  const runFinished = gameState.goalReached || gameState.failed;
+  playButton.textContent = isPlaying ? "Ⅱ Pause" : runFinished ? "✓ Finished" : "▶ Play";
+  playButton.disabled = runFinished;
   resetButton.disabled = false;
-  status.textContent = statusMessage();
 }
 
 function drawRoundedLine(x1, y1, x2, y2, width, color) {
@@ -238,6 +248,34 @@ function drawCup() {
   context.restore();
 }
 
+function drawTimelinePath(startTick, endTick, color) {
+  const points = [];
+  for (let tick = startTick; tick <= endTick; tick += 2) {
+    const position = timeline[tick]?.position;
+    if (position) points.push(position);
+  }
+  const finalPosition = timeline[endTick]?.position;
+  if (finalPosition && points[points.length - 1] !== finalPosition) points.push(finalPosition);
+  if (points.length < 2) return;
+
+  context.save();
+  context.strokeStyle = color;
+  context.lineWidth = 3;
+  context.lineCap = "round";
+  context.setLineDash([2, 7]);
+  context.beginPath();
+  context.moveTo(toPixels(points[0].x), toPixels(points[0].y));
+  points.slice(1).forEach((point) => context.lineTo(toPixels(point.x), toPixels(point.y)));
+  context.stroke();
+  context.restore();
+}
+
+function drawTimelinePaths() {
+  if (timeline.length < 2) return;
+  drawTimelinePath(0, timeline.length - 1, "rgb(36 113 184 / 72%)");
+  drawTimelinePath(0, currentTick, "rgb(224 79 67 / 82%)");
+}
+
 function drawMarble() {
   const position = marbleBody.translation();
   const x = toPixels(position.x);
@@ -257,19 +295,31 @@ function drawMarble() {
   context.arc(x, y, radius, 0, Math.PI * 2);
   context.fill();
   context.restore();
-}
 
-function drawPausedBadge() {
-  if (isPlaying || currentTick === 0) return;
   context.save();
-  context.fillStyle = "rgb(23 53 84 / 78%)";
+  context.translate(x, y);
+  context.rotate(marbleBody.rotation());
   context.beginPath();
-  context.roundRect(28, 518, 138, 50, 18);
+  context.arc(0, 0, radius - 1, 0, Math.PI * 2);
+  context.clip();
+  context.strokeStyle = "rgb(255 255 255 / 72%)";
+  context.lineWidth = 4;
+  context.lineCap = "round";
+  context.beginPath();
+  context.moveTo(-radius * 0.9, -radius * 0.2);
+  context.bezierCurveTo(
+    -radius * 0.35,
+    -radius * 0.75,
+    radius * 0.3,
+    radius * 0.75,
+    radius * 0.9,
+    radius * 0.18,
+  );
+  context.stroke();
+  context.fillStyle = "rgb(153 25 62 / 70%)";
+  context.beginPath();
+  context.arc(radius * 0.48, -radius * 0.28, radius * 0.13, 0, Math.PI * 2);
   context.fill();
-  context.fillStyle = "#fff";
-  context.font = "900 20px ui-rounded, sans-serif";
-  context.textAlign = "center";
-  context.fillText("Ⅱ PAUSED", 97, 550);
   context.restore();
 }
 
@@ -282,8 +332,8 @@ function draw() {
   });
   drawStart();
   drawCup();
+  drawTimelinePaths();
   drawMarble();
-  drawPausedBadge();
 }
 
 function frame(now) {
@@ -310,9 +360,7 @@ async function main() {
   playButton.addEventListener("click", togglePlayback);
   resetButton.addEventListener("click", resetTimeline);
   timelineInput.addEventListener("input", () => {
-    const requestedTick = Number(timelineInput.value);
-    pause();
-    restoreTick(requestedTick);
+    restoreTick(Number(timelineInput.value));
   });
 
   playButton.disabled = false;
@@ -322,5 +370,5 @@ async function main() {
 
 main().catch((error) => {
   console.error(error);
-  status.textContent = "The timeline could not start.";
+  playButton.textContent = "Unavailable";
 });

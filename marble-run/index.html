@@ -14,7 +14,6 @@
           <p class="eyebrow">Level 1 · Change the Future</p>
           <h1>Marble Run</h1>
         </div>
-        <p id="status" class="status" aria-live="polite">Loading the timeline…</p>
       </header>
 
       <section class="stage" aria-label="Marble run level">
@@ -28,12 +27,9 @@
         </div>
 
         <div class="scrubber">
-          <div class="timeline-labels">
-            <strong>Timeline</strong>
-            <output id="time-output" for="timeline">0.00s / 0.00s</output>
+          <div class="timeline-track">
+            <input id="timeline" type="range" min="0" max="0" value="0" step="1" disabled aria-label="Simulation timeline" />
           </div>
-          <input id="timeline" type="range" min="0" max="0" value="0" step="1" disabled aria-label="Simulation timeline" />
-          <p>Play to create the future. Pause, then drag the timeline backward and forward.</p>
         </div>
       </section>
     </main>
