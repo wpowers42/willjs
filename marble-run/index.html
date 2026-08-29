@@ -1,37 +1,43 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#73c8f0">
-    <title>Marble Run</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#dff5ff" />
+    <title>Marble Run: Change the Future</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <main class="game-shell">
       <header>
         <div>
-          <p class="eyebrow">Build it. Run it.</p>
+          <p class="eyebrow">Level 1 · Change the Future</p>
           <h1>Marble Run</h1>
         </div>
-        <p id="status" class="status" aria-live="polite">Add a marble and watch it roll!</p>
+        <p id="status" class="status" aria-live="polite">Loading the timeline…</p>
       </header>
 
-      <div class="stage">
-        <canvas id="game" width="1000" height="600" aria-label="A marble run sandbox"></canvas>
-      </div>
+      <section class="stage" aria-label="Marble run level">
+        <canvas id="game" width="1000" height="600" aria-label="A side-view marble run with one marble and a goal cup"></canvas>
+      </section>
 
-      <div class="controls">
-        <p>Drag the track, its yellow ends, or any marble.</p>
-        <div class="button-group">
-          <button id="add-marble-button" type="button">+ Marble</button>
-          <button id="add-ten-marbles-button" type="button">+10 Marbles</button>
-          <button id="reset-button" class="secondary" type="button">↻ Reset</button>
+      <section class="timeline-panel" aria-label="Timeline controls">
+        <div class="transport-controls">
+          <button id="play-button" type="button" disabled>▶ Play</button>
+          <button id="reset-button" class="secondary" type="button" disabled>↺ Reset</button>
         </div>
-      </div>
+
+        <div class="scrubber">
+          <div class="timeline-labels">
+            <strong>Timeline</strong>
+            <output id="time-output" for="timeline">0.00s / 0.00s</output>
+          </div>
+          <input id="timeline" type="range" min="0" max="0" value="0" step="1" disabled aria-label="Simulation timeline" />
+          <p>Play to create the future. Pause, then drag the timeline backward and forward.</p>
+        </div>
+      </section>
     </main>
 
-    <script src="vendor/matter.min.js"></script>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
   </body>
 </html>

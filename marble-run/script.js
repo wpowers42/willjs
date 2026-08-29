@@ -1,432 +1,326 @@
-(() => {
-  "use strict";
+import RAPIER from "./vendor/rapier2d/rapier.es.js";
+import {
+  CUP,
+  FIXED_STEP,
+  MARBLE_RADIUS,
+  MAX_TICKS,
+  PIXELS_PER_METER,
+  TRACKS,
+  VIEW_HEIGHT,
+  VIEW_WIDTH,
+  createLevelWorld,
+  evaluateMarble,
+} from "./level.js";
 
-  const { Bodies, Body, Composite, Engine, Sleeping } = Matter;
+const canvas = document.querySelector("#game");
+const context = canvas.getContext("2d");
+const status = document.querySelector("#status");
+const playButton = document.querySelector("#play-button");
+const resetButton = document.querySelector("#reset-button");
+const timelineInput = document.querySelector("#timeline");
+const timeOutput = document.querySelector("#time-output");
 
-  const canvas = document.querySelector("#game");
-  const context = canvas.getContext("2d");
-  const addMarbleButton = document.querySelector("#add-marble-button");
-  const addTenMarblesButton = document.querySelector("#add-ten-marbles-button");
-  const resetButton = document.querySelector("#reset-button");
-  const status = document.querySelector("#status");
+let world;
+let marbleHandle;
+let marbleBody;
+let timeline = [];
+let currentTick = 0;
+let gameState = { goalReached: false, failed: false };
+let isPlaying = false;
+let accumulator = 0;
+let previousTime = performance.now();
 
-  const WIDTH = canvas.width;
-  const HEIGHT = canvas.height;
-  const TRACK_WIDTH = 20;
-  const MARBLE_RADIUS = 17;
-  const HANDLE_RADIUS = 30;
-  const SNAP_DISTANCE = 58;
-  const FLOOR_Y = 565;
-  const funnelConnector = { x: 170, y: 215 };
-  const defaultTrack = {
-    start: { ...funnelConnector },
-    end: { x: 760, y: 390 },
+function toPixels(meters) {
+  return meters * PIXELS_PER_METER;
+}
+
+function getMarbleBody() {
+  const body = world.getRigidBody(marbleHandle);
+  if (!body) throw new Error("The marble is missing from the restored world.");
+  return body;
+}
+
+function recordSnapshot() {
+  timeline[currentTick] = {
+    physics: world.takeSnapshot(),
+    gameState: { ...gameState },
   };
-  const marbleColors = ["#e63f5d", "#3f8efc", "#ffbd2e", "#5bbb63", "#9a5de8", "#ff7a3d"];
+  timeline.length = currentTick + 1;
+}
 
-  // Sandbox piles must react immediately when a supporting marble is moved.
-  const engine = Engine.create({ enableSleeping: false });
-  engine.gravity.y = 1;
+function restoreTick(tick, resetClock = true) {
+  const snapshot = timeline[tick];
+  if (!snapshot) return;
 
-  const track = {
-    start: { ...defaultTrack.start },
-    end: { ...defaultTrack.end },
-    body: null,
-  };
+  world = RAPIER.World.restoreSnapshot(snapshot.physics);
+  marbleBody = getMarbleBody();
+  gameState = { ...snapshot.gameState };
+  currentTick = tick;
+  if (resetClock) accumulator = 0;
+  updateInterface();
+}
 
-  let marbles = [];
-  let drag = null;
-  let lastTime = performance.now();
-  let nextMarbleColor = 0;
+function pause() {
+  isPlaying = false;
+  accumulator = 0;
+  updateInterface();
+}
 
-  function segmentBody(start, end, width, options) {
-    const dx = end.x - start.x;
-    const dy = end.y - start.y;
-    return Bodies.rectangle(
-      (start.x + end.x) / 2,
-      (start.y + end.y) / 2,
-      Math.hypot(dx, dy),
-      width,
-      { ...options, angle: Math.atan2(dy, dx) },
-    );
+function advanceOneTick() {
+  if (currentTick < timeline.length - 1) {
+    restoreTick(currentTick + 1, false);
+  } else {
+    world.timestep = FIXED_STEP;
+    world.step();
+    currentTick += 1;
+    gameState = evaluateMarble(marbleBody, currentTick);
+    recordSnapshot();
   }
 
-  function addFixedWorld() {
-    const fixed = { isStatic: true, friction: 0.15, restitution: 0.12 };
-    const boundaries = [
-      Bodies.rectangle(WIDTH / 2, FLOOR_Y + 25, WIDTH + 80, 50, fixed),
-      Bodies.rectangle(-25, HEIGHT / 2, 50, HEIGHT + 100, fixed),
-      Bodies.rectangle(WIDTH + 25, HEIGHT / 2, 50, HEIGHT + 100, fixed),
-    ];
+  if (gameState.goalReached || gameState.failed || currentTick >= MAX_TICKS) {
+    pause();
+  }
+}
 
-    const funnelWalls = [
-      segmentBody({ x: 82, y: 55 }, { x: 139, y: 135 }, 16, fixed),
-      segmentBody({ x: 258, y: 55 }, { x: 201, y: 135 }, 16, fixed),
-      segmentBody({ x: 139, y: 131 }, { x: 139, y: 160 }, 16, fixed),
-      segmentBody({ x: 201, y: 131 }, { x: 201, y: 160 }, 16, fixed),
-    ];
-
-    Composite.add(engine.world, [...boundaries, ...funnelWalls]);
+function togglePlayback() {
+  if (isPlaying) {
+    pause();
+    return;
   }
 
-  function rebuildTrackBody() {
-    if (track.body) {
-      Composite.remove(engine.world, track.body);
-    }
+  const atRecordedEnd = currentTick === timeline.length - 1;
+  if (atRecordedEnd && (gameState.goalReached || gameState.failed)) return;
 
-    const dx = track.end.x - track.start.x;
-    const dy = track.end.y - track.start.y;
-    const length = Math.max(10, Math.hypot(dx, dy));
+  isPlaying = true;
+  accumulator = 0;
+  updateInterface();
+}
 
-    track.body = Bodies.rectangle(
-      (track.start.x + track.end.x) / 2,
-      (track.start.y + track.end.y) / 2,
-      length + TRACK_WIDTH,
-      TRACK_WIDTH,
-      {
-        isStatic: true,
-        angle: Math.atan2(dy, dx),
-        friction: 0.08,
-        restitution: 0.08,
-      },
-    );
-    Composite.add(engine.world, track.body);
+function resetTimeline() {
+  const level = createLevelWorld(RAPIER);
+  world = level.world;
+  marbleHandle = level.marbleHandle;
+  marbleBody = getMarbleBody();
+  timeline = [];
+  currentTick = 0;
+  gameState = { goalReached: false, failed: false };
+  isPlaying = false;
+  accumulator = 0;
+  recordSnapshot();
+  updateInterface();
+}
+
+function statusMessage() {
+  const currentSeconds = (currentTick * FIXED_STEP).toFixed(2);
+
+  if (isPlaying) {
+    return currentTick < timeline.length - 1 ? "Replaying the recorded future…" : "Recording the future…";
   }
+  if (gameState.goalReached) return "Goal reached! Scrub backward to watch it again.";
+  if (gameState.failed) return "Time ran out. Scrub backward to inspect the run.";
+  if (currentTick === 0) return "Press Play to create the future.";
+  if (currentTick < timeline.length - 1) return `Viewing the future at ${currentSeconds}s.`;
+  return `Paused at ${currentSeconds}s. Drag the timeline to inspect the run.`;
+}
 
-  function updateStatus() {
-    if (marbles.length === 0) {
-      status.textContent = "Add a marble and watch it roll!";
-    } else if (marbles.length === 1) {
-      status.textContent = "1 marble rolling — you can drag it!";
-    } else {
-      status.textContent = `${marbles.length} marbles rolling!`;
-    }
-  }
+function updateInterface() {
+  const lastTick = Math.max(0, timeline.length - 1);
+  timelineInput.max = String(lastTick);
+  timelineInput.value = String(currentTick);
+  timelineInput.disabled = isPlaying || lastTick === 0;
+  timeOutput.value = `${(currentTick * FIXED_STEP).toFixed(2)}s / ${(lastTick * FIXED_STEP).toFixed(2)}s`;
 
-  function addMarble() {
-    const spawnY = marbles.reduce(
-      (highest, marble) => Math.min(highest, marble.body.position.y - MARBLE_RADIUS * 2 - 4),
-      20,
-    );
-    const body = Bodies.circle(
-      170 + (Math.random() - 0.5) * 35,
-      spawnY,
-      MARBLE_RADIUS,
-      {
-        restitution: 0.3,
-        friction: 0.015,
-        frictionAir: 0.001,
-        density: 0.0025,
-      },
-    );
-    const marble = {
-      body,
-      color: marbleColors[nextMarbleColor % marbleColors.length],
-    };
-    nextMarbleColor += 1;
-    marbles.push(marble);
-    Composite.add(engine.world, body);
-    updateStatus();
-  }
+  playButton.textContent = isPlaying ? "Ⅱ Pause" : "▶ Play";
+  playButton.disabled =
+    currentTick === lastTick && (gameState.goalReached || gameState.failed);
+  resetButton.disabled = false;
+  status.textContent = statusMessage();
+}
 
-  function resetSandbox() {
-    marbles.forEach((marble) => Composite.remove(engine.world, marble.body));
-    marbles = [];
-    drag = null;
-    canvas.classList.remove("dragging");
-    track.start = { ...defaultTrack.start };
-    track.end = { ...defaultTrack.end };
-    rebuildTrackBody();
-    nextMarbleColor = 0;
-    updateStatus();
-  }
+function drawRoundedLine(x1, y1, x2, y2, width, color) {
+  context.save();
+  context.strokeStyle = color;
+  context.lineWidth = width;
+  context.lineCap = "round";
+  context.lineJoin = "round";
+  context.shadowColor = "rgb(28 75 104 / 18%)";
+  context.shadowBlur = 8;
+  context.shadowOffsetY = 5;
+  context.beginPath();
+  context.moveTo(toPixels(x1), toPixels(y1));
+  context.lineTo(toPixels(x2), toPixels(y2));
+  context.stroke();
+  context.restore();
+}
 
-  function update(delta) {
-    Engine.update(engine, Math.min(delta, 32));
-  }
+function drawBackground() {
+  const gradient = context.createLinearGradient(0, 0, 0, VIEW_HEIGHT);
+  gradient.addColorStop(0, "#caefff");
+  gradient.addColorStop(0.72, "#e7f8ff");
+  gradient.addColorStop(0.721, "#a9dc86");
+  gradient.addColorStop(1, "#73be60");
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);
 
-  function drawBackground() {
-    const sky = context.createLinearGradient(0, 0, 0, HEIGHT);
-    sky.addColorStop(0, "#70caf2");
-    sky.addColorStop(0.72, "#dff6ff");
-    sky.addColorStop(0.721, "#8ed36c");
-    sky.addColorStop(1, "#67b954");
-    context.fillStyle = sky;
-    context.fillRect(0, 0, WIDTH, HEIGHT);
+  context.fillStyle = "rgb(255 255 255 / 45%)";
+  context.beginPath();
+  context.arc(120, 92, 54, 0, Math.PI * 2);
+  context.arc(174, 96, 70, 0, Math.PI * 2);
+  context.arc(230, 98, 48, 0, Math.PI * 2);
+  context.fill();
+}
 
-    context.fillStyle = "rgba(255, 255, 255, 0.72)";
-    [[85, 80, 70], [760, 90, 85], [470, 55, 50]].forEach(([x, y, size]) => {
-      context.beginPath();
-      context.arc(x, y, size * 0.35, 0, Math.PI * 2);
-      context.arc(x + size * 0.35, y - 8, size * 0.42, 0, Math.PI * 2);
-      context.arc(x + size * 0.72, y, size * 0.3, 0, Math.PI * 2);
-      context.fill();
-    });
+function drawSupports() {
+  const supports = [
+    { x: 1.15, top: 1.66, color: "#4bbd6f" },
+    { x: 3.42, top: 2.31, color: "#7654bf" },
+    { x: 4.9, top: 3.42, color: "#397ee8" },
+    { x: 7.08, top: 4.05, color: "#e9425a" },
+  ];
 
-    context.fillStyle = "rgba(44, 116, 45, 0.28)";
-    context.fillRect(0, FLOOR_Y - 5, WIDTH, 8);
-  }
-
-  function funnelPath() {
+  supports.forEach((support) => {
+    context.fillStyle = "rgb(113 77 174 / 54%)";
+    context.fillRect(toPixels(support.x - 0.1), toPixels(support.top), 20, toPixels(5.72 - support.top));
+    context.fillStyle = support.color;
     context.beginPath();
-    context.moveTo(82, 55);
-    context.lineTo(139, 135);
-    context.lineTo(139, 160);
-    context.moveTo(258, 55);
-    context.lineTo(201, 135);
-    context.lineTo(201, 160);
-  }
-
-  function drawFunnel() {
-    context.save();
-    context.lineCap = "round";
-    context.lineJoin = "round";
-    context.strokeStyle = "#49316d";
-    context.lineWidth = 24;
-    funnelPath();
-    context.stroke();
-    context.strokeStyle = "#7651ad";
-    context.lineWidth = 14;
-    funnelPath();
-    context.stroke();
-
-    context.fillStyle = "#49316d";
-    context.font = "900 22px ui-rounded, system-ui, sans-serif";
-    context.textAlign = "center";
-    context.fillText("MARBLES", 170, 105);
-    context.restore();
-  }
-
-  function drawConnector() {
-    context.save();
-    context.setLineDash([8, 8]);
-    context.strokeStyle = "rgba(255, 207, 51, 0.9)";
-    context.lineWidth = 5;
-    context.beginPath();
-    context.arc(funnelConnector.x, funnelConnector.y, SNAP_DISTANCE, 0, Math.PI * 2);
-    context.stroke();
-    context.restore();
-  }
-
-  function drawTrack() {
-    context.save();
-    context.lineCap = "round";
-    context.strokeStyle = "#8d3d17";
-    context.lineWidth = TRACK_WIDTH + 12;
-    context.beginPath();
-    context.moveTo(track.start.x, track.start.y);
-    context.lineTo(track.end.x, track.end.y);
-    context.stroke();
-
-    context.strokeStyle = "#f57c35";
-    context.lineWidth = TRACK_WIDTH;
-    context.stroke();
-
-    context.strokeStyle = "rgba(255, 255, 255, 0.42)";
-    context.lineWidth = 5;
-    context.stroke();
-    context.restore();
-  }
-
-  function drawHandle(point) {
-    context.save();
-    context.shadowColor = "rgba(74, 48, 0, 0.32)";
-    context.shadowBlur = 8;
-    context.shadowOffsetY = 4;
-    context.fillStyle = "#ffcf33";
-    context.strokeStyle = "#765500";
-    context.lineWidth = 6;
-    context.beginPath();
-    context.arc(point.x, point.y, HANDLE_RADIUS, 0, Math.PI * 2);
+    context.ellipse(toPixels(support.x), 572, 34, 11, 0, 0, Math.PI * 2);
     context.fill();
-    context.stroke();
-    context.fillStyle = "#fff4a8";
-    context.beginPath();
-    context.arc(point.x - 7, point.y - 8, 8, 0, Math.PI * 2);
-    context.fill();
-    context.restore();
-  }
-
-  function drawMarble(marble) {
-    const { body, color } = marble;
-    const { x, y } = body.position;
-    context.save();
-    context.translate(x, y);
-    context.rotate(body.angle);
-    context.fillStyle = color;
-    context.strokeStyle = "#5c2a3c";
-    context.lineWidth = 4;
-    context.beginPath();
-    context.arc(0, 0, MARBLE_RADIUS, 0, Math.PI * 2);
-    context.fill();
-    context.stroke();
-    context.strokeStyle = "rgba(255, 255, 255, 0.78)";
-    context.lineWidth = 5;
-    context.beginPath();
-    context.arc(-3, -3, MARBLE_RADIUS - 7, Math.PI * 1.05, Math.PI * 1.75);
-    context.stroke();
-    context.restore();
-  }
-
-  function draw() {
-    drawBackground();
-    drawFunnel();
-    drawConnector();
-    drawTrack();
-    marbles.forEach(drawMarble);
-    drawHandle(track.start);
-    drawHandle(track.end);
-  }
-
-  function canvasPoint(event) {
-    const bounds = canvas.getBoundingClientRect();
-    return {
-      x: (event.clientX - bounds.left) * (WIDTH / bounds.width),
-      y: (event.clientY - bounds.top) * (HEIGHT / bounds.height),
-    };
-  }
-
-  function distance(a, b) {
-    return Math.hypot(a.x - b.x, a.y - b.y);
-  }
-
-  function distanceToTrack(point) {
-    const dx = track.end.x - track.start.x;
-    const dy = track.end.y - track.start.y;
-    const lengthSquared = dx * dx + dy * dy;
-    if (lengthSquared === 0) return distance(point, track.start);
-
-    const amount = Math.max(
-      0,
-      Math.min(1, ((point.x - track.start.x) * dx + (point.y - track.start.y) * dy) / lengthSquared),
-    );
-    const closest = {
-      x: track.start.x + amount * dx,
-      y: track.start.y + amount * dy,
-    };
-    return distance(point, closest);
-  }
-
-  function clampPoint(point) {
-    return {
-      x: Math.max(MARBLE_RADIUS, Math.min(WIDTH - MARBLE_RADIUS, point.x)),
-      y: Math.max(MARBLE_RADIUS, Math.min(FLOOR_Y - MARBLE_RADIUS, point.y)),
-    };
-  }
-
-  function snapPoint(point) {
-    return distance(point, funnelConnector) <= SNAP_DISTANCE ? { ...funnelConnector } : point;
-  }
-
-  function marbleAt(point) {
-    return [...marbles]
-      .reverse()
-      .find((marble) => distance(point, marble.body.position) <= MARBLE_RADIUS * 1.8);
-  }
-
-  canvas.addEventListener("pointerdown", (event) => {
-    const point = canvasPoint(event);
-    const marble = marbleAt(point);
-
-    if (marble) {
-      Sleeping.set(marble.body, false);
-      Body.setStatic(marble.body, true);
-      Body.setPosition(marble.body, clampPoint(point));
-      drag = { type: "marble", marble };
-    } else if (distance(point, track.start) <= HANDLE_RADIUS * 1.6) {
-      drag = { type: "start" };
-    } else if (distance(point, track.end) <= HANDLE_RADIUS * 1.6) {
-      drag = { type: "end" };
-    } else if (distanceToTrack(point) <= 34) {
-      drag = {
-        type: "track",
-        pointer: point,
-        start: { ...track.start },
-        end: { ...track.end },
-      };
-    }
-
-    if (drag) {
-      canvas.setPointerCapture(event.pointerId);
-      canvas.classList.add("dragging");
-    }
   });
+}
 
-  canvas.addEventListener("pointermove", (event) => {
-    if (!drag) return;
+function drawStart() {
+  context.save();
+  context.fillStyle = "#ed3d59";
+  context.beginPath();
+  context.moveTo(56, 72);
+  context.lineTo(152, 72);
+  context.lineTo(132, 126);
+  context.lineTo(78, 126);
+  context.closePath();
+  context.fill();
+  context.strokeStyle = "#c62947";
+  context.lineWidth = 10;
+  context.lineCap = "round";
+  context.beginPath();
+  context.moveTo(52, 72);
+  context.lineTo(156, 72);
+  context.stroke();
+  context.fillStyle = "#fff";
+  context.font = "900 18px ui-rounded, sans-serif";
+  context.textAlign = "center";
+  context.fillText("START", 105, 55);
+  context.restore();
+}
 
-    const point = canvasPoint(event);
-    if (drag.type === "marble") {
-      Body.setPosition(drag.marble.body, clampPoint(point));
-      Body.setVelocity(drag.marble.body, { x: 0, y: 0 });
-    } else if (drag.type === "start" || drag.type === "end") {
-      track[drag.type] = clampPoint(point);
-      rebuildTrackBody();
-    } else {
-      const dx = point.x - drag.pointer.x;
-      const dy = point.y - drag.pointer.y;
-      const desiredStart = { x: drag.start.x + dx, y: drag.start.y + dy };
-      const clampedStart = clampPoint(desiredStart);
-      const adjustedDx = clampedStart.x - drag.start.x;
-      const adjustedDy = clampedStart.y - drag.start.y;
-      track.start = clampedStart;
-      track.end = clampPoint({ x: drag.end.x + adjustedDx, y: drag.end.y + adjustedDy });
-      rebuildTrackBody();
-    }
+function drawCup() {
+  const left = toPixels(CUP.left);
+  const right = toPixels(CUP.right);
+  const rim = toPixels(CUP.rimY);
+  const bottom = toPixels(CUP.bottomY);
+
+  context.save();
+  context.fillStyle = "rgb(240 76 53 / 82%)";
+  context.strokeStyle = "#ce382b";
+  context.lineWidth = 14;
+  context.lineCap = "round";
+  context.lineJoin = "round";
+  context.beginPath();
+  context.moveTo(left, rim);
+  context.lineTo(left, bottom);
+  context.lineTo(right, bottom);
+  context.lineTo(right, rim);
+  context.stroke();
+  context.fillRect(left + 4, bottom - 14, right - left - 8, 14);
+  context.fillStyle = "#173554";
+  context.font = "900 19px ui-rounded, sans-serif";
+  context.textAlign = "center";
+  context.fillText("GOAL", (left + right) / 2, rim - 24);
+  context.restore();
+}
+
+function drawMarble() {
+  const position = marbleBody.translation();
+  const x = toPixels(position.x);
+  const y = toPixels(position.y);
+  const radius = toPixels(MARBLE_RADIUS);
+  const gradient = context.createRadialGradient(x - radius * 0.35, y - radius * 0.4, 2, x, y, radius);
+  gradient.addColorStop(0, "#ffffff");
+  gradient.addColorStop(0.2, "#ff8a9d");
+  gradient.addColorStop(1, "#e22f50");
+
+  context.save();
+  context.shadowColor = "rgb(23 53 84 / 34%)";
+  context.shadowBlur = 7;
+  context.shadowOffsetY = 5;
+  context.fillStyle = gradient;
+  context.beginPath();
+  context.arc(x, y, radius, 0, Math.PI * 2);
+  context.fill();
+  context.restore();
+}
+
+function drawPausedBadge() {
+  if (isPlaying || currentTick === 0) return;
+  context.save();
+  context.fillStyle = "rgb(23 53 84 / 78%)";
+  context.beginPath();
+  context.roundRect(28, 518, 138, 50, 18);
+  context.fill();
+  context.fillStyle = "#fff";
+  context.font = "900 20px ui-rounded, sans-serif";
+  context.textAlign = "center";
+  context.fillText("Ⅱ PAUSED", 97, 550);
+  context.restore();
+}
+
+function draw() {
+  context.clearRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);
+  drawBackground();
+  drawSupports();
+  TRACKS.forEach((track) => {
+    drawRoundedLine(track.x1, track.y1, track.x2, track.y2, toPixels(track.width), track.color);
   });
+  drawStart();
+  drawCup();
+  drawMarble();
+  drawPausedBadge();
+}
 
-  function finishDrag(event) {
-    if (!drag) return;
+function frame(now) {
+  const elapsed = Math.min((now - previousTime) / 1000, 0.1);
+  previousTime = now;
 
-    if (drag.type === "marble") {
-      Body.setStatic(drag.marble.body, false);
-      Body.setVelocity(drag.marble.body, { x: 0, y: 0 });
-      Sleeping.set(drag.marble.body, false);
-    } else if (drag.type === "start" || drag.type === "end") {
-      track[drag.type] = snapPoint(track[drag.type]);
-      rebuildTrackBody();
-    } else {
-      const snappedStart = snapPoint(track.start);
-      const snappedEnd = snapPoint(track.end);
-      if (snappedStart !== track.start) {
-        const dx = snappedStart.x - track.start.x;
-        const dy = snappedStart.y - track.start.y;
-        track.start = snappedStart;
-        track.end = clampPoint({ x: track.end.x + dx, y: track.end.y + dy });
-      } else if (snappedEnd !== track.end) {
-        const dx = snappedEnd.x - track.end.x;
-        const dy = snappedEnd.y - track.end.y;
-        track.end = snappedEnd;
-        track.start = clampPoint({ x: track.start.x + dx, y: track.start.y + dy });
-      }
-      rebuildTrackBody();
+  if (isPlaying) {
+    accumulator += elapsed;
+    while (accumulator >= FIXED_STEP && isPlaying) {
+      advanceOneTick();
+      accumulator -= FIXED_STEP;
     }
-
-    drag = null;
-    canvas.classList.remove("dragging");
-    if (canvas.hasPointerCapture(event.pointerId)) {
-      canvas.releasePointerCapture(event.pointerId);
-    }
+    updateInterface();
   }
 
-  canvas.addEventListener("pointerup", finishDrag);
-  canvas.addEventListener("pointercancel", finishDrag);
-  addMarbleButton.addEventListener("click", addMarble);
-  addTenMarblesButton.addEventListener("click", () => {
-    for (let index = 0; index < 10; index += 1) {
-      addMarble();
-    }
-  });
-  resetButton.addEventListener("click", resetSandbox);
-
-  function frame(now) {
-    update(now - lastTime);
-    draw();
-    lastTime = now;
-    requestAnimationFrame(frame);
-  }
-
-  addFixedWorld();
-  rebuildTrackBody();
+  draw();
   requestAnimationFrame(frame);
-})();
+}
+
+async function main() {
+  await RAPIER.init();
+  resetTimeline();
+
+  playButton.addEventListener("click", togglePlayback);
+  resetButton.addEventListener("click", resetTimeline);
+  timelineInput.addEventListener("input", () => {
+    const requestedTick = Number(timelineInput.value);
+    pause();
+    restoreTick(requestedTick);
+  });
+
+  playButton.disabled = false;
+  resetButton.disabled = false;
+  requestAnimationFrame(frame);
+}
+
+main().catch((error) => {
+  console.error(error);
+  status.textContent = "The timeline could not start.";
+});
