@@ -7,8 +7,31 @@ export const MARBLE_RADIUS = 0.19;
 
 export const TRACKS = [
   { x1: 0.65, y1: 1.52, x2: 4.0, y2: 2.48, width: 0.16, color: "#ffbd2e" },
-  { x1: 4.24, y1: 3.22, x2: 7.82, y2: 4.26, width: 0.16, color: "#ff7b35" },
 ];
+
+const EDITABLE_END = { x: 7.82, y: 4.26 };
+
+export const EDITABLE_TRACK = {
+  x1: 4.24,
+  y1: 3.22,
+  length: Math.hypot(EDITABLE_END.x - 4.24, EDITABLE_END.y - 3.22),
+  defaultAngle: Math.atan2(EDITABLE_END.y - 3.22, EDITABLE_END.x - 4.24),
+  minAngle: -0.18,
+  maxAngle: 0.68,
+  width: 0.16,
+  color: "#ff7b35",
+};
+
+export function editableTrackSegment(angle) {
+  return {
+    x1: EDITABLE_TRACK.x1,
+    y1: EDITABLE_TRACK.y1,
+    x2: EDITABLE_TRACK.x1 + Math.cos(angle) * EDITABLE_TRACK.length,
+    y2: EDITABLE_TRACK.y1 + Math.sin(angle) * EDITABLE_TRACK.length,
+    width: EDITABLE_TRACK.width,
+    color: EDITABLE_TRACK.color,
+  };
+}
 
 export const CUP = {
   left: 8.12,
@@ -22,7 +45,7 @@ function addSegment(RAPIER, world, segment, friction) {
   const dy = segment.y2 - segment.y1;
   const length = Math.hypot(dx, dy);
   const angle = Math.atan2(dy, dx);
-  world.createCollider(
+  return world.createCollider(
     RAPIER.ColliderDesc.cuboid(length / 2 + 0.02, segment.width / 2)
       .setTranslation((segment.x1 + segment.x2) / 2, (segment.y1 + segment.y2) / 2)
       .setRotation(angle)
@@ -31,11 +54,28 @@ function addSegment(RAPIER, world, segment, friction) {
   );
 }
 
+export function setEditableTrackAngle(world, colliderHandle, angle) {
+  const collider = world.getCollider(colliderHandle);
+  if (!collider) throw new Error("The editable track is missing from the restored world.");
+  const segment = editableTrackSegment(angle);
+  collider.setTranslation({
+    x: (segment.x1 + segment.x2) / 2,
+    y: (segment.y1 + segment.y2) / 2,
+  });
+  collider.setRotation(angle);
+}
+
 export function createLevelWorld(RAPIER) {
   const world = new RAPIER.World({ x: 0, y: 9.81 });
   world.timestep = FIXED_STEP;
 
   TRACKS.forEach((track) => addSegment(RAPIER, world, track, 0.12));
+  const editableTrack = addSegment(
+    RAPIER,
+    world,
+    editableTrackSegment(EDITABLE_TRACK.defaultAngle),
+    0.12,
+  );
 
   world.createCollider(
     RAPIER.ColliderDesc.cuboid(0.08, 0.45)
@@ -82,6 +122,7 @@ export function createLevelWorld(RAPIER) {
   return {
     world,
     marbleHandle: marbleBody.handle,
+    editableTrackHandle: editableTrack.handle,
   };
 }
 
