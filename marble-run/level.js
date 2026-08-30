@@ -33,6 +33,47 @@ export function editableTrackSegment(angle) {
   };
 }
 
+export const BLOCKER = {
+  defaultStart: { x: 6.2, y: 2.8 },
+  defaultEnd: { x: 6.2, y: 4.2 },
+  halfWidth: 0.13,
+  halfHeight: 0.38,
+  periodTicks: 180,
+  color: "#7657c8",
+};
+
+export function createDefaultBlockerPath() {
+  return {
+    start: { ...BLOCKER.defaultStart },
+    end: { ...BLOCKER.defaultEnd },
+  };
+}
+
+export function blockerPosition(path, tick) {
+  const progress = 0.5 - 0.5 * Math.cos((Math.PI * 2 * tick) / BLOCKER.periodTicks);
+  return {
+    x: path.start.x + (path.end.x - path.start.x) * progress,
+    y: path.start.y + (path.end.y - path.start.y) * progress,
+  };
+}
+
+function getBlockerBody(world, handle) {
+  const body = world.getRigidBody(handle);
+  if (!body) throw new Error("The moving blocker is missing from the world.");
+  return body;
+}
+
+export function setBlockerNextPosition(world, handle, path, tick) {
+  getBlockerBody(world, handle).setNextKinematicTranslation(blockerPosition(path, tick));
+}
+
+export function placeBlocker(world, handle, path, tick = 0) {
+  const body = getBlockerBody(world, handle);
+  const position = blockerPosition(path, tick);
+  body.setTranslation(position, true);
+  body.setNextKinematicTranslation(position);
+}
+
 export const CUP = {
   left: 8.12,
   right: 9.28,
@@ -75,6 +116,19 @@ export function createLevelWorld(RAPIER) {
     world,
     editableTrackSegment(EDITABLE_TRACK.defaultAngle),
     0.12,
+  );
+
+  const blockerBody = world.createRigidBody(
+    RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(
+      BLOCKER.defaultStart.x,
+      BLOCKER.defaultStart.y,
+    ),
+  );
+  world.createCollider(
+    RAPIER.ColliderDesc.cuboid(BLOCKER.halfWidth, BLOCKER.halfHeight)
+      .setFriction(0.2)
+      .setRestitution(0.1),
+    blockerBody,
   );
 
   world.createCollider(
@@ -123,6 +177,7 @@ export function createLevelWorld(RAPIER) {
     world,
     marbleHandle: marbleBody.handle,
     editableTrackHandle: editableTrack.handle,
+    blockerHandle: blockerBody.handle,
   };
 }
 

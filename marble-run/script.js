@@ -1,5 +1,6 @@
 import RAPIER from "./vendor/rapier2d/rapier.es.js";
 import {
+  BLOCKER,
   CUP,
   EDITABLE_TRACK,
   FIXED_STEP,
@@ -9,9 +10,12 @@ import {
   TRACKS,
   VIEW_HEIGHT,
   VIEW_WIDTH,
+  createDefaultBlockerPath,
   createLevelWorld,
   editableTrackSegment,
   evaluateMarble,
+  placeBlocker,
+  setBlockerNextPosition,
   setEditableTrackAngle,
 } from "./level.js";
 
@@ -25,7 +29,10 @@ let marbleHandle;
 let marbleBody;
 let editableTrackHandle;
 let editableTrackAngle = EDITABLE_TRACK.defaultAngle;
-let isDraggingTrack = false;
+let blockerHandle;
+let blockerBody;
+let blockerPath = createDefaultBlockerPath();
+let dragTarget = null;
 let futurePath = [];
 let actualPath = [];
 let futurePathDirty = false;
@@ -61,6 +68,7 @@ function buildFuturePath() {
   let futureState = { goalReached: false, failed: false };
   while (!futureState.goalReached && !futureState.failed && futureTick < MAX_TICKS) {
     futureWorld.timestep = FIXED_STEP;
+    setBlockerNextPosition(futureWorld, blockerHandle, blockerPath, futureTick + 1);
     futureWorld.step();
     futureTick += 1;
     futureState = evaluateMarble(futureMarble, futureTick);
@@ -72,6 +80,7 @@ function buildFuturePath() {
 
 function advanceOneTick() {
   world.timestep = FIXED_STEP;
+  setBlockerNextPosition(world, blockerHandle, blockerPath, currentTick + 1);
   world.step();
   currentTick += 1;
   gameState = evaluateMarble(marbleBody, currentTick);
@@ -85,26 +94,34 @@ function advanceOneTick() {
 }
 
 function startPlayback() {
-  if (runStarted || isDraggingTrack) return;
+  if (runStarted || dragTarget) return;
   runStarted = true;
   isPlaying = true;
   accumulator = 0;
   updateInterface();
 }
 
-function initializeRun(trackAngle) {
+function initializeRun(trackAngle, nextBlockerPath) {
   const level = createLevelWorld(RAPIER);
   world = level.world;
   marbleHandle = level.marbleHandle;
   marbleBody = getMarbleBody();
   editableTrackHandle = level.editableTrackHandle;
   editableTrackAngle = trackAngle;
+  blockerHandle = level.blockerHandle;
+  blockerBody = world.getRigidBody(blockerHandle);
+  if (!blockerBody) throw new Error("The moving blocker is missing from the world.");
+  blockerPath = {
+    start: { ...nextBlockerPath.start },
+    end: { ...nextBlockerPath.end },
+  };
   setEditableTrackAngle(world, editableTrackHandle, editableTrackAngle);
+  placeBlocker(world, blockerHandle, blockerPath);
   currentTick = 0;
   gameState = { goalReached: false, failed: false };
   runStarted = false;
   isPlaying = false;
-  isDraggingTrack = false;
+  dragTarget = null;
   futurePathDirty = false;
   accumulator = 0;
   actualPath = [bodyPosition(marbleBody)];
@@ -113,13 +130,13 @@ function initializeRun(trackAngle) {
 }
 
 function resetRun() {
-  initializeRun(EDITABLE_TRACK.defaultAngle);
+  initializeRun(EDITABLE_TRACK.defaultAngle, createDefaultBlockerPath());
 }
 
 function updateInterface() {
   const runFinished = gameState.goalReached || gameState.failed;
   playButton.textContent = isPlaying ? "Running…" : runFinished ? "✓ Finished" : "▶ Run";
-  playButton.disabled = runStarted || isDraggingTrack;
+  playButton.disabled = runStarted || Boolean(dragTarget);
   resetButton.disabled = false;
 }
 
@@ -157,6 +174,50 @@ function drawEditableTrack() {
   context.beginPath();
   context.arc(handleX, handleY, 5, 0, Math.PI * 2);
   context.fill();
+  context.restore();
+}
+
+function drawBlockerPath() {
+  context.save();
+  context.strokeStyle = "rgb(118 87 200 / 55%)";
+  context.lineWidth = 4;
+  context.lineCap = "round";
+  context.setLineDash([5, 9]);
+  context.beginPath();
+  context.moveTo(toPixels(blockerPath.start.x), toPixels(blockerPath.start.y));
+  context.lineTo(toPixels(blockerPath.end.x), toPixels(blockerPath.end.y));
+  context.stroke();
+  context.setLineDash([]);
+
+  [blockerPath.start, blockerPath.end].forEach((point) => {
+    context.fillStyle = "#fff";
+    context.strokeStyle = BLOCKER.color;
+    context.lineWidth = 6;
+    context.beginPath();
+    context.arc(toPixels(point.x), toPixels(point.y), 15, 0, Math.PI * 2);
+    context.fill();
+    context.stroke();
+  });
+  context.restore();
+}
+
+function drawBlocker() {
+  const position = blockerBody.translation();
+  const x = toPixels(position.x - BLOCKER.halfWidth);
+  const y = toPixels(position.y - BLOCKER.halfHeight);
+  const width = toPixels(BLOCKER.halfWidth * 2);
+  const height = toPixels(BLOCKER.halfHeight * 2);
+
+  context.save();
+  context.fillStyle = BLOCKER.color;
+  context.strokeStyle = "#fff";
+  context.lineWidth = 5;
+  context.beginPath();
+  context.roundRect(x, y, width, height, 10);
+  context.fill();
+  context.stroke();
+  context.fillStyle = "rgb(255 255 255 / 75%)";
+  context.fillRect(x + width * 0.3, y + 10, width * 0.4, height - 20);
   context.restore();
 }
 
@@ -323,9 +384,11 @@ function draw() {
     drawRoundedLine(track.x1, track.y1, track.x2, track.y2, toPixels(track.width), track.color);
   });
   drawEditableTrack();
+  drawBlockerPath();
   drawStart();
   drawCup();
   drawPaths();
+  drawBlocker();
   drawMarble();
 }
 
@@ -337,13 +400,33 @@ function pointerPosition(event) {
   };
 }
 
-function beginTrackDrag(event) {
+function distanceTo(pointer, point) {
+  return Math.hypot(pointer.x - point.x, pointer.y - point.y);
+}
+
+function beginObjectDrag(event) {
   const pointer = pointerPosition(event);
   const track = editableTrackSegment(editableTrackAngle);
-  if (Math.hypot(pointer.x - track.x2, pointer.y - track.y2) > 0.55) return;
+  const blockerPosition = blockerBody.translation();
 
-  if (runStarted) initializeRun(editableTrackAngle);
-  isDraggingTrack = true;
+  if (distanceTo(pointer, { x: track.x2, y: track.y2 }) <= 0.55) {
+    dragTarget = "track";
+  } else if (distanceTo(pointer, blockerPath.start) <= 0.48) {
+    dragTarget = "blocker-start";
+  } else if (distanceTo(pointer, blockerPath.end) <= 0.48) {
+    dragTarget = "blocker-end";
+  } else if (
+    Math.abs(pointer.x - blockerPosition.x) <= BLOCKER.halfWidth + 0.28 &&
+    Math.abs(pointer.y - blockerPosition.y) <= BLOCKER.halfHeight + 0.2
+  ) {
+    dragTarget = "blocker-start";
+  } else {
+    return;
+  }
+
+  const selectedTarget = dragTarget;
+  if (runStarted) initializeRun(editableTrackAngle, blockerPath);
+  dragTarget = selectedTarget;
   futurePathDirty = true;
   updateInterface();
   canvas.setPointerCapture(event.pointerId);
@@ -351,19 +434,28 @@ function beginTrackDrag(event) {
   event.preventDefault();
 }
 
-function moveTrack(event) {
-  if (!isDraggingTrack) return;
+function moveObject(event) {
+  if (!dragTarget) return;
   const pointer = pointerPosition(event);
-  const angle = Math.atan2(pointer.y - EDITABLE_TRACK.y1, pointer.x - EDITABLE_TRACK.x1);
-  editableTrackAngle = Math.max(EDITABLE_TRACK.minAngle, Math.min(EDITABLE_TRACK.maxAngle, angle));
-  setEditableTrackAngle(world, editableTrackHandle, editableTrackAngle);
+
+  if (dragTarget === "track") {
+    const angle = Math.atan2(pointer.y - EDITABLE_TRACK.y1, pointer.x - EDITABLE_TRACK.x1);
+    editableTrackAngle = Math.max(EDITABLE_TRACK.minAngle, Math.min(EDITABLE_TRACK.maxAngle, angle));
+    setEditableTrackAngle(world, editableTrackHandle, editableTrackAngle);
+  } else {
+    const endpoint = dragTarget === "blocker-start" ? blockerPath.start : blockerPath.end;
+    endpoint.x = Math.max(4.5, Math.min(7.8, pointer.x));
+    endpoint.y = Math.max(2.5, Math.min(5.1, pointer.y));
+    placeBlocker(world, blockerHandle, blockerPath);
+  }
+
   futurePathDirty = true;
   event.preventDefault();
 }
 
-function finishTrackDrag(event) {
-  if (!isDraggingTrack) return;
-  isDraggingTrack = false;
+function finishObjectDrag(event) {
+  if (!dragTarget) return;
+  dragTarget = null;
   if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
   canvas.style.cursor = "default";
   buildFuturePath();
@@ -383,7 +475,7 @@ function frame(now) {
     updateInterface();
   }
 
-  if (isDraggingTrack && futurePathDirty) buildFuturePath();
+  if (dragTarget && futurePathDirty) buildFuturePath();
   draw();
   requestAnimationFrame(frame);
 }
@@ -394,10 +486,10 @@ async function main() {
 
   playButton.addEventListener("click", startPlayback);
   resetButton.addEventListener("click", resetRun);
-  canvas.addEventListener("pointerdown", beginTrackDrag);
-  canvas.addEventListener("pointermove", moveTrack);
-  canvas.addEventListener("pointerup", finishTrackDrag);
-  canvas.addEventListener("pointercancel", finishTrackDrag);
+  canvas.addEventListener("pointerdown", beginObjectDrag);
+  canvas.addEventListener("pointermove", moveObject);
+  canvas.addEventListener("pointerup", finishObjectDrag);
+  canvas.addEventListener("pointercancel", finishObjectDrag);
 
   playButton.disabled = false;
   resetButton.disabled = false;
