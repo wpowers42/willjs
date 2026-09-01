@@ -2,16 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Development Commands
-
-### Python Weather Tool
-```bash
-cd weather
-export KNMI_API_KEY="your_api_key_here"
-python main.py
-```
-Fetches and processes weather radar data from KNMI API for Utrecht rainfall forecasts.
-
 ## Project Architecture
 
 ### Pure JavaScript Structure
@@ -31,14 +21,6 @@ Games follow a consistent architecture pattern:
 - **Game Classes**: Main game controllers that orchestrate all game systems
 - **Entity Classes**: Individual game objects (Ball, Paddle, Player, etc.)
 
-### Weather Tool Integration
-The weather tool demonstrates a complete data pipeline:
-- Python script (`weather/main.py`) fetches KNMI radar data
-- Processes HDF5 radar files for Utrecht coordinates
-- Generates JSON output for web display
-- GitHub Actions automates data updates every 5 minutes
-- Deployed to GitHub Pages at `/weather/` path
-
 ## File Organization
 
 All projects are organized as peer directories at the root level:
@@ -54,8 +36,7 @@ All projects are organized as peer directories at the root level:
 ├── temperature/
 ├── box-breathing/       # Standalone apps
 ├── growth-model/
-├── spot-it/
-└── weather/             # Tools (Python + web)
+└── spot-it/
 ```
 
 ### Project Structure Pattern
@@ -83,8 +64,3 @@ Complex projects (like space-shooter) use a src/ subdirectory:
 - ES6+ features with module imports/exports
 - Class-based architecture for game components
 - Modern browser compatibility
-
-### GitHub Actions
-- Weather data automation runs every 15 minutes
-- Automatic deployment to GitHub Pages
-- Secure API key management through GitHub Secrets
