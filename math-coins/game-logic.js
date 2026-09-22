@@ -30,6 +30,15 @@
             return Math.floor(this.random() * (max - min + 1)) + min;
         }
 
+        chooseNextCoin() {
+            this.nextCoin = this.coins.length === 0 ? null : {
+                value: this.coins[this.randomInteger(0, this.coins.length - 1)],
+                direction: this.random() < 0.5 ? -1 : 1,
+                tilt: 0.2 + this.random() * 0.2,
+                drift: 25 + this.random() * 35,
+            };
+        }
+
         startRound() {
             this.round += 1;
             this.left = this.randomInteger(0, 10);
@@ -37,6 +46,7 @@
             this.answer = '';
             this.keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
             this.coins = Array.from({ length: 20 }, (_, index) => index + 1);
+            this.chooseNextCoin();
             this.dropElapsed = 0;
             this.phase = 'playing';
             this.feedback = null;
@@ -125,7 +135,10 @@
                 this.dropElapsed += deltaMilliseconds;
                 while (this.dropElapsed >= this.coinDropMs && this.coins.length > 0) {
                     this.dropElapsed -= this.coinDropMs;
-                    events.push({ type: 'coin-dropped', value: this.coins.pop() });
+                    const coin = this.nextCoin;
+                    this.coins.splice(this.coins.indexOf(coin.value), 1);
+                    events.push({ type: 'coin-dropped', coin });
+                    this.chooseNextCoin();
                 }
             }
 
@@ -168,6 +181,7 @@
                 answer: this.answer,
                 keys: [...this.keys],
                 coins: [...this.coins],
+                nextCoin: this.nextCoin ? { ...this.nextCoin } : null,
                 dropElapsed: this.dropElapsed,
                 phase: this.phase,
                 feedback: this.feedback ? { ...this.feedback } : null,

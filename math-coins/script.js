@@ -114,14 +114,17 @@ function coinPosition(value) {
     };
 }
 
-function addFallingCoin(value) {
+function addFallingCoin(value, tip = null) {
     const position = coinPosition(value);
     view.fallingCoins.push({
         value,
         x: position.x,
-        y: position.y,
+        y: position.y + (tip ? 3 : 0),
+        velocityX: tip ? tip.direction * tip.drift : 0,
         velocityY: 90,
-        rotation: 0,
+        rotation: tip ? tip.direction * tip.tilt : 0,
+        spin: tip ? tip.direction * (2 + tip.tilt * 5) : 2.4,
+        edgeScale: tip ? 0.55 : 1,
         alpha: 1,
     });
 }
@@ -150,7 +153,7 @@ function activateButton(button) {
     }
     syncState();
     if (button.type === 'submit' && state.phase === 'wrong-feedback') {
-        state.coins.forEach(addFallingCoin);
+        state.coins.forEach((value) => addFallingCoin(value));
     }
 }
 
@@ -206,7 +209,7 @@ function update(deltaMilliseconds) {
 
     events.forEach((event) => {
         if (event.type === 'coin-dropped') {
-            addFallingCoin(event.value);
+            addFallingCoin(event.coin.value, event.coin);
         } else if (event.type === 'coin-awarded') {
             addScorePop(event.value, event.index);
         } else if (event.type === 'round-started') {
@@ -220,8 +223,10 @@ function update(deltaMilliseconds) {
 
     view.fallingCoins.forEach((coin) => {
         coin.velocityY += 260 * deltaSeconds;
+        coin.x += coin.velocityX * deltaSeconds;
         coin.y += coin.velocityY * deltaSeconds;
-        coin.rotation += 2.4 * deltaSeconds;
+        coin.rotation += coin.spin * deltaSeconds;
+        coin.edgeScale = Math.min(1, coin.edgeScale + 2 * deltaSeconds);
         coin.alpha -= 0.55 * deltaSeconds;
     });
     view.fallingCoins = view.fallingCoins.filter((coin) => coin.alpha > 0 && coin.y < HEIGHT + 60);
@@ -392,20 +397,20 @@ function drawCoins() {
             if (award && animationElapsed >= 0) return;
 
             const position = coinPosition(value);
-            drawCoinShape(position.x, position.y, 11, '');
+            if (state.phase === 'playing' && value === state.nextCoin?.value) {
+                const progress = Math.min(state.dropElapsed / state.coinDropMs, 1);
+                const tip = (1 - Math.cos(progress * Math.PI)) / 2;
+                const wobble = Math.sin(progress * Math.PI * 4) * (1 - progress) * state.nextCoin.tilt * 0.3;
+                context.save();
+                context.translate(position.x, position.y);
+                context.rotate(state.nextCoin.direction * (tip * state.nextCoin.tilt + wobble));
+                context.scale(1 - tip * 0.45, 1);
+                drawCoinShape(0, tip * 3, 11, '');
+                context.restore();
+            } else {
+                drawCoinShape(position.x, position.y, 11, '');
+            }
         });
-    }
-
-    if (state.coins.length > 0 && state.phase === 'playing') {
-        const nextValue = state.coins[state.coins.length - 1];
-        const position = coinPosition(nextValue);
-        const progress = state.dropElapsed / state.coinDropMs;
-        context.strokeStyle = colors.coral;
-        context.lineWidth = 4;
-        context.lineCap = 'round';
-        context.beginPath();
-        context.arc(position.x, position.y, 17, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
-        context.stroke();
     }
 
     let barFill = '#fff8da';
@@ -439,6 +444,7 @@ function drawCoins() {
         context.save();
         context.translate(coin.x, coin.y);
         context.rotate(coin.rotation);
+        context.scale(coin.edgeScale, 1);
         drawCoinShape(0, 0, 11, '', Math.max(coin.alpha, 0));
         context.restore();
     });

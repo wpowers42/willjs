@@ -8,7 +8,16 @@ const script = fs.readFileSync(require.resolve('./script.js'), 'utf8');
 
 test('canvas stays sharp at display resolution and pointer hits use logical coordinates', () => {
     const transforms = [];
+    const scales = [];
     const handlers = {};
+    const context = {
+        setTransform: (...values) => transforms.push(values),
+        scale: (...values) => scales.push(values),
+    };
+    for (const method of ['save', 'restore', 'translate', 'rotate', 'beginPath', 'arc',
+        'fill', 'stroke', 'roundRect', 'fillText']) {
+        context[method] = () => {};
+    }
     const canvas = {
         width: 1000,
         height: 700,
@@ -16,7 +25,7 @@ test('canvas stays sharp at display resolution and pointer hits use logical coor
         clientHeight: 875,
         clientLeft: 4,
         clientTop: 4,
-        getContext: () => ({ setTransform: (...values) => transforms.push(values) }),
+        getContext: () => context,
         getBoundingClientRect: () => ({ left: 100, top: 50 }),
         addEventListener: (event, handler) => { handlers[event] = handler; },
     };
@@ -47,6 +56,9 @@ test('canvas stays sharp at display resolution and pointer hits use logical coor
         clientY: 50 + 4 + 322 * 1.25,
     });
     assert.equal(vm.runInContext('state.answer', sandbox), '1');
+
+    vm.runInContext('state.dropElapsed = 500; drawCoins()', sandbox);
+    assert.ok(scales.some(([x]) => x < 1), 'the next coin tips while time runs down');
 
     canvas.clientWidth = 1000;
     canvas.clientHeight = 700;

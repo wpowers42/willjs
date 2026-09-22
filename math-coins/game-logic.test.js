@@ -24,14 +24,32 @@ test('new rounds contain an age-appropriate equation and a fixed ordered keypad'
     }
 });
 
-test('twenty identical coins disappear once per second', () => {
+test('each second drops a randomly selected remaining coin', () => {
     const game = new MathCoinsGame({ random: seededRandom(3) });
-    assert.equal(game.getState().coins.length, 20);
+    const target = game.getState().nextCoin;
+    assert.ok(game.getState().coins.includes(target.value));
     assert.deepEqual(game.update(999), []);
-    assert.deepEqual(game.update(1), [{ type: 'coin-dropped', value: 20 }]);
+    const [drop] = game.update(1);
+    assert.equal(drop.type, 'coin-dropped');
+    assert.deepEqual(drop.coin, target);
     assert.equal(game.getState().coins.length, 19);
-    game.update(19000);
+    assert.ok(!game.getState().coins.includes(target.value));
+    assert.ok(game.getState().coins.includes(game.getState().nextCoin.value));
+    const remainingDrops = game.update(19000);
+    assert.equal(new Set([drop, ...remainingDrops].map((event) => event.coin.value)).size, 20);
     assert.equal(game.getState().coins.length, 0);
+    assert.equal(game.getState().nextCoin, null);
+});
+
+test('different random draws change which coin tips and how it falls', () => {
+    const left = new MathCoinsGame({ random: () => 0 });
+    const right = new MathCoinsGame({ random: () => 0.999999 });
+    assert.equal(left.getState().nextCoin.value, 1);
+    assert.equal(right.getState().nextCoin.value, 20);
+    assert.equal(left.getState().nextCoin.direction, -1);
+    assert.equal(right.getState().nextCoin.direction, 1);
+    assert.notEqual(left.getState().nextCoin.tilt, right.getState().nextCoin.tilt);
+    assert.notEqual(left.getState().nextCoin.drift, right.getState().nextCoin.drift);
 });
 
 test('skip reveals the answer, costs zero, and starts a new round after feedback', () => {
