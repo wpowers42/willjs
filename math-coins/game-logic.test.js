@@ -11,7 +11,7 @@ function seededRandom(seed = 1) {
     };
 }
 
-test('new rounds contain an age-appropriate equation and every digit once', () => {
+test('new rounds contain an age-appropriate equation and a fixed ordered keypad', () => {
     const game = new MathCoinsGame({ random: seededRandom(42) });
 
     for (let round = 0; round < 100; round += 1) {
@@ -19,9 +19,29 @@ test('new rounds contain an age-appropriate equation and every digit once', () =
         const answer = state.left + state.right;
 
         assert.ok(answer >= 0 && answer <= 20);
-        assert.deepEqual([...state.keys].sort((a, b) => a - b), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        assert.deepEqual(state.keys, [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]);
         game.startRound();
     }
+});
+
+test('skip reveals the answer, costs zero, and starts a new round after feedback', () => {
+    const game = new MathCoinsGame({ random: seededRandom(7) });
+    const initial = game.getState();
+    game.update(2900);
+    game.pressNumber(9);
+    game.skip();
+
+    const skipped = game.getState();
+    assert.equal(skipped.phase, 'skip-feedback');
+    assert.equal(skipped.feedback.answer, initial.left + initial.right);
+    assert.equal(skipped.score, 0);
+    assert.equal(skipped.answer, '');
+    assert.deepEqual(game.update(100), []);
+    assert.deepEqual(game.getState().coins, initial.coins);
+    assert.deepEqual(game.update(1000), [{ type: 'round-started' }]);
+    assert.equal(game.getState().phase, 'playing');
+    assert.equal(game.getState().score, 0);
+    assert.deepEqual(game.getState().coins, initial.coins);
 });
 
 test('a wrong answer keeps the round and coin timer running before clearing the guess', () => {

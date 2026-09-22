@@ -29,20 +29,11 @@
             return Math.floor(this.random() * (max - min + 1)) + min;
         }
 
-        shuffle(values) {
-            const shuffled = [...values];
-            for (let index = shuffled.length - 1; index > 0; index -= 1) {
-                const swapIndex = this.randomInteger(0, index);
-                [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-            }
-            return shuffled;
-        }
-
         startRound() {
             this.left = this.randomInteger(0, 10);
             this.right = this.randomInteger(0, 10);
             this.answer = '';
-            this.keys = this.shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+            this.keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
             this.coins = [1, 2, 3, 4, 5, 6, 7, 8, 9];
             this.dropElapsed = 0;
             this.phase = 'playing';
@@ -64,6 +55,17 @@
         reset() {
             this.score = 0;
             this.startRound();
+        }
+
+        skip() {
+            if (this.phase !== 'playing') return;
+            this.answer = '';
+            this.phase = 'skip-feedback';
+            this.feedback = {
+                type: 'skip',
+                answer: this.left + this.right,
+                remaining: this.feedbackDelayMs,
+            };
         }
 
         submit() {
@@ -116,12 +118,17 @@
                 }
             }
 
-            if (this.phase === 'wrong-feedback') {
+            if (this.phase === 'wrong-feedback' || this.phase === 'skip-feedback') {
                 this.feedback.remaining -= deltaMilliseconds;
                 if (this.feedback.remaining <= 0) {
-                    this.answer = '';
-                    this.feedback = null;
-                    this.phase = 'playing';
+                    if (this.phase === 'skip-feedback') {
+                        this.startRound();
+                        events.push({ type: 'round-started' });
+                    } else {
+                        this.answer = '';
+                        this.feedback = null;
+                        this.phase = 'playing';
+                    }
                 }
             } else if (this.phase === 'awarding') {
                 this.awardElapsed += deltaMilliseconds;

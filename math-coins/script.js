@@ -75,14 +75,20 @@ function buildKeypadButtons() {
         });
     });
 
+    const bottomY = startY + 3 * (buttonHeight + gapY);
     keypadButtons.push({
-        type: 'number',
-        value: state.keys[9],
-        label: String(state.keys[9]),
-        x: startX + buttonWidth + gapX,
-        y: startY + 3 * (buttonHeight + gapY),
-        width: buttonWidth,
-        height: buttonHeight,
+        type: 'disabled', label: ',',
+        x: startX, y: bottomY, width: buttonWidth, height: buttonHeight,
+    });
+    keypadButtons.push({
+        type: 'number', value: 0, label: '0',
+        x: startX + buttonWidth + gapX, y: bottomY,
+        width: buttonWidth, height: buttonHeight,
+    });
+    keypadButtons.push({
+        type: 'skip', label: '?',
+        x: startX + 2 * (buttonWidth + gapX), y: bottomY,
+        width: buttonWidth, height: buttonHeight,
     });
 }
 
@@ -121,13 +127,15 @@ function addScorePop(value, index, awardCount) {
 }
 
 function activateButton(button) {
-    if (state.phase !== 'playing') return;
+    if (state.phase !== 'playing' || button.type === 'disabled') return;
 
     view.pressedButton = { button, remaining: 130 };
     if (button.type === 'number') {
         logic.pressNumber(button.value);
     } else if (button.type === 'backspace') {
         logic.backspace();
+    } else if (button.type === 'skip') {
+        logic.skip();
     } else {
         logic.submit();
     }
@@ -344,7 +352,11 @@ function drawEquation() {
     roundedRectangle(55, 134, 600, 134, 24, colors.white, borderColor, wrong ? 7 : 4);
     drawText(`${state.left} + ${state.right} =`, 176, 202, 46, colors.ink);
     roundedRectangle(296, 159, 144, 84, 16, '#f2fbfe', borderColor, 4);
-    drawText(state.answer || '?', 368, 203, 40, state.answer ? colors.darkBlue : '#a7bdc5');
+    const displayedAnswer = state.phase === 'skip-feedback'
+        ? String(state.feedback.answer)
+        : state.answer || '?';
+    drawText(displayedAnswer, 368, 203, 40,
+        state.phase === 'skip-feedback' || state.answer ? colors.darkBlue : '#a7bdc5');
 
     drawButton(backspaceButton, '#fff0b8', colors.darkGold, colors.ink, 40);
     drawButton(submitButton, colors.green, colors.darkGreen, colors.white, 40);
@@ -352,7 +364,10 @@ function drawEquation() {
 
 function drawKeypad() {
     keypadButtons.forEach((button) => {
-        drawButton(button, colors.white, colors.darkBlue, colors.ink, 40);
+        const disabled = button.type === 'disabled';
+        drawButton(button, disabled ? '#e6ebed' : colors.white,
+            disabled ? '#aab8be' : colors.darkBlue,
+            disabled ? '#9aa8ae' : colors.ink, 40);
     });
 }
 
@@ -397,6 +412,9 @@ function drawCoins() {
         barBorder = '#b9463e';
         barText = `${state.feedback.answer}  ✕`;
         barTextColor = colors.white;
+        showCoinSymbol = false;
+    } else if (state.feedback && state.feedback.type === 'skip') {
+        barText = '→  0';
         showCoinSymbol = false;
     }
 
