@@ -1,0 +1,38 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: #dff3ff;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+main {
+    width: min(100vw, 142.86vh);
+    aspect-ratio: 10 / 7;
+    padding: 10px;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 4px solid #184f67;
+    border-radius: 22px;
+    background: #fffdf4;
+    box-shadow: 0 12px 30px rgb(24 79 103 / 22%);
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
