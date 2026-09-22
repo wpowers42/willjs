@@ -5,6 +5,21 @@ const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 const { MathCoinsGame } = window.MathCoins;
 
+function resizeCanvas() {
+    const pixelRatio = window.devicePixelRatio || 1;
+    const width = Math.round(canvas.clientWidth * pixelRatio);
+    const height = Math.round(canvas.clientHeight * pixelRatio);
+    if (!width || !height || (canvas.width === width && canvas.height === height)) return;
+
+    canvas.width = width;
+    canvas.height = height;
+    context.setTransform(width / WIDTH, 0, 0, height / HEIGHT, 0, 0);
+}
+
+resizeCanvas();
+new ResizeObserver(resizeCanvas).observe(canvas);
+window.addEventListener('resize', resizeCanvas);
+
 const colors = {
     ink: '#173f52',
     blue: '#66c7e8',
@@ -92,14 +107,10 @@ function buildKeypadButtons() {
     });
 }
 
-function remainingCoinValue() {
-    return state.coins.reduce((total, coin) => total + coin, 0);
-}
-
 function coinPosition(value) {
     return {
-        x: 704 + (value - 1) * 29,
-        y: 161,
+        x: 710 + ((value - 1) % 10) * 26,
+        y: 138 + Math.floor((value - 1) / 10) * 29,
     };
 }
 
@@ -115,12 +126,10 @@ function addFallingCoin(value) {
     });
 }
 
-function addScorePop(value, index, awardCount) {
-    const spacing = 68;
-    const firstX = WIDTH / 2 - ((awardCount - 1) * spacing) / 2;
+function addScorePop(value, index) {
     view.scorePops.push({
         value,
-        x: firstX + index * spacing,
+        x: 740 + (index % 4) * 52,
         y: 116,
         remaining: 750,
     });
@@ -140,6 +149,9 @@ function activateButton(button) {
         logic.submit();
     }
     syncState();
+    if (button.type === 'submit' && state.phase === 'wrong-feedback') {
+        state.coins.forEach(addFallingCoin);
+    }
 }
 
 function containsPoint(rectangle, x, y) {
@@ -152,10 +164,10 @@ function containsPoint(rectangle, x, y) {
 canvas.addEventListener('pointerdown', (event) => {
     event.preventDefault();
     const bounds = canvas.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) * (WIDTH / bounds.width);
-    const y = (event.clientY - bounds.top) * (HEIGHT / bounds.height);
+    const x = (event.clientX - bounds.left - canvas.clientLeft) * (WIDTH / canvas.clientWidth);
+    const y = (event.clientY - bounds.top - canvas.clientTop) * (HEIGHT / canvas.clientHeight);
 
-    if (state.phase === 'won') {
+    if (state.phase === 'finished') {
         if (containsPoint(playAgainButton, x, y)) {
             logic.reset();
             view.fallingCoins = [];
@@ -189,7 +201,6 @@ function createConfetti() {
 
 function update(deltaMilliseconds) {
     const deltaSeconds = deltaMilliseconds / 1000;
-    const previousState = state;
     const events = logic.update(deltaMilliseconds);
     syncState();
 
@@ -197,11 +208,12 @@ function update(deltaMilliseconds) {
         if (event.type === 'coin-dropped') {
             addFallingCoin(event.value);
         } else if (event.type === 'coin-awarded') {
-            addScorePop(event.value, event.index, previousState.awards.length);
+            addScorePop(event.value, event.index);
         } else if (event.type === 'round-started') {
+            view.fallingCoins = [];
             view.scorePops = [];
             buildKeypadButtons();
-        } else if (event.type === 'won') {
+        } else if (event.type === 'finished') {
             createConfetti();
         }
     });
@@ -310,17 +322,17 @@ function drawBackground() {
 function drawProgress() {
     const x = 70;
     const y = 48;
-    const width = 860;
+    const width = 580;
     const height = 48;
-    const progress = Math.min(state.score / state.goal, 1);
+    const progress = state.round / state.rounds;
 
     roundedRectangle(x, y, width, height, 24, '#d7edf3', colors.ink, 4);
-    if (progress > 0) {
-        roundedRectangle(x + 5, y + 5, (width - 10) * progress, height - 10, 19, colors.green);
-    }
+    roundedRectangle(x + 5, y + 5, (width - 10) * progress, height - 10, 19, colors.green);
+    drawText(`${state.round} / ${state.rounds}`, x + width / 2, y + height / 2 + 1, 25, colors.ink);
 
-    drawText(`${state.score} / ${state.goal}`, WIDTH / 2, y + height / 2 + 1, 25, colors.ink);
-    drawCoinShape(52, 72, 24, '');
+    roundedRectangle(682, y, 268, height, 24, '#fff8da', '#e2a533', 4);
+    drawCoinShape(720, 72, 17, '');
+    drawText(String(state.score), 820, 73, 28, colors.ink);
 }
 
 function drawButton(button, fill, border, textColor, textSize) {
@@ -352,11 +364,10 @@ function drawEquation() {
     roundedRectangle(55, 134, 600, 134, 24, colors.white, borderColor, wrong ? 7 : 4);
     drawText(`${state.left} + ${state.right} =`, 176, 202, 46, colors.ink);
     roundedRectangle(296, 159, 144, 84, 16, '#f2fbfe', borderColor, 4);
-    const displayedAnswer = state.phase === 'skip-feedback'
-        ? String(state.feedback.answer)
-        : state.answer || '?';
+    const revealingAnswer = state.phase === 'skip-feedback' || state.phase === 'wrong-feedback';
+    const displayedAnswer = revealingAnswer ? String(state.feedback.answer) : state.answer || '?';
     drawText(displayedAnswer, 368, 203, 40,
-        state.phase === 'skip-feedback' || state.answer ? colors.darkBlue : '#a7bdc5');
+        revealingAnswer || state.answer ? colors.darkBlue : '#a7bdc5');
 
     drawButton(backspaceButton, '#fff0b8', colors.darkGold, colors.ink, 40);
     drawButton(submitButton, colors.green, colors.darkGreen, colors.white, 40);
@@ -372,18 +383,20 @@ function drawKeypad() {
 }
 
 function drawCoins() {
-    state.coins.forEach((value) => {
-        const award = state.awards.find((candidate) => candidate.value === value);
-        const animationElapsed = award
-            ? state.awardElapsed - (award.awardAt - state.coinFlowDurationMs)
-            : -1;
-        if (award && animationElapsed >= 0) return;
+    if (state.phase !== 'wrong-feedback') {
+        state.coins.forEach((value) => {
+            const award = state.awards.find((candidate) => candidate.value === value);
+            const animationElapsed = award
+                ? state.awardElapsed - (award.awardAt - state.coinFlowDurationMs)
+                : -1;
+            if (award && animationElapsed >= 0) return;
 
-        const position = coinPosition(value);
-        drawCoinShape(position.x, position.y, 12, String(value));
-    });
+            const position = coinPosition(value);
+            drawCoinShape(position.x, position.y, 11, '');
+        });
+    }
 
-    if (state.coins.length > 0 && state.phase !== 'awarding') {
+    if (state.coins.length > 0 && state.phase === 'playing') {
         const nextValue = state.coins[state.coins.length - 1];
         const position = coinPosition(nextValue);
         const progress = state.dropElapsed / state.coinDropMs;
@@ -397,7 +410,7 @@ function drawCoins() {
 
     let barFill = '#fff8da';
     let barBorder = '#e2a533';
-    let barText = String(remainingCoinValue());
+    let barText = String(state.coins.length);
     let barTextColor = colors.ink;
     let showCoinSymbol = true;
 
@@ -410,7 +423,7 @@ function drawCoins() {
     } else if (state.feedback && state.feedback.type === 'wrong') {
         barFill = colors.coral;
         barBorder = '#b9463e';
-        barText = `${state.feedback.answer}  ✕`;
+        barText = `✕   −${state.feedback.lost}`;
         barTextColor = colors.white;
         showCoinSymbol = false;
     } else if (state.feedback && state.feedback.type === 'skip') {
@@ -426,7 +439,7 @@ function drawCoins() {
         context.save();
         context.translate(coin.x, coin.y);
         context.rotate(coin.rotation);
-        drawCoinShape(0, 0, 12, String(coin.value), Math.max(coin.alpha, 0));
+        drawCoinShape(0, 0, 11, '', Math.max(coin.alpha, 0));
         context.restore();
     });
 
@@ -438,10 +451,9 @@ function drawCoins() {
         const progress = elapsed / state.coinFlowDurationMs;
         const easedProgress = 1 - (1 - progress) ** 3;
         const start = coinPosition(award.value);
-        const targetX = 75 + 850 * Math.min(award.targetScore / state.goal, 1);
-        const x = start.x + (targetX - start.x) * easedProgress;
+        const x = start.x + (820 - start.x) * easedProgress;
         const y = start.y + (72 - start.y) * easedProgress - Math.sin(progress * Math.PI) * 70;
-        drawCoinShape(x, y, 14, String(award.value));
+        drawCoinShape(x, y, 11, '');
     });
 
     view.scorePops.forEach((scorePop) => {
@@ -470,7 +482,7 @@ function drawWinScreen() {
 
     roundedRectangle(225, 160, 550, 430, 38, colors.cream, colors.gold, 8);
     drawText('★  ★  ★', 500, 245, 56, colors.gold);
-    drawText('✓', 500, 337, 100, colors.darkGreen);
+    drawText(`${state.round} / ${state.rounds}`, 500, 337, 48, colors.ink);
     drawText(String(state.score), 475, 418, 38, colors.ink);
     drawCoinShape(555, 416, 23, '');
     roundedRectangle(
@@ -494,7 +506,7 @@ function draw() {
     drawCoins();
     drawConfetti();
 
-    if (state.phase === 'won') drawWinScreen();
+    if (state.phase === 'finished') drawWinScreen();
 }
 
 function gameLoop(timestamp) {
