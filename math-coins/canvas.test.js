@@ -60,6 +60,17 @@ test('canvas stays sharp at display resolution and pointer hits use logical coor
     vm.runInContext('state.dropElapsed = 500; drawCoins()', sandbox);
     assert.ok(scales.some(([x]) => x < 1), 'the next coin tips while time runs down');
 
+    vm.runInContext(`
+        logic.backspace();
+        String(logic.getState().left + logic.getState().right)
+            .split('').forEach((digit) => logic.pressNumber(Number(digit)));
+        logic.submit();
+        update(700);
+    `, sandbox);
+    assert.equal(vm.runInContext('state.score', sandbox), 1);
+    assert.equal(vm.runInContext('view.poolPulse', sandbox), 120);
+    assert.equal(vm.runInContext('"scorePops" in view', sandbox), false);
+
     canvas.clientWidth = 1000;
     canvas.clientHeight = 700;
     window.devicePixelRatio = 1;

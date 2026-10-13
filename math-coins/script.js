@@ -38,7 +38,7 @@ let state = logic.getState();
 
 const view = {
     fallingCoins: [],
-    scorePops: [],
+    poolPulse: 0,
     confetti: [],
     pressedButton: null,
     lastFrame: performance.now(),
@@ -129,15 +129,6 @@ function addFallingCoin(value, tip = null) {
     });
 }
 
-function addScorePop(value, index) {
-    view.scorePops.push({
-        value,
-        x: 740 + (index % 4) * 52,
-        y: 116,
-        remaining: 750,
-    });
-}
-
 function activateButton(button) {
     if (state.phase !== 'playing' || button.type === 'disabled') return;
 
@@ -174,7 +165,7 @@ canvas.addEventListener('pointerdown', (event) => {
         if (containsPoint(playAgainButton, x, y)) {
             logic.reset();
             view.fallingCoins = [];
-            view.scorePops = [];
+            view.poolPulse = 0;
             view.confetti = [];
             syncState();
             buildKeypadButtons();
@@ -204,6 +195,7 @@ function createConfetti() {
 
 function update(deltaMilliseconds) {
     const deltaSeconds = deltaMilliseconds / 1000;
+    view.poolPulse = Math.max(0, view.poolPulse - deltaMilliseconds);
     const events = logic.update(deltaMilliseconds);
     syncState();
 
@@ -211,10 +203,10 @@ function update(deltaMilliseconds) {
         if (event.type === 'coin-dropped') {
             addFallingCoin(event.coin.value, event.coin);
         } else if (event.type === 'coin-awarded') {
-            addScorePop(event.value, event.index);
+            view.poolPulse = 120;
         } else if (event.type === 'round-started') {
             view.fallingCoins = [];
-            view.scorePops = [];
+            view.poolPulse = 0;
             buildKeypadButtons();
         } else if (event.type === 'finished') {
             createConfetti();
@@ -230,12 +222,6 @@ function update(deltaMilliseconds) {
         coin.alpha -= 0.55 * deltaSeconds;
     });
     view.fallingCoins = view.fallingCoins.filter((coin) => coin.alpha > 0 && coin.y < HEIGHT + 60);
-
-    view.scorePops.forEach((scorePop) => {
-        scorePop.y -= 24 * deltaSeconds;
-        scorePop.remaining -= deltaMilliseconds;
-    });
-    view.scorePops = view.scorePops.filter((scorePop) => scorePop.remaining > 0);
 
     view.confetti.forEach((piece) => {
         piece.x += piece.velocityX * deltaSeconds;
@@ -336,7 +322,13 @@ function drawProgress() {
     drawText(`${state.round} / ${state.rounds}`, x + width / 2, y + height / 2 + 1, 25, colors.ink);
 
     roundedRectangle(682, y, 268, height, 24, '#fff8da', '#e2a533', 4);
-    drawCoinShape(720, 72, 17, '');
+    if (view.poolPulse > 0) {
+        context.save();
+        context.globalAlpha = view.poolPulse / 120 * 0.35;
+        roundedRectangle(686, y + 4, 260, height - 8, 20, colors.gold);
+        context.restore();
+    }
+    drawCoinShape(720, 72, 17 + view.poolPulse / 60, '');
     drawText(String(state.score), 820, 73, 28, colors.ink);
 }
 
@@ -462,13 +454,6 @@ function drawCoins() {
         drawCoinShape(x, y, 11, '');
     });
 
-    view.scorePops.forEach((scorePop) => {
-        const alpha = Math.min(scorePop.remaining / 250, 1);
-        context.save();
-        context.globalAlpha = alpha;
-        drawText(`+${scorePop.value}`, scorePop.x, scorePop.y, 22, colors.darkGreen);
-        context.restore();
-    });
 }
 
 function drawConfetti() {
